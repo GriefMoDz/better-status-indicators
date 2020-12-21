@@ -16,8 +16,24 @@
 /* Theme Compatibility */
 
 /* Radial Status */
-#app-mount .wrapper-3t9DeA foreignObject[mask*=mobile]:after {
-  background: var(--bsi-avatar-status-mobile-color) !important;
+#app-mount .wrapper-3t9DeA foreignObject[mask*=mobile][data-status='online']:after {
+  background: var(--rs-online-color, #43b581);
+}
+
+#app-mount .wrapper-3t9DeA foreignObject[mask*=mobile][data-status='idle']:after {
+  background: var(--rs-idle-color, #faa61a);
+}
+
+#app-mount .wrapper-3t9DeA foreignObject[mask*=mobile][data-status='dnd']:after {
+  background: var(--rs-dnd-color, #f04747);
+}
+
+#app-mount .wrapper-3t9DeA foreignObject[mask*=mobile][data-status='offline']:after {
+  background: var(--rs-offline-color, #636b75);
+}
+
+#app-mount .wrapper-3t9DeA foreignObject[mask*=mobile][data-status='streaming']:after {
+  background: var(--rs-streaming-color, #643da7);
 }
 
 /* Settings */
