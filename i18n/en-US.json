@@ -1,0 +1,24 @@
+{
+  "BSI": {
+    "ACTIVE_ON_WEB": "Active on Web",
+    "HARDWARE_ACCELERATION_DISABLED_MSG": "Hi, there! We've noticed that you've disabled hardware acceleration. \"Better Status Indicators\" recommends leaving this feature on for significantly better results — visually and quantitatively.",
+    "HARDWARE_ACCELERATION_DISABLED_BTN_TEXT": "Let's change it!",
+    "STATUS_DISPLAY": "Status Display",
+    "STATUS_DISPLAY_SOLID_OPT": "Solid: Simple and minimalistic.",
+    "STATUS_DISPLAY_DEFAULT_OPT": "Default: Modern, beautiful, and easy on your eyes.",
+    "STATUS_DISPLAY_CLASSIC_OPT": "Classic: Tried and true color-blind mode.",
+    "TRUE_STATUS_DESC": "Displays all statuses with their true color when a user is performing an activity.",
+    "TRUE_STATUS": "True Status Color",
+    "WEB_STATUS_DISPLAY_TITLE": "Web Status Display",
+    "WEB_STATUS_MEMBERS_LIST_DESC": "Displays the web status indicator in the members list.",
+    "WEB_STATUS_MEMBERS_LIST": "Members List",
+    "WEB_STATUS_USER_POPOUT_MODAL_DESC": "Displays the web status indicator in the user popout / profile modal.",
+    "WEB_STATUS_USER_POPOUT_MODAL": "User Popout / Profile Modal",
+    "WEB_STATUS_DM_DESC": "Displays the web status indicator under direct messages.",
+    "WEB_STATUS_DM": "Direct Messages",
+    "WEB_STATUS_MATCH_COLOR_DESC": "Fills the web status indicator with the corresponding color of their status.",
+    "WEB_STATUS_MATCH_COLOR": "Match Status Color",
+    "WEB_STATUS_SHOW_ON_BOTS_DESC": "Displays the web status indicator for bot users.",
+    "WEB_STATUS_SHOW_ON_BOTS": "Show on Bots"
+  }
+}

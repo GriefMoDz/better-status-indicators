@@ -1,0 +1,8 @@
+{
+  "BSI": {
+    "STATUS_DISPLAY_CLASSIC_OPT": "Classic: Tried and true colour-blind mode.",
+    "TRUE_STATUS": "True Status Colour",
+    "WEB_STATUS_MATCH_COLOR_DESC": "Fills the web status indicator with the corresponding colour of their status.",
+    "WEB_STATUS_MATCH_COLOR": "Match Status Colour"
+  }
+}

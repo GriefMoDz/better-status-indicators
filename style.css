@@ -1,0 +1,26 @@
+/* General */
+.bsi-webIcon {
+  color: var(--channels-default);
+  margin-left: 4px;
+  top: 0;
+}
+
+.peopleListItem-2nzedh .userInfo-2zN2z8 .bsi-webIcon {
+  visibility: hidden;
+}
+
+.peopleListItem-2nzedh .userInfo-2zN2z8.hovered-15FzL3 .bsi-webIcon {
+  visibility: visible;
+}
+
+/* Theme Compatibility */
+
+/* Radial Status */
+#app-mount .wrapper-3t9DeA foreignObject[mask*=mobile]:after {
+  background: var(--bsi-avatar-status-mobile-color) !important;
+}
+
+/* Settings */
+.bsi-title {
+  margin-bottom: 20px;
+}
