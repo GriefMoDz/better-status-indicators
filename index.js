@@ -42,6 +42,7 @@ const WebIcon = require('./components/WebIcon');
 const i18n = require('./i18n');
 
 const injectionIds = [];
+const clientStatusStore = require('./stores/clientStatusStore');
 
 module.exports = class BetterStatusIndicators extends Plugin {
   constructor () {
@@ -52,6 +53,14 @@ module.exports = class BetterStatusIndicators extends Plugin {
       ...getModule([ 'wrapper', 'avatar' ], false),
       disableFlex: getModule([ 'disableFlex' ], false).disableFlex
     };
+  }
+
+  get clientStatusStore () {
+    return clientStatusStore;
+  }
+
+  get currentUserId () {
+    return window.DiscordNative.crashReporter.getMetadata().user_id;
   }
 
   get hardwareAccelerationIsEnabled () {
@@ -75,13 +84,14 @@ module.exports = class BetterStatusIndicators extends Plugin {
       this._hardwareAccelerationDisabled();
     }
 
+    const _this = this;
+
     /* Mobile Status Indicator */
     const statusStore = await getModule([ 'isMobileOnline' ]);
     this.inject('bsi-mobile-status-online', statusStore, 'isMobileOnline', function ([ userId ], res) {
-      const { clientStatuses } = this.getState();
-
-      const clientStatus = clientStatuses[userId];
-      if (clientStatus && clientStatus.mobile && !clientStatus.desktop) {
+      const showOnSelf = userId === _this.currentUserId && _this.settings.get('mobileShowOnSelf', false);
+      const clientStatus = showOnSelf ? clientStatusStore.getCurrentClientStatus() : this.getState().clientStatuses[userId];
+      if (clientStatus && clientStatus.mobile && (_this.settings.get('mobilePreserveStatus', false) ? true : !clientStatus.desktop)) {
         return true;
       }
 

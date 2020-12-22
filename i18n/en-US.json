@@ -9,6 +9,11 @@
     "STATUS_DISPLAY_CLASSIC_OPT": "Classic: Tried and true color-blind mode.",
     "TRUE_STATUS_DESC": "Displays all statuses with their true color when a user is performing an activity.",
     "TRUE_STATUS": "True Status Color",
+    "MOBILE_STATUS_DISPLAY_TITLE": "Mobile Status Display",
+    "MOBILE_STATUS_PRESERVE_STATUS_DESC": "Displays the mobile status indicator even if the user is active on desktop.",
+    "MOBILE_STATUS_PRESERVE_STATUS": "Preserve Status",
+    "MOBILE_STATUS_SHOW_ON_SELF_DESC": "Displays the mobile status indicator for yourself; requires the mobile \"Preserve Status\" setting to be enabled.",
+    "MOBILE_STATUS_SHOW_ON_SELF": "Show on Self",
     "WEB_STATUS_DISPLAY_TITLE": "Web Status Display",
     "WEB_STATUS_MEMBERS_LIST_DESC": "Displays the web status indicator in the members list.",
     "WEB_STATUS_MEMBERS_LIST": "Members List",
@@ -18,6 +23,10 @@
     "WEB_STATUS_DM": "Direct Messages",
     "WEB_STATUS_MATCH_COLOR_DESC": "Fills the web status indicator with the corresponding color of their status.",
     "WEB_STATUS_MATCH_COLOR": "Match Status Color",
+    "WEB_STATUS_PRESERVE_STATUS_DESC": "Displays the web status indicator even if the user is active on desktop or mobile.",
+    "WEB_STATUS_PRESERVE_STATUS": "Preserve Status",
+    "WEB_STATUS_SHOW_ON_SELF_DESC": "Displays the web status indicator for yourself; requires the web \"Preserve Status\" setting to be enabled.",
+    "WEB_STATUS_SHOW_ON_SELF": "Show on Self",
     "WEB_STATUS_SHOW_ON_BOTS_DESC": "Displays the web status indicator for bot users.",
     "WEB_STATUS_SHOW_ON_BOTS": "Show on Bots"
   }

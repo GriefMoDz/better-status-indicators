@@ -66,6 +66,23 @@ module.exports = class Settings extends React.PureComponent {
         {Messages.BSI.TRUE_STATUS}
       </SwitchItem>
 
+      <FormTitle>{Messages.BSI.MOBILE_STATUS_DISPLAY_TITLE}</FormTitle>
+      <SwitchItem
+        note={Messages.BSI.MOBILE_STATUS_PRESERVE_STATUS_DESC}
+        value={getSetting('mobilePreserveStatus', false)}
+        onChange={() => toggleSetting('mobilePreserveStatus', false)}
+      >
+        {Messages.BSI.MOBILE_STATUS_PRESERVE_STATUS}
+      </SwitchItem>
+      <SwitchItem
+        note={Messages.BSI.MOBILE_STATUS_SHOW_ON_SELF_DESC}
+        value={getSetting('mobileShowOnSelf', false)}
+        onChange={() => toggleSetting('mobileShowOnSelf', false)}
+        disabled={getSetting('mobilePreserveStatus', false) === false}
+      >
+        {Messages.BSI.MOBILE_STATUS_SHOW_ON_SELF}
+      </SwitchItem>
+
       <FormTitle>{Messages.BSI.WEB_STATUS_DISPLAY_TITLE}</FormTitle>
       <SwitchItem
         note={Messages.BSI.WEB_STATUS_MEMBERS_LIST_DESC}
@@ -94,6 +111,21 @@ module.exports = class Settings extends React.PureComponent {
         onChange={() => toggleSetting('webMatchStatus', false)}
       >
         {Messages.BSI.WEB_STATUS_MATCH_COLOR}
+      </SwitchItem>
+      <SwitchItem
+        note={Messages.BSI.WEB_STATUS_PRESERVE_STATUS_DESC}
+        value={getSetting('webPreserveStatus', false)}
+        onChange={() => toggleSetting('webPreserveStatus', false)}
+      >
+        {Messages.BSI.WEB_STATUS_PRESERVE_STATUS}
+      </SwitchItem>
+      <SwitchItem
+        note={Messages.BSI.WEB_STATUS_SHOW_ON_SELF_DESC}
+        value={getSetting('webShowOnSelf', false)}
+        onChange={() => toggleSetting('webShowOnSelf', false)}
+        disabled={getSetting('webPreserveStatus', false) === false}
+      >
+        {Messages.BSI.WEB_STATUS_SHOW_ON_SELF}
       </SwitchItem>
       <SwitchItem
         note={Messages.BSI.WEB_STATUS_SHOW_ON_BOTS_DESC}

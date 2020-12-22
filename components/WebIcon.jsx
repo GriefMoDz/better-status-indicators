@@ -31,8 +31,12 @@ const { Icon } = require('powercord/components');
 
 const Flux = getModule([ 'useStateFromStores' ], false);
 const Tooltip = getModuleByDisplayName('Tooltip', false);
+
 const statusStore = getModule([ 'isMobileOnline' ], false);
 const statusUtils = getModule([ 'getStatusColor' ], false);
+const authStore = getModule([ 'initialize', 'getFingerprint' ], false);
+
+const clientStatusStore = require('../stores/clientStatusStore');
 
 module.exports = React.memo(props => {
   if (!props.user || (props.user.bot && !props.getSetting('webShowOnBots', true))) {
@@ -41,8 +45,10 @@ module.exports = React.memo(props => {
 
   const { user } = props;
   const isWebOnline = Flux.useStateFromStores([ statusStore ], () => {
-    const clientStatus = statusStore.getState().clientStatuses[user.id];
-    return clientStatus && clientStatus.web && !clientStatus.desktop && !clientStatus.mobile;
+    const showOnSelf = user.id === authStore.getId() && props.getSetting('webShowOnSelf', false);
+    const clientStatus = showOnSelf ? clientStatusStore.getCurrentClientStatus() : statusStore.getState().clientStatuses[user.id];
+
+    return clientStatus && clientStatus.web && (props.getSetting('webPreserveStatus', false) ? true : !clientStatus.desktop && !clientStatus.mobile);
   });
 
   const statusColor = Flux.useStateFromStores([ statusStore ], () => {
