@@ -26,6 +26,7 @@
  * SOFTWARE.
  */
 
+/* eslint-disable object-property-newline */
 const { React, getModule, getModuleByDisplayName, i18n: { Messages } } = require('powercord/webpack');
 const { Icon } = require('powercord/components');
 
@@ -37,9 +38,37 @@ const statusUtils = getModule([ 'getStatusColor' ], false);
 const authStore = getModule([ 'initialize', 'getFingerprint' ], false);
 
 const clientStatusStore = require('../stores/clientStatusStore');
+const clientIcons = Object.freeze({
+  web: 'Public',
+  desktop: 'Monitor'
+});
+
+function renderClientStatus (client, state) {
+  if (this.props.user.bot && !this.props.getSetting(`${client}ShowOnBots`, true)) {
+    return null;
+  }
+
+  const matchStatus = this.props.getSetting(`${client}MatchStatus`, false);
+  const settingsKey = this.props.location.replace(/^(.)|-(.)/g, (match) => match.toUpperCase()).replace(/-/g, '');
+
+  const statusColor = Flux.useStateFromStores([ statusStore ], () => {
+    const userStatus = statusStore.getStatus(this.props.user.id);
+    return statusUtils.getStatusColor(userStatus);
+  });
+
+  // eslint-disable-next-line multiline-ternary
+  return this.props.getSetting(`${client}${settingsKey}`, client === 'web') && state ? React.createElement(Tooltip, {
+    text: Messages.BSI[`ACTIVE_ON_${client.toUpperCase()}`],
+    hideOnClick: false
+  }, (props) => React.createElement(Icon, Object.assign({}, props, {
+    name: clientIcons[client],
+    className: `bsi-${client}Icon ${getModule([ 'member', 'ownerIcon' ], false).icon}`,
+    color: matchStatus ? statusColor : 'currentColor'
+  }))) : null;
+}
 
 module.exports = React.memo(props => {
-  if (!props.user || (props.user.bot && !props.getSetting('webShowOnBots', true))) {
+  if (!props.user) {
     return null;
   }
 
@@ -51,22 +80,14 @@ module.exports = React.memo(props => {
     return clientStatus && clientStatus.web && (props.getSetting('webPreserveStatus', false) ? true : !clientStatus.desktop && !clientStatus.mobile);
   });
 
-  const statusColor = Flux.useStateFromStores([ statusStore ], () => {
-    const userStatus = statusStore.getStatus(user.id);
-    return statusUtils.getStatusColor(userStatus);
+  const isDesktopOnline = Flux.useStateFromStores([ statusStore ], () => {
+    const showOnSelf = user.id === authStore.getId() && props.getSetting('desktopShowOnSelf', false);
+    const clientStatus = showOnSelf ? clientStatusStore.getCurrentClientStatus() : statusStore.getState().clientStatuses[user.id];
+
+    return clientStatus && clientStatus.desktop && (props.getSetting('desktopPreserveStatus', false) ? clientStatus.web || clientStatus.mobile : !clientStatus.web && !clientStatus.mobile);
   });
 
-  const matchStatus = props.getSetting('webMatchStatus', false);
-  const settingsKey = `web${props.location.replace(/^(.)|-(.)/g, (match) => match.toUpperCase()).replace(/-/g, '')}`;
+  const _renderClientStatus = (client, state) => renderClientStatus.call({ props }, client, state);
 
-  return props.getSetting(settingsKey, true) && isWebOnline
-    ? React.createElement(Tooltip, {
-      text: Messages.BSI.ACTIVE_ON_WEB,
-      hideOnClick: false
-    }, (props) => React.createElement(Icon, Object.assign({}, props, {
-      name: 'Public',
-      className: `bsi-webIcon ${getModule([ 'member', 'ownerIcon' ], false).icon}`,
-      color: matchStatus ? statusColor : 'currentColor'
-    })))
-    : null;
+  return [ _renderClientStatus('web', isWebOnline), _renderClientStatus('desktop', isDesktopOnline) ];
 });

@@ -31,6 +31,11 @@ const { React, i18n: { Messages } } = require('powercord/webpack');
 const { SwitchItem, RadioGroup } = require('powercord/components/settings');
 const { FormTitle } = require('powercord/components');
 
+function formatClientTranslation (translation, args) {
+  const key = translation === 'DISPLAY_TITLE' ? 'CLIENT_DISPLAY_TITLE' : `CLIENT_SWITCH_${translation}`;
+  return Messages.BSI[key].format(args);
+}
+
 module.exports = class Settings extends React.PureComponent {
   render () {
     return <>
@@ -66,73 +71,118 @@ module.exports = class Settings extends React.PureComponent {
         {Messages.BSI.TRUE_STATUS}
       </SwitchItem>
 
-      <FormTitle>{Messages.BSI.MOBILE_STATUS_DISPLAY_TITLE}</FormTitle>
+      <FormTitle className="bsi-status-display-title">{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'Desktop' })}</FormTitle>
       <SwitchItem
-        note={Messages.BSI.MOBILE_STATUS_PRESERVE_STATUS_DESC}
+        note={formatClientTranslation('MEMBERS_LIST_DESC', { client: 'desktop' })}
+        value={getSetting('desktopMembersList', false)}
+        onChange={() => toggleSetting('desktopMembersList', false)}
+      >
+        {Messages.BSI.CLIENT_SWITCH_MEMBERS_LIST}
+      </SwitchItem>
+      <SwitchItem
+        note={formatClientTranslation('USER_POPOUT_MODAL_DESC', { client: 'desktop' })}
+        value={getSetting('desktopUserPopoutModal', false)}
+        onChange={() => toggleSetting('desktopUserPopoutModal', false)}
+      >
+        {Messages.BSI.CLIENT_SWITCH_USER_POPOUT_MODAL}
+      </SwitchItem>
+      <SwitchItem
+        note={formatClientTranslation('DM_DESC', { client: 'desktop' })}
+        value={getSetting('desktopDirectMessages', false)}
+        onChange={() => toggleSetting('desktopDirectMessages', false)}
+      >
+        {Messages.BSI.CLIENT_SWITCH_DM}
+      </SwitchItem>
+      <SwitchItem
+        note={formatClientTranslation('MATCH_COLOR_DESC', { client: 'desktop' })}
+        value={getSetting('desktopMatchStatus', false)}
+        onChange={() => toggleSetting('desktopMatchStatus', false)}
+      >
+        {Messages.BSI.CLIENT_SWITCH_MATCH_COLOR}
+      </SwitchItem>
+      <SwitchItem
+        note={Messages.BSI.DESKTOP_SWITCH_PRESERVE_STATUS_DESC}
+        value={getSetting('desktopPreserveStatus', false)}
+        onChange={() => toggleSetting('desktopPreserveStatus', false)}
+      >
+        {Messages.BSI.CLIENT_SWITCH_PRESERVE_STATUS}
+      </SwitchItem>
+      <SwitchItem
+        note={formatClientTranslation('SHOW_ON_SELF_DESC', { client: 'desktop' })}
+        value={getSetting('desktopShowOnSelf', false)}
+        onChange={() => toggleSetting('desktopShowOnSelf', false)}
+        disabled={getSetting('desktopPreserveStatus', false) === false}
+      >
+        {Messages.BSI.CLIENT_SWITCH_SHOW_ON_SELF}
+      </SwitchItem>
+
+      <FormTitle className="bsi-status-display-title">{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'Mobile' })}</FormTitle>
+      <SwitchItem
+        note={Messages.BSI.MOBILE_SWITCH_PRESERVE_STATUS_DESC}
         value={getSetting('mobilePreserveStatus', false)}
         onChange={() => toggleSetting('mobilePreserveStatus', false)}
       >
-        {Messages.BSI.MOBILE_STATUS_PRESERVE_STATUS}
+        {Messages.BSI.CLIENT_SWITCH_PRESERVE_STATUS}
       </SwitchItem>
       <SwitchItem
-        note={Messages.BSI.MOBILE_STATUS_SHOW_ON_SELF_DESC}
+        note={formatClientTranslation('SHOW_ON_SELF_DESC', { client: 'mobile' })}
         value={getSetting('mobileShowOnSelf', false)}
         onChange={() => toggleSetting('mobileShowOnSelf', false)}
         disabled={getSetting('mobilePreserveStatus', false) === false}
       >
-        {Messages.BSI.MOBILE_STATUS_SHOW_ON_SELF}
+        {Messages.BSI.CLIENT_SWITCH_SHOW_ON_SELF}
       </SwitchItem>
 
-      <FormTitle>{Messages.BSI.WEB_STATUS_DISPLAY_TITLE}</FormTitle>
+      <FormTitle className="bsi-status-display-title">{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'WEB' })}</FormTitle>
       <SwitchItem
-        note={Messages.BSI.WEB_STATUS_MEMBERS_LIST_DESC}
+        note={formatClientTranslation('MEMBERS_LIST_DESC', { client: 'web' })}
         value={getSetting('webMembersList', true)}
         onChange={() => toggleSetting('webMembersList', true)}
       >
-        {Messages.BSI.WEB_STATUS_MEMBERS_LIST}
+        {Messages.BSI.CLIENT_SWITCH_MEMBERS_LIST}
       </SwitchItem>
       <SwitchItem
-        note={Messages.BSI.WEB_STATUS_USER_POPOUT_MODAL_DESC}
+        note={formatClientTranslation('USER_POPOUT_MODAL_DESC', { client: 'web' })}
         value={getSetting('webUserPopoutModal', true)}
         onChange={() => toggleSetting('webUserPopoutModal', true)}
       >
-        {Messages.BSI.WEB_STATUS_USER_POPOUT_MODAL}
+        {Messages.BSI.CLIENT_SWITCH_USER_POPOUT_MODAL}
       </SwitchItem>
       <SwitchItem
-        note={Messages.BSI.WEB_STATUS_DM_DESC}
+        note={formatClientTranslation('DM_DESC', { client: 'web' })}
         value={getSetting('webDirectMessages', true)}
         onChange={() => toggleSetting('webDirectMessages', true)}
       >
-        {Messages.BSI.WEB_STATUS_DM}
+        {Messages.BSI.CLIENT_SWITCH_DM}
       </SwitchItem>
       <SwitchItem
-        note={Messages.BSI.WEB_STATUS_MATCH_COLOR_DESC}
+        note={formatClientTranslation('MATCH_COLOR_DESC', { client: 'web' })}
         value={getSetting('webMatchStatus', false)}
         onChange={() => toggleSetting('webMatchStatus', false)}
       >
-        {Messages.BSI.WEB_STATUS_MATCH_COLOR}
+        {Messages.BSI.CLIENT_SWITCH_MATCH_COLOR}
       </SwitchItem>
       <SwitchItem
-        note={Messages.BSI.WEB_STATUS_PRESERVE_STATUS_DESC}
+        note={Messages.BSI.WEB_SWITCH_PRESERVE_STATUS_DESC}
         value={getSetting('webPreserveStatus', false)}
         onChange={() => toggleSetting('webPreserveStatus', false)}
       >
-        {Messages.BSI.WEB_STATUS_PRESERVE_STATUS}
+        {Messages.BSI.CLIENT_SWITCH_PRESERVE_STATUS}
       </SwitchItem>
       <SwitchItem
-        note={Messages.BSI.WEB_STATUS_SHOW_ON_SELF_DESC}
+        note={formatClientTranslation('SHOW_ON_SELF_DESC', { client: 'web' })}
         value={getSetting('webShowOnSelf', false)}
         onChange={() => toggleSetting('webShowOnSelf', false)}
         disabled={getSetting('webPreserveStatus', false) === false}
       >
-        {Messages.BSI.WEB_STATUS_SHOW_ON_SELF}
+        {Messages.BSI.CLIENT_SWITCH_SHOW_ON_SELF}
       </SwitchItem>
       <SwitchItem
-        note={Messages.BSI.WEB_STATUS_SHOW_ON_BOTS_DESC}
+        note={formatClientTranslation('SHOW_ON_BOTS_DESC', { client: 'web' })}
         value={getSetting('webShowOnBots', true)}
         onChange={() => toggleSetting('webShowOnBots', true)}
       >
-        {Messages.BSI.WEB_STATUS_SHOW_ON_BOTS}
+        {Messages.BSI.CLIENT_SWITCH_SHOW_ON_BOTS}
       </SwitchItem>
     </>;
   }

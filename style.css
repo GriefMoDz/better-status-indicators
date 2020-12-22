@@ -1,15 +1,17 @@
 /* General */
-.bsi-webIcon {
+.bsi-webIcon, .bsi-desktopIcon {
   color: var(--channels-default);
   margin-left: 4px;
   top: 0;
 }
 
-.peopleListItem-2nzedh .userInfo-2zN2z8 .bsi-webIcon {
+.peopleListItem-2nzedh .userInfo-2zN2z8 .bsi-webIcon,
+.peopleListItem-2nzedh .userInfo-2zN2z8 .bsi-desktopIcon {
   visibility: hidden;
 }
 
-.peopleListItem-2nzedh .userInfo-2zN2z8.hovered-15FzL3 .bsi-webIcon {
+.peopleListItem-2nzedh .userInfo-2zN2z8.hovered-15FzL3 .bsi-webIcon,
+.peopleListItem-2nzedh .userInfo-2zN2z8.hovered-15FzL3 .bsi-desktopIcon {
   visibility: visible;
 }
 
@@ -39,4 +41,8 @@
 /* Settings */
 .bsi-title {
   margin-bottom: 20px;
+}
+
+.bsi-status-display-title {
+  margin: 40px 0 8px 0;
 }

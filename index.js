@@ -36,9 +36,9 @@ const { Plugin } = require('powercord/entities');
 
 const AnimatedAvatarStatus = require('./components/AnimatedAvatarStatus');
 const AnimatedStatus = require('./components/AnimatedStatus');
+const ClientStatuses = require('./components/ClientStatuses');
 const Settings = require('./components/Settings');
 // const WebMask = require('./components/WebMask');
-const WebIcon = require('./components/WebIcon');
 const i18n = require('./i18n');
 
 const injectionIds = [];
@@ -252,11 +252,11 @@ module.exports = class BetterStatusIndicators extends Plugin {
     }, true);
 
     /* Web Status Indicator */
-    const ConnectedWebIcon = this.settings.connectStore(WebIcon);
+    const ConnectedClientStatuses = this.settings.connectStore(ClientStatuses);
 
     const MemberListItem = await getModuleByDisplayName('MemberListItem');
     this.inject('bsi-member-list-web-status', MemberListItem.prototype, 'renderDecorators', function (_, res) {
-      res.props.children.unshift(React.createElement(ConnectedWebIcon, { user: this.props.user, location: 'members-list' }));
+      res.props.children.unshift(React.createElement(ConnectedClientStatuses, { user: this.props.user, location: 'members-list' }));
 
       return res;
     });
@@ -266,7 +266,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     this.inject('bsi-name-tag-web-status', NameTag, 'default', ([ props ], res) => {
       const user = userStore.findByTag(props.name, props.discriminator);
 
-      res.props.children.splice(2, 0, React.createElement(ConnectedWebIcon, { user, location: 'user-popout-modal' }));
+      res.props.children.splice(2, 0, React.createElement(ConnectedClientStatuses, { user, location: 'user-popout-modal' }));
 
       return res;
     });
@@ -279,7 +279,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
         return res;
       }
 
-      res.props.decorators = React.createElement(ConnectedWebIcon, { user: this.props.user, location: 'direct-messages' });
+      res.props.decorators = React.createElement(ConnectedClientStatuses, { user: this.props.user, location: 'direct-messages' });
 
       return res;
     });
