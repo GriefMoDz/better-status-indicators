@@ -79,19 +79,28 @@ module.exports = class BetterStatusIndicators extends Plugin {
       })
     });
 
-    if (!this.settings.get('seenHardwareAccelerationNotice', false) && !this.hardwareAccelerationIsEnabled) {
-      this.settings.set('seenHardwareAccelerationNotice', true);
+    const { getSetting, toggleSetting } = powercord.api.settings._fluxProps(this.entityID);
+
+    const _this = this;
+
+    /* Hardware Acceleration Notice */
+    if (!getSetting('seenHardwareAccelerationNotice', false) && !this.hardwareAccelerationIsEnabled) {
+      toggleSetting('seenHardwareAccelerationNotice', true);
       this._hardwareAccelerationDisabled();
     }
 
-    const _this = this;
+    const DiscordUtils = await getModule([ 'setEnableHardwareAcceleration' ]);
+    DiscordUtils.setEnableHardwareAcceleration = (enable) => {
+      toggleSetting('seenHardwareAccelerationNotice', enable);
+      setTimeout(() => window.DiscordNative.gpuSettings.setEnableHardwareAcceleration(enable), 1e3);
+    };
 
     /* Mobile Status Indicator */
     const statusStore = await getModule([ 'isMobileOnline' ]);
     this.inject('bsi-mobile-status-online', statusStore, 'isMobileOnline', function ([ userId ], res) {
-      const showOnSelf = userId === _this.currentUserId && _this.settings.get('mobileShowOnSelf', false);
+      const showOnSelf = userId === _this.currentUserId && getSetting('mobileShowOnSelf', false);
       const clientStatus = showOnSelf ? clientStatusStore.getCurrentClientStatus() : this.getState().clientStatuses[userId];
-      if (clientStatus && clientStatus.mobile && (_this.settings.get('mobilePreserveStatus', false) ? true : !clientStatus.desktop)) {
+      if (clientStatus && clientStatus.mobile && (getSetting('mobilePreserveStatus', false) ? true : !clientStatus.desktop)) {
         return true;
       }
 
@@ -208,7 +217,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       const foreignObject = findInReactTree(res, n => n?.type === 'foreignObject');
 
       if (isMobile && !isTyping) {
-        foreignObject.props['data-bsi-mobile-avatar-status'] = this.settings.get('mobileAvatarStatus', true);
+        foreignObject.props['data-bsi-mobile-avatar-status'] = getSetting('mobileAvatarStatus', true);
       }
 
       if (status !== 'online' && isMobile && !isTyping) {
@@ -248,7 +257,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     avatarModule.default.Sizes = avatarModule.Sizes;
 
     this.inject('bsi-true-status-color', avatarModule, 'default', (args) => {
-      if (this.settings.get('trueStatusColor', false) && args[0].statusColor && args[0].statusColor === '#ffffff') {
+      if (getSetting('trueStatusColor', false) && args[0].statusColor && args[0].statusColor === '#ffffff') {
         args[0].statusColor = statusModule.getStatusColor(args[0].status);
       }
 
@@ -353,9 +362,9 @@ module.exports = class BetterStatusIndicators extends Plugin {
   _hardwareAccelerationDisabled () {
     powercord.api.notices.sendAnnouncement('bsi-hardware-acceleration-disabled', {
       color: 'blue',
-      message: Messages.BSI.HARDWARE_ACCELERATION_DISABLED_MSG,
+      message: Messages.BSI_HARDWARE_ACCELERATION_DISABLED_MSG,
       button: {
-        text: Messages.BSI.HARDWARE_ACCELERATION_DISABLED_BTN_TEXT,
+        text: Messages.BSI_HARDWARE_ACCELERATION_DISABLED_BTN_TEXT,
         onClick: () => openModal(() => React.createElement(Confirm, {
           header: Messages.SWITCH_HARDWARE_ACCELERATION,
           confirmText: Messages.OKAY,

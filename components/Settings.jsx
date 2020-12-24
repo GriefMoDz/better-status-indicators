@@ -34,19 +34,19 @@ const { open: openModal } = require('powercord/modal');
 
 function formatClientTranslation (translation, args) {
   const key = translation === 'DISPLAY_TITLE' ? 'CLIENT_DISPLAY_TITLE' : `CLIENT_SWITCH_${translation}`;
-  return Messages.BSI[key].format(args);
+  return Messages[`BSI_${key}`].format(args);
 }
 
 function handleAvatarStatusChange () {
   return openModal(() => React.createElement(Confirm, {
-    header: Messages.BSI.MOBILE_AVATAR_STATUS_MODAL_HEADER,
+    header: Messages.BSI_MOBILE_AVATAR_STATUS_MODAL_HEADER,
     confirmText: Messages.OKAY,
     cancelText: Messages.CANCEL,
     onConfirm: () => {
       this.props.toggleSetting('mobileAvatarStatus', true);
-      setTimeout(() => location.reload(), 2e3);
+      setTimeout(() => location.reload(), 1e3);
     }
-  }, React.createElement(Text, {}, Messages.BSI.MOBILE_AVATAR_STATUS_MODAL_BODY)));
+  }, React.createElement(Text, {}, Messages.BSI_MOBILE_AVATAR_STATUS_MODAL_BODY)));
 }
 
 module.exports = class Settings extends React.PureComponent {
@@ -63,9 +63,9 @@ module.exports = class Settings extends React.PureComponent {
     return <>
       <RadioGroup
         options={[
-          { name: Messages.BSI.STATUS_DISPLAY_SOLID_OPT, value: 'solid' },
-          { name: Messages.BSI.STATUS_DISPLAY_DEFAULT_OPT, value: 'default' },
-          { name: Messages.BSI.STATUS_DISPLAY_CLASSIC_OPT, value: 'classic' }
+          { name: Messages.BSI_STATUS_DISPLAY_SOLID_OPT, value: 'solid' },
+          { name: Messages.BSI_STATUS_DISPLAY_DEFAULT_OPT, value: 'default' },
+          { name: Messages.BSI_STATUS_DISPLAY_CLASSIC_OPT, value: 'classic' }
         ]}
         value={this.props.getSetting('statusDisplay', 'default')}
         onChange={e => {
@@ -73,15 +73,15 @@ module.exports = class Settings extends React.PureComponent {
           this.props.main._refreshStatusIcons();
         }}
       >
-        {Messages.BSI.STATUS_DISPLAY}
+        {Messages.BSI_STATUS_DISPLAY}
       </RadioGroup>
 
       <SwitchItem
-        note={Messages.BSI.TRUE_STATUS_DESC}
+        note={Messages.BSI_TRUE_STATUS_DESC}
         value={getSetting('trueStatusColor', false)}
         onChange={() => toggleSetting('trueStatusColor', false)}
       >
-        {Messages.BSI.TRUE_STATUS}
+        {Messages.BSI_TRUE_STATUS}
       </SwitchItem>
 
       <FormTitle className="bsi-status-display-title">{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'Desktop' })}</FormTitle>
@@ -90,35 +90,35 @@ module.exports = class Settings extends React.PureComponent {
         value={getSetting('desktopMembersList', false)}
         onChange={() => toggleSetting('desktopMembersList', false)}
       >
-        {Messages.BSI.CLIENT_SWITCH_MEMBERS_LIST}
+        {Messages.BSI_CLIENT_SWITCH_MEMBERS_LIST}
       </SwitchItem>
       <SwitchItem
         note={formatClientTranslation('USER_POPOUT_MODAL_DESC', { client: 'desktop' })}
         value={getSetting('desktopUserPopoutModal', false)}
         onChange={() => toggleSetting('desktopUserPopoutModal', false)}
       >
-        {Messages.BSI.CLIENT_SWITCH_USER_POPOUT_MODAL}
+        {Messages.BSI_CLIENT_SWITCH_USER_POPOUT_MODAL}
       </SwitchItem>
       <SwitchItem
         note={formatClientTranslation('DM_DESC', { client: 'desktop' })}
         value={getSetting('desktopDirectMessages', false)}
         onChange={() => toggleSetting('desktopDirectMessages', false)}
       >
-        {Messages.BSI.CLIENT_SWITCH_DM}
+        {Messages.BSI_CLIENT_SWITCH_DM}
       </SwitchItem>
       <SwitchItem
         note={formatClientTranslation('MATCH_COLOR_DESC', { client: 'desktop' })}
         value={getSetting('desktopMatchStatus', false)}
         onChange={() => toggleSetting('desktopMatchStatus', false)}
       >
-        {Messages.BSI.CLIENT_SWITCH_MATCH_COLOR}
+        {Messages.BSI_CLIENT_SWITCH_MATCH_COLOR}
       </SwitchItem>
       <SwitchItem
-        note={Messages.BSI.DESKTOP_SWITCH_PRESERVE_STATUS_DESC}
+        note={Messages.BSI_DESKTOP_SWITCH_PRESERVE_STATUS_DESC}
         value={getSetting('desktopPreserveStatus', false)}
         onChange={() => toggleSetting('desktopPreserveStatus', false)}
       >
-        {Messages.BSI.CLIENT_SWITCH_PRESERVE_STATUS}
+        {Messages.BSI_CLIENT_SWITCH_PRESERVE_STATUS}
       </SwitchItem>
       <SwitchItem
         note={formatClientTranslation('SHOW_ON_SELF_DESC', { client: 'desktop' })}
@@ -126,16 +126,16 @@ module.exports = class Settings extends React.PureComponent {
         onChange={() => toggleSetting('desktopShowOnSelf', false)}
         disabled={getSetting('desktopPreserveStatus', false) === false}
       >
-        {Messages.BSI.CLIENT_SWITCH_SHOW_ON_SELF}
+        {Messages.BSI_CLIENT_SWITCH_SHOW_ON_SELF}
       </SwitchItem>
 
       <FormTitle className="bsi-status-display-title">{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'Mobile' })}</FormTitle>
       <SwitchItem
-        note={Messages.BSI.MOBILE_SWITCH_PRESERVE_STATUS_DESC}
+        note={Messages.BSI_MOBILE_SWITCH_PRESERVE_STATUS_DESC}
         value={getSetting('mobilePreserveStatus', false)}
         onChange={() => toggleSetting('mobilePreserveStatus', false)}
       >
-        {Messages.BSI.CLIENT_SWITCH_PRESERVE_STATUS}
+        {Messages.BSI_CLIENT_SWITCH_PRESERVE_STATUS}
       </SwitchItem>
       <SwitchItem
         note={formatClientTranslation('SHOW_ON_SELF_DESC', { client: 'mobile' })}
@@ -143,14 +143,14 @@ module.exports = class Settings extends React.PureComponent {
         onChange={() => toggleSetting('mobileShowOnSelf', false)}
         disabled={getSetting('mobilePreserveStatus', false) === false}
       >
-        {Messages.BSI.CLIENT_SWITCH_SHOW_ON_SELF}
+        {Messages.BSI_CLIENT_SWITCH_SHOW_ON_SELF}
       </SwitchItem>
       <SwitchItem
         note={formatClientTranslation('AVATAR_STATUS_DESC', { client: 'mobile' })}
         value={getSetting('mobileAvatarStatus', true)}
         onChange={handleAvatarStatusChange.bind(this)}
       >
-        {Messages.BSI.CLIENT_SWITCH_AVATAR_STATUS}
+        {Messages.BSI_CLIENT_SWITCH_AVATAR_STATUS}
       </SwitchItem>
 
       <FormTitle className="bsi-status-display-title">{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'Web' })}</FormTitle>
@@ -159,35 +159,35 @@ module.exports = class Settings extends React.PureComponent {
         value={getSetting('webMembersList', true)}
         onChange={() => toggleSetting('webMembersList', true)}
       >
-        {Messages.BSI.CLIENT_SWITCH_MEMBERS_LIST}
+        {Messages.BSI_CLIENT_SWITCH_MEMBERS_LIST}
       </SwitchItem>
       <SwitchItem
         note={formatClientTranslation('USER_POPOUT_MODAL_DESC', { client: 'web' })}
         value={getSetting('webUserPopoutModal', true)}
         onChange={() => toggleSetting('webUserPopoutModal', true)}
       >
-        {Messages.BSI.CLIENT_SWITCH_USER_POPOUT_MODAL}
+        {Messages.BSI_CLIENT_SWITCH_USER_POPOUT_MODAL}
       </SwitchItem>
       <SwitchItem
         note={formatClientTranslation('DM_DESC', { client: 'web' })}
         value={getSetting('webDirectMessages', true)}
         onChange={() => toggleSetting('webDirectMessages', true)}
       >
-        {Messages.BSI.CLIENT_SWITCH_DM}
+        {Messages.BSI_CLIENT_SWITCH_DM}
       </SwitchItem>
       <SwitchItem
         note={formatClientTranslation('MATCH_COLOR_DESC', { client: 'web' })}
         value={getSetting('webMatchStatus', false)}
         onChange={() => toggleSetting('webMatchStatus', false)}
       >
-        {Messages.BSI.CLIENT_SWITCH_MATCH_COLOR}
+        {Messages.BSI_CLIENT_SWITCH_MATCH_COLOR}
       </SwitchItem>
       <SwitchItem
-        note={Messages.BSI.WEB_SWITCH_PRESERVE_STATUS_DESC}
+        note={Messages.BSI_WEB_SWITCH_PRESERVE_STATUS_DESC}
         value={getSetting('webPreserveStatus', false)}
         onChange={() => toggleSetting('webPreserveStatus', false)}
       >
-        {Messages.BSI.CLIENT_SWITCH_PRESERVE_STATUS}
+        {Messages.BSI_CLIENT_SWITCH_PRESERVE_STATUS}
       </SwitchItem>
       <SwitchItem
         note={formatClientTranslation('SHOW_ON_SELF_DESC', { client: 'web' })}
@@ -195,14 +195,14 @@ module.exports = class Settings extends React.PureComponent {
         onChange={() => toggleSetting('webShowOnSelf', false)}
         disabled={getSetting('webPreserveStatus', false) === false}
       >
-        {Messages.BSI.CLIENT_SWITCH_SHOW_ON_SELF}
+        {Messages.BSI_CLIENT_SWITCH_SHOW_ON_SELF}
       </SwitchItem>
       <SwitchItem
         note={formatClientTranslation('SHOW_ON_BOTS_DESC', { client: 'web' })}
         value={getSetting('webShowOnBots', true)}
         onChange={() => toggleSetting('webShowOnBots', true)}
       >
-        {Messages.BSI.CLIENT_SWITCH_SHOW_ON_BOTS}
+        {Messages.BSI_CLIENT_SWITCH_SHOW_ON_BOTS}
       </SwitchItem>
     </>;
   }

@@ -1,8 +1,6 @@
 {
-  "BSI": {
-    "STATUS_DISPLAY_CLASSIC_OPT": "Classic: Tried and true colour-blind mode.",
-    "TRUE_STATUS": "True Status Colour",
-    "CLIENT_SWITCH_MATCH_COLOR_DESC": "Fills the {client} status indicator with the corresponding colour of their status.",
-    "CLIENT_SWITCH_MATCH_COLOR": "Match Status Colour"
-  }
+  "BSI_STATUS_DISPLAY_CLASSIC_OPT": "Classic: Tried and true colour-blind mode.",
+  "BSI_TRUE_STATUS": "True Status Colour",
+  "BSI_CLIENT_SWITCH_MATCH_COLOR_DESC": "Fills the {client} status indicator with the corresponding colour of their status.",
+  "BSI_CLIENT_SWITCH_MATCH_COLOR": "Match Status Colour"
 }

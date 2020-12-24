@@ -55,7 +55,7 @@ function renderClientStatus (client, props, states) {
 
   // eslint-disable-next-line multiline-ternary
   return props.getSetting(`${client}${settingsKey}`, client !== 'desktop') && states[`is${clientCapitalized}Online`] ? React.createElement(Tooltip, {
-    text: Messages.BSI.CLIENT_SIGNED_IN.format({ clientCapitalized }),
+    text: Messages.BSI_CLIENT_SIGNED_IN.format({ clientCapitalized }),
     hideOnClick: false
   }, (props) => React.createElement(Icon, Object.assign({}, props, {
     name: clientIcons[client],
