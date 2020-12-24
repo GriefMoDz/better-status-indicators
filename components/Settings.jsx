@@ -28,12 +28,25 @@
 
 /* eslint-disable object-property-newline */
 const { React, i18n: { Messages } } = require('powercord/webpack');
+const { FormTitle, Text, modal: { Confirm } } = require('powercord/components');
 const { SwitchItem, RadioGroup } = require('powercord/components/settings');
-const { FormTitle } = require('powercord/components');
+const { open: openModal } = require('powercord/modal');
 
 function formatClientTranslation (translation, args) {
   const key = translation === 'DISPLAY_TITLE' ? 'CLIENT_DISPLAY_TITLE' : `CLIENT_SWITCH_${translation}`;
   return Messages.BSI[key].format(args);
+}
+
+function handleAvatarStatusChange () {
+  return openModal(() => React.createElement(Confirm, {
+    header: Messages.BSI.MOBILE_AVATAR_STATUS_MODAL_HEADER,
+    confirmText: Messages.OKAY,
+    cancelText: Messages.CANCEL,
+    onConfirm: () => {
+      this.props.toggleSetting('mobileAvatarStatus', true);
+      setTimeout(() => location.reload(), 2e3);
+    }
+  }, React.createElement(Text, {}, Messages.BSI.MOBILE_AVATAR_STATUS_MODAL_BODY)));
 }
 
 module.exports = class Settings extends React.PureComponent {
@@ -132,8 +145,15 @@ module.exports = class Settings extends React.PureComponent {
       >
         {Messages.BSI.CLIENT_SWITCH_SHOW_ON_SELF}
       </SwitchItem>
+      <SwitchItem
+        note={formatClientTranslation('AVATAR_STATUS_DESC', { client: 'mobile' })}
+        value={getSetting('mobileAvatarStatus', true)}
+        onChange={handleAvatarStatusChange.bind(this)}
+      >
+        {Messages.BSI.CLIENT_SWITCH_AVATAR_STATUS}
+      </SwitchItem>
 
-      <FormTitle className="bsi-status-display-title">{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'WEB' })}</FormTitle>
+      <FormTitle className="bsi-status-display-title">{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'Web' })}</FormTitle>
       <SwitchItem
         note={formatClientTranslation('MEMBERS_LIST_DESC', { client: 'web' })}
         value={getSetting('webMembersList', true)}

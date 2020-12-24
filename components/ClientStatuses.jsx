@@ -40,31 +40,48 @@ const authStore = getModule([ 'initialize', 'getFingerprint' ], false);
 const clientStatusStore = require('../stores/clientStatusStore');
 const clientIcons = Object.freeze({
   web: 'Public',
-  desktop: 'Monitor'
+  desktop: 'Monitor',
+  mobile: 'MobileDevice'
 });
 
-function renderClientStatus (client, state) {
-  if (this.props.user.bot && !this.props.getSetting(`${client}ShowOnBots`, true)) {
+function renderClientStatus (client, props, states) {
+  if (props.user.bot && !props.getSetting(`${client}ShowOnBots`, true)) {
     return null;
   }
 
-  const matchStatus = this.props.getSetting(`${client}MatchStatus`, false);
-  const settingsKey = this.props.location.replace(/^(.)|-(.)/g, (match) => match.toUpperCase()).replace(/-/g, '');
-
-  const statusColor = Flux.useStateFromStores([ statusStore ], () => {
-    const userStatus = statusStore.getStatus(this.props.user.id);
-    return statusUtils.getStatusColor(userStatus);
-  });
+  const matchStatus = props.getSetting(`${client}MatchStatus`, false);
+  const clientCapitalized = client.charAt(0).toUpperCase() + client.slice(1);
+  const settingsKey = props.location.replace(/^(.)|-(.)/g, (match) => match.toUpperCase()).replace(/-/g, '');
 
   // eslint-disable-next-line multiline-ternary
-  return this.props.getSetting(`${client}${settingsKey}`, client === 'web') && state ? React.createElement(Tooltip, {
-    text: Messages.BSI[`ACTIVE_ON_${client.toUpperCase()}`],
+  return props.getSetting(`${client}${settingsKey}`, client !== 'desktop') && states[`is${clientCapitalized}Online`] ? React.createElement(Tooltip, {
+    text: Messages.BSI.CLIENT_SIGNED_IN.format({ clientCapitalized }),
     hideOnClick: false
   }, (props) => React.createElement(Icon, Object.assign({}, props, {
     name: clientIcons[client],
     className: `bsi-${client}Icon ${getModule([ 'member', 'ownerIcon' ], false).icon}`,
-    color: matchStatus ? statusColor : 'currentColor'
+    color: matchStatus ? states.statusColor : 'currentColor'
   }))) : null;
+}
+
+function isClientOnline (client, props) {
+  if (client === 'mobile' && props.getSetting('mobileAvatarStatus', true)) {
+    return false;
+  }
+
+  const showOnSelf = props.user.id === authStore.getId() && props.getSetting(`${client}ShowOnSelf`, false);
+  const clientStatus = showOnSelf ? clientStatusStore.getCurrentClientStatus() : statusStore.getState().clientStatuses[props.user.id];
+  if (!clientStatus) {
+    return false;
+  }
+
+  const states = {
+    web: { preserve: true, nonPreserve: !clientStatus.desktop && !clientStatus.mobile },
+    desktop: { preserve: clientStatus.web || clientStatus.mobile, nonPreserve: !clientStatus.web && !clientStatus.mobile },
+    mobile: { preserve: clientStatus.desktop || clientStatus.web || true, nonPreserve: !clientStatus.web && !clientStatus.desktop }
+  };
+
+  return clientStatus && clientStatus[client] && (props.getSetting(`${client}PreserveStatus`, false) ? states[client].preserve : states[client].nonPreserve);
 }
 
 module.exports = React.memo(props => {
@@ -72,22 +89,21 @@ module.exports = React.memo(props => {
     return null;
   }
 
-  const { user } = props;
-  const isWebOnline = Flux.useStateFromStores([ statusStore ], () => {
-    const showOnSelf = user.id === authStore.getId() && props.getSetting('webShowOnSelf', false);
-    const clientStatus = showOnSelf ? clientStatusStore.getCurrentClientStatus() : statusStore.getState().clientStatuses[user.id];
+  const userStatus = statusStore.getStatus(props.user.id);
+  const states = Flux.useStateFromStoresObject([ statusStore ], () => ({
+    statusColor: statusUtils.getStatusColor(userStatus),
+    isWebOnline: isClientOnline('web', props),
+    isDesktopOnline: isClientOnline('desktop', props),
+    isMobileOnline: isClientOnline('mobile', props)
+  }));
 
-    return clientStatus && clientStatus.web && (props.getSetting('webPreserveStatus', false) ? true : !clientStatus.desktop && !clientStatus.mobile);
-  });
+  if (!states.isWebOnline && !states.isDesktopOnline && !states.isMobileOnline) {
+    return null;
+  }
 
-  const isDesktopOnline = Flux.useStateFromStores([ statusStore ], () => {
-    const showOnSelf = user.id === authStore.getId() && props.getSetting('desktopShowOnSelf', false);
-    const clientStatus = showOnSelf ? clientStatusStore.getCurrentClientStatus() : statusStore.getState().clientStatuses[user.id];
-
-    return clientStatus && clientStatus.desktop && (props.getSetting('desktopPreserveStatus', false) ? clientStatus.web || clientStatus.mobile : !clientStatus.web && !clientStatus.mobile);
-  });
-
-  const _renderClientStatus = (client, state) => renderClientStatus.call({ props }, client, state);
-
-  return [ _renderClientStatus('web', isWebOnline), _renderClientStatus('desktop', isDesktopOnline) ];
+  return React.createElement('div', { className: 'bsi-clientStatuses' }, [
+    renderClientStatus('web', props, states),
+    renderClientStatus('desktop', props, states),
+    renderClientStatus('mobile', props, states)
+  ]);
 });

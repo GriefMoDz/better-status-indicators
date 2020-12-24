@@ -1,40 +1,59 @@
 /* General */
-.bsi-webIcon, .bsi-desktopIcon {
+.bsi-clientStatuses svg {
   color: var(--channels-default);
   margin-left: 4px;
-  top: 0;
 }
 
-.peopleListItem-2nzedh .userInfo-2zN2z8 .bsi-webIcon,
-.peopleListItem-2nzedh .userInfo-2zN2z8 .bsi-desktopIcon {
+.peopleListItem-2nzedh .userInfo-2zN2z8 .bsi-clientStatuses {
   visibility: hidden;
 }
 
-.peopleListItem-2nzedh .userInfo-2zN2z8.hovered-15FzL3 .bsi-webIcon,
-.peopleListItem-2nzedh .userInfo-2zN2z8.hovered-15FzL3 .bsi-desktopIcon {
+.peopleListItem-2nzedh .userInfo-2zN2z8.hovered-15FzL3 .bsi-clientStatuses {
   visibility: visible;
+}
+
+.wrapper-3t9DeA foreignObject[width='32'][data-bsi-mobile-avatar-status='false']:not([mask*='avatar-default']) {
+  mask: url(#svg-mask-avatar-status-round-32);
+}
+
+.wrapper-3t9DeA foreignObject[width='32'][data-bsi-mobile-avatar-status='false'] + rect {
+  mask: url(#svg-mask-status-online);
+  height: 10px;
+  x: 22;
+  y: 22;
+}
+
+.wrapper-3t9DeA foreignObject[width='80'][data-bsi-mobile-avatar-status='false']:not([mask*='avatar-default']) {
+  mask: url(#svg-mask-avatar-status-round-80);
+}
+
+.wrapper-3t9DeA foreignObject[width='80'][data-bsi-mobile-avatar-status='false'] + rect {
+  mask: url(#svg-mask-status-online);
+  height: 16px;
+  x: 60;
+  y: 60;
 }
 
 /* Theme Compatibility */
 
 /* Radial Status */
-#app-mount .wrapper-3t9DeA foreignObject[mask*=mobile][data-status='online']:after {
+#app-mount .wrapper-3t9DeA foreignObject[mask*=mobile][data-bsi-status='online']:after {
   background: var(--rs-online-color, #43b581);
 }
 
-#app-mount .wrapper-3t9DeA foreignObject[mask*=mobile][data-status='idle']:after {
+#app-mount .wrapper-3t9DeA foreignObject[mask*=mobile][data-bsi-status='idle']:after {
   background: var(--rs-idle-color, #faa61a);
 }
 
-#app-mount .wrapper-3t9DeA foreignObject[mask*=mobile][data-status='dnd']:after {
+#app-mount .wrapper-3t9DeA foreignObject[mask*=mobile][data-bsi-status='dnd']:after {
   background: var(--rs-dnd-color, #f04747);
 }
 
-#app-mount .wrapper-3t9DeA foreignObject[mask*=mobile][data-status='offline']:after {
+#app-mount .wrapper-3t9DeA foreignObject[mask*=mobile][data-bsi-status='offline']:after {
   background: var(--rs-offline-color, #636b75);
 }
 
-#app-mount .wrapper-3t9DeA foreignObject[mask*=mobile][data-status='streaming']:after {
+#app-mount .wrapper-3t9DeA foreignObject[mask*=mobile][data-bsi-status='streaming']:after {
   background: var(--rs-streaming-color, #643da7);
 }
 

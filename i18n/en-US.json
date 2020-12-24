@@ -1,7 +1,8 @@
 {
   "BSI": {
-    "ACTIVE_ON_DESKTOP": "Active on Desktop",
-    "ACTIVE_ON_WEB": "Active on Web",
+    "CLIENT_SIGNED_IN": "Signed in on {clientCapitalized}",
+    "MOBILE_AVATAR_STATUS_MODAL_HEADER": "Change mobile avatar status",
+    "MOBILE_AVATAR_STATUS_MODAL_BODY": "Changing the mobile avatar status setting will re-launch Discord. Are you sure you want to do this?",
     "HARDWARE_ACCELERATION_DISABLED_MSG": "Hi, there! We've noticed that you've disabled hardware acceleration. \"Better Status Indicators\" recommends leaving this feature on for significantly better results — visually and quantitatively.",
     "HARDWARE_ACCELERATION_DISABLED_BTN_TEXT": "Let's change it!",
     "STATUS_DISPLAY": "Status Display",
@@ -20,6 +21,8 @@
     "CLIENT_SWITCH_MATCH_COLOR_DESC": "Fills the {client} status indicator with the corresponding color of their status.",
     "CLIENT_SWITCH_MATCH_COLOR": "Match Status Color",
     "CLIENT_SWITCH_PRESERVE_STATUS": "Preserve Status",
+    "CLIENT_SWITCH_AVATAR_STATUS_DESC": "Displays the {client} status indicator within the avatar. If disabled, the mobile indicator will be displayed next to usernames.",
+    "CLIENT_SWITCH_AVATAR_STATUS": "Avatar Status",
     "CLIENT_SWITCH_SHOW_ON_SELF_DESC": "Displays the {client} status indicator for yourself; requires the {client} \"Preserve Status\" setting to be enabled.",
     "CLIENT_SWITCH_SHOW_ON_SELF": "Show on Self",
     "CLIENT_SWITCH_SHOW_ON_BOTS_DESC": "Displays the {client} status indicator for bot users.",

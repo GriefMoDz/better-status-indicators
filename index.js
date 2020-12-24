@@ -205,11 +205,15 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     this.inject('bsi-mobile-status-default-mask', avatarModule, 'default', (args, res) => {
       const { size, status, isMobile, isTyping } = args[0];
+      const foreignObject = findInReactTree(res, n => n?.type === 'foreignObject');
+
+      if (isMobile && !isTyping) {
+        foreignObject.props['data-bsi-mobile-avatar-status'] = this.settings.get('mobileAvatarStatus', true);
+      }
 
       if (status !== 'online' && isMobile && !isTyping) {
-        const foreignObject = findInReactTree(res, n => n?.type === 'foreignObject');
         foreignObject.props.mask = `url(#svg-mask-avatar-status-mobile-${size.split('_')[1]})`;
-        foreignObject.props['data-status'] = status;
+        foreignObject.props['data-bsi-status'] = status;
 
         const tooltip = findInReactTree(res, n => n.type?.displayName === 'Tooltip');
         const { children } = tooltip.props;
