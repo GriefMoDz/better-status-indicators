@@ -68,7 +68,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
   }
 
   async startPlugin () {
-    this.loadStylesheet('./style.css');
+    this.loadStylesheet('./style.scss');
     powercord.api.i18n.loadAllStrings(i18n);
     powercord.api.settings.registerSettings('better-status-indicators', {
       category: this.entityID,
@@ -217,12 +217,12 @@ module.exports = class BetterStatusIndicators extends Plugin {
       const foreignObject = findInReactTree(res, n => n?.type === 'foreignObject');
 
       if (isMobile && !isTyping) {
+        foreignObject.props['data-bsi-status'] = status;
         foreignObject.props['data-bsi-mobile-avatar-status'] = getSetting('mobileAvatarStatus', true);
       }
 
       if (status !== 'online' && isMobile && !isTyping) {
         foreignObject.props.mask = `url(#svg-mask-avatar-status-mobile-${size.split('_')[1]})`;
-        foreignObject.props['data-bsi-status'] = status;
 
         const tooltip = findInReactTree(res, n => n.type?.displayName === 'Tooltip');
         const { children } = tooltip.props;
