@@ -27,10 +27,12 @@
  */
 
 /* eslint-disable object-property-newline */
-const { React, i18n: { Messages } } = require('powercord/webpack');
-const { FormTitle, Text, modal: { Confirm } } = require('powercord/components');
+const { React, getModule, i18n: { Messages } } = require('powercord/webpack');
+const { Divider, FormTitle, TabBar, Text, modal: { Confirm } } = require('powercord/components');
 const { SwitchItem, RadioGroup } = require('powercord/components/settings');
 const { open: openModal } = require('powercord/modal');
+
+const StatusPickerPreview = require('./StatusPickerPreview');
 
 function formatClientTranslation (translation, args) {
   const key = translation === 'DISPLAY_TITLE' ? 'CLIENT_DISPLAY_TITLE' : `CLIENT_SWITCH_${translation}`;
@@ -50,17 +52,53 @@ function handleAvatarStatusChange () {
 }
 
 module.exports = class Settings extends React.PureComponent {
+  constructor () {
+    super();
+
+    this.state = {
+      selectedItem: 'SETTINGS'
+    };
+  }
+
   render () {
+    const { selectedItem } = this.state;
+
     return <>
-      <FormTitle tag='h2' className='bsi-title'>{Messages.SETTINGS}</FormTitle>
-      {this.renderSettings()}
+      {this.renderTabBar()}
+
+      <FormTitle tag='h2' className='bsi-settings-title'>{Messages[`${selectedItem !== 'SETTINGS' ? 'BSI_' : ''}${selectedItem}`]}</FormTitle>
+      {selectedItem === 'SETTINGS' && this.renderSettings()}
+      {selectedItem === 'CUSTOMIZE' && this.renderCustomize()}
     </>;
   }
 
-  renderSettings () {
-    const { getSetting, toggleSetting } = this.props;
+  renderTabBar () {
+    const { topPill, item } = getModule([ 'topPill' ], false);
 
+    return (
+      <div className='bsi-settings-tab-bar'>
+        <TabBar
+          selectedItem={this.state.selectedItem}
+          onItemSelect={selectedItem => this.setState({ selectedItem })}
+          type={topPill}
+        >
+          <TabBar.Item className={item} selectedItem={this.state.selectedItem} id='SETTINGS'>
+            {Messages.SETTINGS}
+          </TabBar.Item>
+          <TabBar.Item className={item} selectedItem={this.state.selectedItem} id='CUSTOMIZE'>
+            {Messages.BSI_CUSTOMIZE}
+          </TabBar.Item>
+        </TabBar>
+      </div>
+    );
+  }
+
+  renderCustomize () {
     return <>
+      <FormTitle>{Messages.FORM_LABEL_VIDEO_PREVIEW}</FormTitle>
+      <StatusPickerPreview/>
+      <Divider/>
+
       <RadioGroup
         options={[
           { name: Messages.BSI_STATUS_DISPLAY_SOLID_OPT, value: 'solid' },
@@ -75,7 +113,14 @@ module.exports = class Settings extends React.PureComponent {
       >
         {Messages.BSI_STATUS_DISPLAY}
       </RadioGroup>
+    </>;
+  }
 
+  renderSettings () {
+    const { getSetting, toggleSetting } = this.props;
+
+    return <>
+      <FormTitle className="bsi-settings-status-display-title">{Messages.BSI_STATUS_DISPLAY}</FormTitle>
       <SwitchItem
         note={Messages.BSI_TRUE_STATUS_DESC}
         value={getSetting('trueStatusColor', false)}
@@ -84,7 +129,7 @@ module.exports = class Settings extends React.PureComponent {
         {Messages.BSI_TRUE_STATUS}
       </SwitchItem>
 
-      <FormTitle className="bsi-status-display-title">{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'Desktop' })}</FormTitle>
+      <FormTitle className="bsi-settings-status-display-title">{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'Desktop' })}</FormTitle>
       <SwitchItem
         note={formatClientTranslation('MEMBERS_LIST_DESC', { client: 'desktop' })}
         value={getSetting('desktopMembersList', false)}
@@ -129,7 +174,7 @@ module.exports = class Settings extends React.PureComponent {
         {Messages.BSI_CLIENT_SWITCH_SHOW_ON_SELF}
       </SwitchItem>
 
-      <FormTitle className="bsi-status-display-title">{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'Mobile' })}</FormTitle>
+      <FormTitle className="bsi-settings-status-display-title">{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'Mobile' })}</FormTitle>
       <SwitchItem
         note={Messages.BSI_MOBILE_SWITCH_PRESERVE_STATUS_DESC}
         value={getSetting('mobilePreserveStatus', false)}
@@ -153,7 +198,7 @@ module.exports = class Settings extends React.PureComponent {
         {Messages.BSI_CLIENT_SWITCH_AVATAR_STATUS}
       </SwitchItem>
 
-      <FormTitle className="bsi-status-display-title">{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'Web' })}</FormTitle>
+      <FormTitle className="bsi-settings-status-display-title">{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'Web' })}</FormTitle>
       <SwitchItem
         note={formatClientTranslation('MEMBERS_LIST_DESC', { client: 'web' })}
         value={getSetting('webMembersList', true)}

@@ -92,10 +92,37 @@ $status-colors: (
 }
 
 /** Settings **/
-.bsi-title {
-  margin-bottom: 20px;
+.bsi-settings {
+  &-title {
+    margin-bottom: 20px;
+  }
+
+  &-tab-bar {
+    background-color: var(--background-secondary);
+    padding: 8px 10px;
+    border-radius: 25px;
+    margin-bottom: 25px;
+    margin-left: -5px;
+  }
+
+  &-title + &-status-display-title {
+    margin: 0 0 8px 0;
+  }
+
+  &-status-display-title {
+    margin: 40px 0 8px 0;
+  }
 }
 
-.bsi-status-display-title {
-  margin: 40px 0 8px 0;
+/* Status Picker Preview */
+#bsi-status-picker {
+  width: auto;
+
+  .description-2L932D, .status-1fhblQ {
+    display: initial;
+  }
+
+  &+ .divider-3573oO {
+    margin-bottom: 20px;
+  }
 }

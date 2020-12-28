@@ -4,6 +4,7 @@
   "BSI_MOBILE_AVATAR_STATUS_MODAL_BODY": "\n  Changing the mobile avatar status setting will re-launch Discord. Are you sure you want to do this?",
   "BSI_HARDWARE_ACCELERATION_DISABLED_MSG": "Hi, there! We've noticed that you've disabled hardware acceleration. \"Better Status Indicators\" recommends leaving this feature on for significantly better results — visually and quantitatively.",
   "BSI_HARDWARE_ACCELERATION_DISABLED_BTN_TEXT": "Let's change it!",
+  "BSI_CUSTOMIZE": "Customize",
   "BSI_STATUS_DISPLAY": "Status Display",
   "BSI_STATUS_DISPLAY_SOLID_OPT": "Solid: Simple and minimalistic.",
   "BSI_STATUS_DISPLAY_DEFAULT_OPT": "Default: Modern, beautiful, and easy on your eyes.",
