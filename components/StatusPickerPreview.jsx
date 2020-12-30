@@ -26,76 +26,71 @@
  * SOFTWARE.
  */
 
-const { React, getModule, i18n: { Messages }, constants } = require('powercord/webpack');
-const { Menu } = require('powercord/components');
+const { React, Flux, getModule, constants } = require('powercord/webpack');
+const { AdvancedScrollerThin } = require('powercord/components');
 
 const { Status } = getModule([ 'AnimatedStatus' ], false);
 const { humanizeStatus } = getModule([ 'humanizeStatus' ], false);
 
-const classes = getModule([ 'status', 'statusItem' ], false);
+const classes = {
+  ...getModule([ 'menu', 'item' ], false),
+  ...getModule([ 'status', 'statusItem' ], false)
+};
 
 class StatusMenuItem extends React.PureComponent {
-  render () {
-    const { status, description, focused } = this.props;
+  constructor () {
+    super();
 
-    return React.createElement('div', {
+    this.state = {
+      focused: false
+    };
+  }
+
+  render () {
+    const { focused } = this.state;
+    const { status, description, separator } = this.props;
+
+    return [ React.createElement('div', {
+      onMouseOver: () => this.setState({ focused: true }),
+      onMouseOut: () => this.setState({ focused: false }),
+      className: [ classes.item, classes.colorDefault, focused && classes.focused ].filter(Boolean).join(' '),
+      role: 'menuitem'
+    }, React.createElement('div', {
       className: classes.statusItem
     }, React.createElement(Status, {
       status,
       className: classes.icon,
       size: 10,
-      color: focused ? 'currentColor' : void 0
+      color: focused ? 'currentColor' : this.props.getSetting(`${status}StatusColor`, void 0)
     }), React.createElement('div', {
       className: classes.status
-    }, humanizeStatus(this.props.status)), description && React.createElement('div', {
+    }, humanizeStatus(status)), description && React.createElement('div', {
       className: classes.description
-    }, description));
+    }, description))), separator && React.createElement('div', {
+      role: 'separator',
+      className: 'bsi-status-separator'
+    }) ];
   }
 }
 
-module.exports = class StatusPickerPreview extends React.PureComponent {
+class StatusPickerPreview extends React.PureComponent {
   render () {
     return <>
-      <Menu.Menu navId='bsi-status-picker' style={Menu.MenuStyle.FIXED} aria-label={Messages.SET_STATUS} onClose={() => void 0}>
-        <Menu.MenuItem id='online' keepItemStyles={true} render={(props) =>
-          <StatusMenuItem
-            status={constants.StatusTypes.ONLINE}
-            focused={props.isFocused}
-          />
-        } action={() => void 0} />
-
-        <Menu.MenuSeparator />
-
-        <Menu.MenuItem id='idle' keepItemStyles={true} render={(props) =>
-          <StatusMenuItem
-            status={constants.StatusTypes.IDLE}
-            focused={props.isFocused}
-          />
-        } action={() => void 0} />
-        <Menu.MenuItem id='dnd' keepItemStyles={true} render={(props) =>
-          <StatusMenuItem
-            status={constants.StatusTypes.DND}
-            description={Messages.STATUS_DND_HELP}
-            focused={props.isFocused}
-          />
-        } action={() => void 0} />
-        <Menu.MenuItem id='invisible' keepItemStyles={true} render={(props) =>
-          <StatusMenuItem
-            status={constants.StatusTypes.INVISIBLE}
-            description={Messages.STATUS_INVISIBLE_HELPER}
-            focused={props.isFocused}
-          />
-        } action={() => void 0} />
-
-        <Menu.MenuSeparator />
-
-        <Menu.MenuItem id='streaming' keepItemStyles={true} render={(props) =>
-          <StatusMenuItem
-            status={constants.StatusTypes.STREAMING}
-            focused={props.isFocused}
-          />
-        } action={() => void 0} />
-      </Menu.Menu>
+      <div className={[ classes.menu, this.props.className ].join(' ')} role='menu' id='bsi-status-picker'>
+        <AdvancedScrollerThin className='bsi-status-scroller'>
+          {[ 'ONLINE', 'IDLE', 'DND', 'OFFLINE', 'STREAMING' ].map(status =>
+            <StatusMenuItem
+              status={constants.StatusTypes[status]}
+              separator={status !== 'STREAMING'}
+              {...this.props }
+            />
+          )}
+        </AdvancedScrollerThin>
+      </div>
     </>;
   }
-};
+}
+
+module.exports = Flux.connectStores([ powercord.api.settings.store ], () => ({
+  ...powercord.api.settings._fluxProps('better-status-indicators')
+}))(StatusPickerPreview);

@@ -28,11 +28,14 @@
 
 /* eslint-disable object-property-newline */
 const { React, getModule, i18n: { Messages } } = require('powercord/webpack');
-const { Divider, FormTitle, TabBar, Text, modal: { Confirm } } = require('powercord/components');
-const { SwitchItem, RadioGroup } = require('powercord/components/settings');
+const { Divider, Flex, FormTitle, TabBar, Text, modal: { Confirm } } = require('powercord/components');
+const { ColorPickerInput, SwitchItem, RadioGroup } = require('powercord/components/settings');
 const { open: openModal } = require('powercord/modal');
 
 const StatusPickerPreview = require('./StatusPickerPreview');
+const TextInputWithColorPicker = require('./TextInputWithColorPicker');
+
+const colorUtils = getModule([ 'isValidHex' ], false);
 
 function formatClientTranslation (translation, args) {
   const key = translation === 'DISPLAY_TITLE' ? 'CLIENT_DISPLAY_TITLE' : `CLIENT_SWITCH_${translation}`;
@@ -52,11 +55,13 @@ function handleAvatarStatusChange () {
 }
 
 module.exports = class Settings extends React.PureComponent {
-  constructor () {
-    super();
+  constructor (props) {
+    super(props);
 
+    this.statusColors = Object.assign({}, ...props.main._getDefaultStatusColors());
     this.state = {
-      selectedItem: 'SETTINGS'
+      selectedItem: 'SETTINGS',
+      activeColorPicker: ''
     };
   }
 
@@ -94,10 +99,46 @@ module.exports = class Settings extends React.PureComponent {
   }
 
   renderCustomize () {
+    const { activeColorPicker } = this.state;
+    const { getSetting, updateSetting, toggleSetting } = this.props;
+
     return <>
-      <FormTitle>{Messages.FORM_LABEL_VIDEO_PREVIEW}</FormTitle>
-      <StatusPickerPreview/>
-      <Divider/>
+      <Flex direction={Flex.Direction.VERTICAL}>
+        <FormTitle>{Messages.BSI_STATUS_COLOR_PICKER} / {Messages.FORM_LABEL_VIDEO_PREVIEW}</FormTitle>
+        <Flex>
+          <Flex.Child basis='70%'>
+            <></> {/* Workaround for constructing a flex child */}
+            {[ 'online', 'idle', 'dnd', 'offline', 'streaming' ].map(status => {
+              const defaultColor = this.statusColors[status.toUpperCase()];
+              const settingsKey = `${status}StatusColor`;
+
+              return <TextInputWithColorPicker
+                placeholder={`${status.charAt(0).toUpperCase()}${status.slice(1)} - ${defaultColor}`}
+                buttonText={`${activeColorPicker === status ? 'Close' : 'Open'} Color Picker`}
+                buttonColor={getSetting(settingsKey, defaultColor)}
+                buttonOnClick={() => this.setState({ activeColorPicker: activeColorPicker === status ? '' : status })}
+                onChange={(value) => updateSetting(settingsKey, value === '' ? defaultColor : value)}
+                defaultValue={getSetting(settingsKey, defaultColor)}
+              />;
+            })}
+          </Flex.Child>
+
+          <Flex.Child basis='auto'>
+            <></> {/* Workaround for constructing a flex child */}
+            <StatusPickerPreview className={activeColorPicker ? 'animate' : ''} />
+          </Flex.Child>
+        </Flex>
+
+        <Text size={Text.Sizes.SIZE_12} style={{ marginTop: 10 }}>{Messages.BSI_STATUS_COLOR_CHANGE_NOTE}</Text>
+      </Flex>
+
+      {activeColorPicker && <ColorPickerInput
+        default={colorUtils.hex2int(this.statusColors[activeColorPicker.toUpperCase()])}
+        value={colorUtils.hex2int(getSetting(`${activeColorPicker}StatusColor`, '000000'))}
+        onChange={(value) => updateSetting(`${activeColorPicker}StatusColor`, colorUtils.int2hex(value))}
+      />}
+
+      {!activeColorPicker && <Divider/>}
 
       <RadioGroup
         options={[
@@ -113,6 +154,15 @@ module.exports = class Settings extends React.PureComponent {
       >
         {Messages.BSI_STATUS_DISPLAY}
       </RadioGroup>
+
+      <SwitchItem
+        note='Adds some variables that are useful for themes (i.e. custom status colors).'
+        value={getSetting('themeVariables', false)}
+        onChange={() => toggleSetting('themeVariables', false)}
+        disabled
+      >
+        Theme Variables
+      </SwitchItem>
     </>;
   }
 

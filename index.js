@@ -27,7 +27,7 @@
  */
 
 /* eslint-disable object-property-newline */
-const { React, getModule, getModuleByDisplayName, i18n: { Messages } } = require('powercord/webpack');
+const { React, getModule, getModuleByDisplayName, i18n: { Messages }, constants: { Colors, StatusTypes } } = require('powercord/webpack');
 const { Text, modal: { Confirm } } = require('powercord/components');
 const { findInReactTree, waitFor } = require('powercord/util');
 const { inject, uninject } = require('powercord/injector');
@@ -118,6 +118,23 @@ module.exports = class BetterStatusIndicators extends Plugin {
     });
 
     const statusModule = await getModule([ 'getStatusMask' ]);
+    this.inject('bsi-status-colors', statusModule, 'getStatusColor', ([ status ], color) => {
+      switch (status) {
+        case 'online':
+          return getSetting('onlineStatusColor', '#43b581');
+        case 'idle':
+          return getSetting('idleStatusColor', '#faa61a');
+        case 'dnd':
+          return getSetting('dndStatusColor', '#f04747');
+        case 'streaming':
+          return getSetting('streamingStatusColor', '#643da7');
+        case 'offline':
+          return getSetting('offlineStatusColor', '#636b75');
+      }
+
+      return color;
+    });
+
     this.inject('bsi-mobile-status-mask', statusModule, 'getStatusMask', ([ status, isMobile, isTyping ]) => {
       if (status !== 'online' && isMobile && !isTyping) {
         status = 'online';
@@ -168,7 +185,12 @@ module.exports = class BetterStatusIndicators extends Plugin {
      * FocusRingScope.default.displayName = 'FocusRingScope';
      */
 
-    this.inject('bsi-mobile-status', statusModule, 'Status', ([ { isMobile, status, size } ], res) => {
+    this.inject('bsi-mobile-status', statusModule, 'Status', ([ { isMobile, status, size, color } ], res) => {
+      const statusStyle = res.props.children.props.style;
+      if (!color) {
+        statusStyle.backgroundColor = getSetting(`${status}StatusColor`);
+      }
+
       if (status !== 'online' && isMobile) {
         res.props = { ...res.props,
           mask: Mask.default.Masks.STATUS_ONLINE_MOBILE,
@@ -373,6 +395,22 @@ module.exports = class BetterStatusIndicators extends Plugin {
         }, React.createElement(Text, {}, Messages.SWITCH_HARDWARE_ACCELERATION_BODY)))
       }
     });
+  }
+
+  _getDefaultStatusColors () {
+    const statusColors = {
+      ONLINE: 'STATUS_GREEN',
+      IDLE: 'STATUS_YELLOW',
+      DND: 'STATUS_RED',
+      STREAMING: 'TWITCH',
+      OFFLINE: 'STATUS_GREY',
+      INVISIBLE: 'STATUS_GREY',
+      UNKNOWN: 'STATUS_GREY'
+    };
+
+    return Object.keys(StatusTypes).map(status => ({
+      [status]: Colors[statusColors[status]]
+    }));
   }
 
   inject (...args) {

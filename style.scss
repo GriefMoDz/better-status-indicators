@@ -56,6 +56,10 @@ $statuses: (
         mask: url(#svg-mask-avatar-status-round-#{$width});
       }
 
+      &::after {
+        display: none !important;
+      }
+
       + rect {
         mask: url(#svg-mask-status-#{$status});
         height: $height;
@@ -105,6 +109,14 @@ $status-colors: (
     margin-left: -5px;
   }
 
+  &-tab-bar ~ .divider-3573oO {
+    margin-bottom: 20px;
+  }
+
+  &-tab-bar ~ div > [data-list-id='color-picker'] {
+    margin-top: 10px;
+  }
+
   &-title + &-status-display-title {
     margin: 0 0 8px 0;
   }
@@ -114,15 +126,62 @@ $status-colors: (
   }
 }
 
-/* Status Picker Preview */
+.bsi-settings-tab-bar ~ .divider-3573oO {
+  margin-bottom: 20px;
+}
+
+/* Status Color Picker */
 #bsi-status-picker {
-  width: auto;
+  width: 190px;
+  height: 219px;
+  transition: width .45s ease-in-out;
+
+  &.animate {
+    width: 170px;
+  }
+
+  .bsi-status-scroller {
+    padding: 3px 8px;
+  }
+
+  .bsi-status-separator {
+    margin: 4px;
+    border-bottom: 1px solid var(--background-modifier-accent);
+    box-sizing: border-box;
+  }
 
   .description-2L932D, .status-1fhblQ {
     display: initial;
   }
 
-  &+ .divider-3573oO {
-    margin-bottom: 20px;
+  .item-1tOPte {
+    margin: 5px 0px;
+  }
+}
+
+.bsi-color-picker-input {
+  margin-bottom: 5px;
+
+  &:focus-within [type='button']:not([class*='disabled']),
+  &:hover [type='button']:not([class*='disabled']) {
+    width: 150px !important;
+  }
+
+  &:not([class*='disabled']):focus-within,
+  &:not([class*='disabled']):hover {
+    border-color: rgba(114, 137, 218, .3);
+  }
+}
+
+/* Status Color Variables */
+:root {
+  @each $status, $color in $status-colors {
+    --bsi-#{$status}-color: #{$color};
+  }
+}
+
+@each $status, $color in $status-colors {
+  .wrapper-3t9DeA foreignObject + rect[fill='#{$color}'][mask*='status-#{$status}'] {
+    fill: var(--bsi-#{$status}-color);
   }
 }

@@ -5,6 +5,8 @@
   "BSI_HARDWARE_ACCELERATION_DISABLED_MSG": "Hi, there! We've noticed that you've disabled hardware acceleration. \"Better Status Indicators\" recommends leaving this feature on for significantly better results — visually and quantitatively.",
   "BSI_HARDWARE_ACCELERATION_DISABLED_BTN_TEXT": "Let's change it!",
   "BSI_CUSTOMIZE": "Customize",
+  "BSI_STATUS_COLOR_PICKER": "Status Color Picker",
+  "BSI_STATUS_COLOR_CHANGE_NOTE": "Note: Due to limitations, color changes won't take affect straight away. To fix this, please either go to a different guild or channel.",
   "BSI_STATUS_DISPLAY": "Status Display",
   "BSI_STATUS_DISPLAY_SOLID_OPT": "Solid: Simple and minimalistic.",
   "BSI_STATUS_DISPLAY_DEFAULT_OPT": "Default: Modern, beautiful, and easy on your eyes.",
