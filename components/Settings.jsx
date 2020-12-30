@@ -58,7 +58,7 @@ module.exports = class Settings extends React.PureComponent {
   constructor (props) {
     super(props);
 
-    this.statusColors = Object.assign({}, ...props.main._getDefaultStatusColors());
+    this.statusColors = props.main._getDefaultStatusColors();
     this.state = {
       selectedItem: 'SETTINGS',
       activeColorPicker: ''
@@ -246,6 +246,13 @@ module.exports = class Settings extends React.PureComponent {
         onChange={handleAvatarStatusChange.bind(this)}
       >
         {Messages.BSI_CLIENT_SWITCH_AVATAR_STATUS}
+      </SwitchItem>
+      <SwitchItem
+        note={formatClientTranslation('MATCH_COLOR_DESC', { client: 'mobile' })}
+        value={getSetting('mobileMatchStatus', false)}
+        onChange={() => toggleSetting('mobileMatchStatus', false)}
+      >
+        {Messages.BSI_CLIENT_SWITCH_MATCH_COLOR}
       </SwitchItem>
 
       <FormTitle className="bsi-settings-status-display-title">{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'Web' })}</FormTitle>

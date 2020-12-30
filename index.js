@@ -185,10 +185,11 @@ module.exports = class BetterStatusIndicators extends Plugin {
      * FocusRingScope.default.displayName = 'FocusRingScope';
      */
 
+    const statusColors = this._getDefaultStatusColors();
     this.inject('bsi-mobile-status', statusModule, 'Status', ([ { isMobile, status, size, color } ], res) => {
       const statusStyle = res.props.children.props.style;
       if (!color) {
-        statusStyle.backgroundColor = getSetting(`${status}StatusColor`);
+        statusStyle.backgroundColor = getSetting(`${status}StatusColor`, statusColors[status.toUpperCase()]);
       }
 
       if (status !== 'online' && isMobile) {
@@ -408,9 +409,9 @@ module.exports = class BetterStatusIndicators extends Plugin {
       UNKNOWN: 'STATUS_GREY'
     };
 
-    return Object.keys(StatusTypes).map(status => ({
+    return Object.assign({}, ...Object.keys(StatusTypes).map(status => ({
       [status]: Colors[statusColors[status]]
-    }));
+    })));
   }
 
   inject (...args) {
