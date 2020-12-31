@@ -1,10 +1,14 @@
 {
   "BSI_CLIENT_SIGNED_IN": "Signed in on {clientCapitalized}",
+  "BSI_STREAMING_ON_STATUS": "Streaming on {status}",
   "BSI_MOBILE_AVATAR_STATUS_MODAL_HEADER": "Change mobile avatar status",
   "BSI_MOBILE_AVATAR_STATUS_MODAL_BODY": "\n  Changing the mobile avatar status setting will re-launch Discord. Are you sure you want to do this?",
   "BSI_HARDWARE_ACCELERATION_DISABLED_MSG": "Hi, there! We've noticed that you've disabled hardware acceleration. \"Better Status Indicators\" recommends leaving this feature on for significantly better results — visually and quantitatively.",
   "BSI_HARDWARE_ACCELERATION_DISABLED_BTN_TEXT": "Let's change it!",
   "BSI_CUSTOMIZE": "Customize",
+  "BSI_MOBILE": "Mobile",
+  "BSI_WEB": "Web",
+  "BSI_VIEW_SETTINGS": "View Settings",
   "BSI_STATUS_COLOR_PICKER": "Status Color Picker",
   "BSI_STATUS_COLOR_CHANGE_NOTE": "Note: Due to limitations, color changes won't take affect straight away. To fix this, please either go to a different guild or channel.",
   "BSI_STATUS_DISPLAY": "Status Display",
@@ -29,6 +33,7 @@
   "BSI_CLIENT_SWITCH_SHOW_ON_SELF": "Show on Self",
   "BSI_CLIENT_SWITCH_SHOW_ON_BOTS_DESC": "Displays the {client} status indicator for bot users.",
   "BSI_CLIENT_SWITCH_SHOW_ON_BOTS": "Show on Bots",
+  "BSI_STREAMING_SWITCH_SHOW_ON_SELF_DESC": "Displays the game status indicator for yourself.",
   "BSI_DESKTOP_SWITCH_PRESERVE_STATUS_DESC": "Displays the desktop status indicator even if the user is active on web or mobile.",
   "BSI_MOBILE_SWITCH_PRESERVE_STATUS_DESC": "Displays the mobile status indicator even if the user is active on desktop.",
   "BSI_WEB_SWITCH_PRESERVE_STATUS_DESC": "Displays the web status indicator even if the user is active on desktop or mobile."

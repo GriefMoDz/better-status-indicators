@@ -48,12 +48,12 @@ class StatusMenuItem extends React.PureComponent {
 
   render () {
     const { focused } = this.state;
-    const { status, description, separator } = this.props;
+    const { status, description, separator, active } = this.props;
 
     return [ React.createElement('div', {
       onMouseOver: () => this.setState({ focused: true }),
       onMouseOut: () => this.setState({ focused: false }),
-      className: [ classes.item, classes.colorDefault, focused && classes.focused ].filter(Boolean).join(' '),
+      className: [ classes.item, classes.colorDefault, focused && classes.focused, active === status && 'bsi-status-active' ].filter(Boolean).join(' '),
       role: 'menuitem'
     }, React.createElement('div', {
       className: classes.statusItem

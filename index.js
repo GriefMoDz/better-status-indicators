@@ -37,6 +37,7 @@ const { Plugin } = require('powercord/entities');
 const AnimatedAvatarStatus = require('./components/AnimatedAvatarStatus');
 const AnimatedStatus = require('./components/AnimatedStatus');
 const ClientStatuses = require('./components/ClientStatuses');
+const StatusIcon = require('./components/StatusIcon');
 const Settings = require('./components/Settings');
 // const WebMask = require('./components/WebMask');
 const i18n = require('./i18n');
@@ -287,12 +288,18 @@ module.exports = class BetterStatusIndicators extends Plugin {
       return args;
     }, true);
 
-    /* Web Status Indicator */
+    /* Status Indicators */
+    const ConnectedStatusIcon = this.settings.connectStore(StatusIcon);
     const ConnectedClientStatuses = this.settings.connectStore(ClientStatuses);
 
     const MemberListItem = await getModuleByDisplayName('MemberListItem');
     this.inject('bsi-member-list-web-status', MemberListItem.prototype, 'renderDecorators', function (_, res) {
-      res.props.children.unshift(React.createElement(ConnectedClientStatuses, { user: this.props.user, location: 'members-list' }));
+      const defaultProps = { user: this.props.user, location: 'members-list' };
+
+      res.props.children.unshift([
+        React.createElement(ConnectedStatusIcon, defaultProps),
+        React.createElement(ConnectedClientStatuses, defaultProps)
+      ]);
 
       return res;
     });
@@ -301,8 +308,12 @@ module.exports = class BetterStatusIndicators extends Plugin {
     const NameTag = await getModule(m => m.default?.displayName === 'NameTag');
     this.inject('bsi-name-tag-web-status', NameTag, 'default', ([ props ], res) => {
       const user = userStore.findByTag(props.name, props.discriminator);
+      const defaultProps = { user, location: 'user-popout-modal' };
 
-      res.props.children.splice(2, 0, React.createElement(ConnectedClientStatuses, { user, location: 'user-popout-modal' }));
+      res.props.children.splice(2, 0, [
+        React.createElement(ConnectedStatusIcon, defaultProps),
+        React.createElement(ConnectedClientStatuses, defaultProps)
+      ]);
 
       return res;
     });
@@ -315,7 +326,12 @@ module.exports = class BetterStatusIndicators extends Plugin {
         return res;
       }
 
-      res.props.decorators = React.createElement(ConnectedClientStatuses, { user: this.props.user, location: 'direct-messages' });
+      const defaultProps = { user: this.props.user, location: 'direct-messages' };
+
+      res.props.decorators = [
+        React.createElement(ConnectedStatusIcon, defaultProps),
+        React.createElement(ConnectedClientStatuses, defaultProps)
+      ];
 
       return res;
     });

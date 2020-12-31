@@ -27,18 +27,20 @@
  */
 
 /** General **/
-.bsi-clientStatuses svg {
+.bsi-clientStatuses svg, .bsi-statusIcon {
   color: var(--channels-default);
   margin-left: 4px;
 }
 
 .peopleListItem-2nzedh .userInfo-2zN2z8 {
-  .bsi-clientStatuses {
+  .bsi-clientStatuses, .bsi-statusIcon {
     visibility: hidden;
   }
 
-  &.hovered-15FzL3 .bsi-clientStatuses {
-    visibility: visible;
+  &.hovered-15FzL3 {
+    .bsi-clientStatuses, .bsi-statusIcon {
+      visibility: visible;
+    }
   }
 }
 
@@ -98,7 +100,7 @@ $status-colors: (
 /** Settings **/
 .bsi-settings {
   &-title {
-    margin-bottom: 20px;
+    margin-bottom: 0px;
   }
 
   &-tab-bar {
@@ -107,6 +109,10 @@ $status-colors: (
     border-radius: 25px;
     margin-bottom: 25px;
     margin-left: -5px;
+
+    .selected-3s45Ha {
+      cursor: pointer !important;
+    }
   }
 
   &-tab-bar ~ .divider-3573oO {
@@ -115,14 +121,15 @@ $status-colors: (
 
   &-tab-bar ~ div > [data-list-id='color-picker'] {
     margin-top: 10px;
-  }
-
-  &-title + &-status-display-title {
-    margin: 0 0 8px 0;
+    animation: fade-in 1.5s;
   }
 
   &-status-display-title {
-    margin: 40px 0 8px 0;
+    margin: 10px 0 8px 0;
+  }
+
+  .breadcrumbs-SOzMJD + &-status-display-title {
+    margin: 0 0 8px 0;
   }
 }
 
@@ -150,12 +157,18 @@ $status-colors: (
     box-sizing: border-box;
   }
 
+  .bsi-status-active {
+    color: #fff;
+    background-color: var(--background-modifier-hover);
+  }
+
   .description-2L932D, .status-1fhblQ {
     display: initial;
   }
 
   .item-1tOPte {
     margin: 5px 0px;
+    cursor: default;
   }
 }
 
@@ -183,5 +196,16 @@ $status-colors: (
 @each $status, $color in $status-colors {
   .wrapper-3t9DeA foreignObject + rect[fill='#{$color}'][mask*='status-#{$status}'] {
     fill: var(--bsi-#{$status}-color);
+  }
+}
+
+/** Animations **/
+@keyframes fade-in {
+  from{
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
   }
 }
