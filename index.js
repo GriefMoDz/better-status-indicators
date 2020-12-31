@@ -27,7 +27,7 @@
  */
 
 /* eslint-disable object-property-newline */
-const { React, getModule, getModuleByDisplayName, i18n: { Messages }, constants: { Colors, StatusTypes } } = require('powercord/webpack');
+const { React, FluxDispatcher, getModule, getModuleByDisplayName, i18n: { Messages }, constants: { Colors, StatusTypes } } = require('powercord/webpack');
 const { Text, modal: { Confirm } } = require('powercord/components');
 const { findInReactTree, waitFor } = require('powercord/util');
 const { inject, uninject } = require('powercord/injector');
@@ -83,6 +83,10 @@ module.exports = class BetterStatusIndicators extends Plugin {
     const { getSetting, toggleSetting } = powercord.api.settings._fluxProps(this.entityID);
 
     const _this = this;
+
+    /* Refresh Status Icons on Locale Change */
+    this.handleRefreshIcons = () => this._refreshStatusIcons(true);
+    FluxDispatcher.subscribe('I18N_LOAD_SUCCESS', this.handleRefreshIcons);
 
     /* Hardware Acceleration Notice */
     if (!getSetting('seenHardwareAccelerationNotice', false) && !this.hardwareAccelerationIsEnabled) {
@@ -337,7 +341,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     });
 
     const { container } = await getModule([ 'container', 'base' ]);
-    await waitFor(`.${container}`).then(() => this._refreshStatusIcons(true));
+    await waitFor(`.${container}`).then(this.handleRefreshIcons);
   }
 
   _refreshStatusIcons (initialize = false, restore = false) {
@@ -440,6 +444,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
     injectionIds.forEach(injectionId => uninject(injectionId));
 
     powercord.api.settings.unregisterSettings('better-status-indicators');
+
+    FluxDispatcher.unsubscribe('I18N_LOAD_SUCCESS', this.handleRefreshIcons);
 
     this._refreshStatusIcons(false, true);
   }

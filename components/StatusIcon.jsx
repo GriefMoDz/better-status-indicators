@@ -52,7 +52,7 @@ function renderStatusIcon (props, states) {
 
   // eslint-disable-next-line multiline-ternary
   return props.getSetting(`stream${settingsKey}`, true) && states.isStreaming ? React.createElement(Tooltip, {
-    text: Messages.BSI_STREAMING_ON_STATUS.format({ status: humanizeStatus(states.status) }),
+    text: Messages.BSI_STREAMING_AS_STATUS.format({ status: humanizeStatus(states.status) }),
     hideOnClick: false
   }, (props) => React.createElement(Icon, Object.assign({}, props, {
     name: 'Activity',

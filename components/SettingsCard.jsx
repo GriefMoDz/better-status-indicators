@@ -77,13 +77,13 @@ module.exports = React.memo(props => {
 
   if (props.hasNextSection) {
     return <Clickable onClick={props.onButtonClick} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}>
-      <Card editable={true} className={[ classes.card, classes.clickable ].filter(Boolean).join(' ')}>
+      <Card editable={true} className={[ 'bsi-settings-card', classes.card, classes.clickable ].join(' ')}>
         <SettingsCard {...props} focused={focused} />
       </Card>
     </Clickable>;
   }
 
-  return <Card editable={true} className={classes.card}>
+  return <Card editable={true} className={[ 'bsi-settings-card', classes.card ].join(' ')}>
     <SettingsCard {...props} focused={focused} />
   </Card>;
 });

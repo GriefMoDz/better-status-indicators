@@ -32,6 +32,10 @@
   margin-left: 4px;
 }
 
+.bsi-statusIcon {
+  top: 0;
+}
+
 .peopleListItem-2nzedh .userInfo-2zN2z8 {
   .bsi-clientStatuses, .bsi-statusIcon {
     visibility: hidden;
@@ -126,6 +130,10 @@ $status-colors: (
 
   &-status-display-title {
     margin: 10px 0 8px 0;
+  }
+
+  &-card .icon-3oSHuZ {
+    margin-left: 1px;
   }
 
   .breadcrumbs-SOzMJD + &-status-display-title {
