@@ -13,7 +13,7 @@
  * your needs please document your changes and make backups before you update.
  *
  *
- * @copyright Copyright (c) 2020 GriefMoDz
+ * @copyright Copyright (c) 2020-2021 GriefMoDz
  * @license   OSL-3.0 (Open Software License ("OSL") v. 3.0)
  * @link      https://github.com/GriefMoDz/better-status-indicators
  *
@@ -26,7 +26,6 @@
  * SOFTWARE.
  */
 
-/* eslint-disable multiline-ternary */
 const { React, getModule } = require('powercord/webpack');
 
 const avatarModule = getModule([ 'AnimatedAvatar' ], false);
@@ -34,17 +33,21 @@ const avatarModule = getModule([ 'AnimatedAvatar' ], false);
 module.exports = React.memo(props => {
   const { status, isMobile, isTyping, statusColor } = props;
 
-  const statusRef = React.useRef(props.fromStatus);
-  const isMobileRef = React.useRef(props.fromIsMobile);
-  const statusColorRef = React.useRef(props.fromColor);
-  const animatedRef = React.useRef(!1);
-  const animated = animatedRef.current || avatarModule.determineIsAnimated(isTyping, status, statusRef.current, isMobile, isMobileRef.current);
+  const refs = {
+    status: React.useRef(props.fromStatus),
+    isMobile: React.useRef(props.fromIsMobile),
+    statusColor: React.useRef(props.fromColor),
+    animated: React.useRef(false)
+  };
 
-  return (React.useLayoutEffect((() => {
-    animatedRef.current = animated;
-    statusRef.current = status;
-    isMobileRef.current = isMobile;
-    statusColorRef.current = statusColor;
-  }), [ status, isMobile, statusColor, animated ]),
-  status !== null && statusRef.current !== null && animated ? React.createElement(props.component, props) : React.createElement(avatarModule.default, props));
+  const animated = refs.animated.current || avatarModule.determineIsAnimated(isTyping, status, refs.status.current, isMobile, refs.isMobile.current);
+
+  React.useLayoutEffect(() => {
+    refs.animated.current = animated;
+    refs.status.current = status;
+    refs.isMobile.current = isMobile;
+    refs.statusColor.current = statusColor;
+  }, [ status, isMobile, statusColor, animated ]);
+
+  return status !== null && refs.status.current !== null && React.createElement(animated ? props.component : avatarModule.default, props);
 });

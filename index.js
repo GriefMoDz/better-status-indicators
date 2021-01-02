@@ -13,7 +13,7 @@
  * your needs please document your changes and make backups before you update.
  *
  *
- * @copyright Copyright (c) 2020 GriefMoDz
+ * @copyright Copyright (c) 2020-2021 GriefMoDz
  * @license   OSL-3.0 (Open Software License ("OSL") v. 3.0)
  * @link      https://github.com/GriefMoDz/better-status-indicators
  *
@@ -298,11 +298,12 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     const MemberListItem = await getModuleByDisplayName('MemberListItem');
     this.inject('bsi-member-list-web-status', MemberListItem.prototype, 'renderDecorators', function (_, res) {
-      const defaultProps = { user: this.props.user, location: 'members-list' };
+      const { activities, status, user } = this.props;
+      const defaultProps = { user, location: 'members-list' };
 
       res.props.children.unshift([
-        React.createElement(ConnectedStatusIcon, defaultProps),
-        React.createElement(ConnectedClientStatuses, defaultProps)
+        React.createElement(ConnectedStatusIcon, { activities, status, ...defaultProps }),
+        React.createElement(ConnectedClientStatuses, { status, ...defaultProps })
       ]);
 
       return res;
@@ -330,11 +331,12 @@ module.exports = class BetterStatusIndicators extends Plugin {
         return res;
       }
 
-      const defaultProps = { user: this.props.user, location: 'direct-messages' };
+      const { activities, status, user } = this.props;
+      const defaultProps = { user, location: 'direct-messages' };
 
       res.props.decorators = [
-        React.createElement(ConnectedStatusIcon, defaultProps),
-        React.createElement(ConnectedClientStatuses, defaultProps)
+        React.createElement(ConnectedStatusIcon, { activities, status, ...defaultProps }),
+        React.createElement(ConnectedClientStatuses, { status, ...defaultProps })
       ];
 
       return res;

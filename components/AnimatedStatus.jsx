@@ -13,7 +13,7 @@
  * your needs please document your changes and make backups before you update.
  *
  *
- * @copyright Copyright (c) 2020 GriefMoDz
+ * @copyright Copyright (c) 2020-2021 GriefMoDz
  * @license   OSL-3.0 (Open Software License ("OSL") v. 3.0)
  * @link      https://github.com/GriefMoDz/better-status-indicators
  *
@@ -26,6 +26,7 @@
  * SOFTWARE.
  */
 
+/* eslint-disable object-property-newline */
 const { React, getModule } = require('powercord/webpack');
 const ReactHooks = {};
 
@@ -41,26 +42,16 @@ module.exports = React.memo(props => {
 
   const isMobile = props.isMobile !== void 0 && props.isMobile;
   const size = props.size !== void 0 ? props.size : 8;
-  const config = {
-    tension: 600,
-    friction: 70
-  };
+  const config = { tension: 600, friction: 70 };
 
   const maskId = ReactHooks.Basic.useLazyValue((() => uuid.v4()));
-  const statusValues = React.useMemo((() => statusModule.getStatusValues({
-    size,
-    status,
-    isMobile
-  })), [ size, status, isMobile ]);
 
-  const statusDimensions = ReactHooks.Spring.useSpring({
-    config,
-    to: statusValues
-  });
-  const statusColor = ReactHooks.Spring.useSpring({
-    config,
-    fill: !color ? statusModule.getStatusColor(status) : color
-  }, [ !color ? statusModule.getStatusColor(status) : color ])[0].fill;
+  const statusValues = React.useMemo((() => statusModule.getStatusValues({ size, status, isMobile })), [ size, status, isMobile ]);
+  const statusDimensions = ReactHooks.Spring.useSpring({ config, to: statusValues });
+  const statusColor = ReactHooks.Spring.useSpring(
+    { config, fill: !color ? statusModule.getStatusColor(status) : color },
+    [ !color ? statusModule.getStatusColor(status) : color ]
+  )[0].fill;
 
   return React.createElement('svg', {
     width: size,

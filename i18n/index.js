@@ -13,7 +13,7 @@
  * your needs please document your changes and make backups before you update.
  *
  *
- * @copyright Copyright (c) 2020 GriefMoDz
+ * @copyright Copyright (c) 2020-2021 GriefMoDz
  * @license   OSL-3.0 (Open Software License ("OSL") v. 3.0)
  * @link      https://github.com/GriefMoDz/better-status-indicators
  *

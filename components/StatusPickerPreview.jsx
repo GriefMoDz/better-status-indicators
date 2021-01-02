@@ -13,7 +13,7 @@
  * your needs please document your changes and make backups before you update.
  *
  *
- * @copyright Copyright (c) 2020 GriefMoDz
+ * @copyright Copyright (c) 2020-2021 GriefMoDz
  * @license   OSL-3.0 (Open Software License ("OSL") v. 3.0)
  * @link      https://github.com/GriefMoDz/better-status-indicators
  *
@@ -46,48 +46,44 @@ class StatusMenuItem extends React.PureComponent {
     };
   }
 
+  renderSeparator () {
+    if (this.props.separate) {
+      return <div role='separator' className='bsi-status-separator' />;
+    }
+  }
+
   render () {
     const { focused } = this.state;
-    const { status, description, separator, active } = this.props;
+    const { status, description, active } = this.props;
 
-    return [ React.createElement('div', {
-      onMouseOver: () => this.setState({ focused: true }),
-      onMouseOut: () => this.setState({ focused: false }),
-      className: [ classes.item, classes.colorDefault, focused && classes.focused, active === status && 'bsi-status-active' ].filter(Boolean).join(' '),
-      role: 'menuitem'
-    }, React.createElement('div', {
-      className: classes.statusItem
-    }, React.createElement(Status, {
-      status,
-      className: classes.icon,
-      size: 10,
-      color: focused ? 'currentColor' : this.props.getSetting(`${status}StatusColor`, void 0)
-    }), React.createElement('div', {
-      className: classes.status
-    }, humanizeStatus(status)), description && React.createElement('div', {
-      className: classes.description
-    }, description))), separator && React.createElement('div', {
-      role: 'separator',
-      className: 'bsi-status-separator'
-    }) ];
+    return [ <div
+      onMouseOver={() => this.setState({ focused: true })}
+      onMouseOut={() => this.setState({ focused: false })}
+      className={[ classes.item, classes.colorDefault, focused && classes.focused, active === status && 'bsi-status-active' ].filter(Boolean).join(' ')}
+      role='menuitem'
+    >
+      <div className={classes.statusItem}>
+        <Status status={status} className={classes.icon} size={10} color={focused ? 'currentColor' : this.props.getSetting(`${status}StatusColor`, void 0)} />
+        <div className={classes.status}>{humanizeStatus(status)}</div>
+        {description && <div className={classes.description}>{description}</div>}
+      </div>
+    </div>, this.renderSeparator() ];
   }
 }
 
 class StatusPickerPreview extends React.PureComponent {
   render () {
-    return <>
-      <div className={[ classes.menu, this.props.className ].join(' ')} role='menu' id='bsi-status-picker'>
-        <AdvancedScrollerThin className='bsi-status-scroller'>
-          {[ 'ONLINE', 'IDLE', 'DND', 'OFFLINE', 'STREAMING' ].map(status =>
-            <StatusMenuItem
-              status={constants.StatusTypes[status]}
-              separator={status !== 'STREAMING'}
-              {...this.props }
-            />
-          )}
-        </AdvancedScrollerThin>
-      </div>
-    </>;
+    return <div className={[ classes.menu, this.props.className ].join(' ')} role='menu' id='bsi-status-picker'>
+      <AdvancedScrollerThin className='bsi-status-scroller'>
+        {[ 'ONLINE', 'IDLE', 'DND', 'OFFLINE', 'STREAMING' ].map(status =>
+          <StatusMenuItem
+            status={constants.StatusTypes[status]}
+            separate={status !== 'STREAMING'}
+            {...this.props }
+          />
+        )}
+      </AdvancedScrollerThin>
+    </div>;
   }
 }
 

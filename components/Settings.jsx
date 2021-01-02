@@ -13,7 +13,7 @@
  * your needs please document your changes and make backups before you update.
  *
  *
- * @copyright Copyright (c) 2020 GriefMoDz
+ * @copyright Copyright (c) 2020-2021 GriefMoDz
  * @license   OSL-3.0 (Open Software License ("OSL") v. 3.0)
  * @link      https://github.com/GriefMoDz/better-status-indicators
  *
@@ -34,7 +34,7 @@ const { open: openModal } = require('powercord/modal');
 
 const SettingsCard = require('./SettingsCard');
 const StatusPickerPreview = require('./StatusPickerPreview');
-const TextInputWithColorPicker = require('./TextInputWithColorPicker');
+const TextInputWithButton = require('./TextInputWithButton');
 
 const colorUtils = getModule([ 'isValidHex' ], false);
 const Breadcrumbs = getModuleByDisplayName('Breadcrumbs', false);
@@ -57,6 +57,7 @@ function handleAvatarStatusChange () {
   }, React.createElement(Text, {}, Messages.BSI_MOBILE_AVATAR_STATUS_MODAL_BODY)));
 }
 
+// @todo: Make settings dynamic to improve readibility and performance
 module.exports = class Settings extends React.PureComponent {
   constructor (props) {
     super(props);
@@ -153,11 +154,12 @@ module.exports = class Settings extends React.PureComponent {
               const defaultColor = this.statusColors[status.toUpperCase()];
               const settingsKey = `${status}StatusColor`;
 
-              return <TextInputWithColorPicker
+              return <TextInputWithButton
                 placeholder={`${status.charAt(0).toUpperCase()}${status.slice(1)} - ${defaultColor}`}
                 buttonText={`${activeColorPicker === status ? 'Close' : 'Open'} Color Picker`}
                 buttonColor={getSetting(settingsKey, defaultColor)}
-                buttonOnClick={() => this.setState({ activeColorPicker: activeColorPicker === status ? '' : status })}
+                buttonIcon='fas fa-palette'
+                onButtonClick={() => this.setState({ activeColorPicker: activeColorPicker === status ? '' : status })}
                 onChange={(value) => updateSetting(settingsKey, value === '' ? defaultColor : value)}
                 defaultValue={getSetting(settingsKey, defaultColor)}
               />;
@@ -343,7 +345,7 @@ module.exports = class Settings extends React.PureComponent {
         {Messages.BSI_CLIENT_SWITCH_AVATAR_STATUS}
       </SwitchItem>
       <SwitchItem
-        note={formatClientTranslation('MATCH_COLOR_DESC', { client: 'mobile' })}
+        note={Messages.BSI_MOBILE_SWITCH_MATCH_COLOR_DESC}
         value={getSetting('mobileMatchStatus', false)}
         onChange={() => toggleSetting('mobileMatchStatus', false)}
       >

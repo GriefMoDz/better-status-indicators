@@ -35,6 +35,7 @@
   "BSI_CLIENT_SWITCH_SHOW_ON_BOTS": "Show on Bots",
   "BSI_STREAMING_SWITCH_SHOW_ON_SELF_DESC": "Displays the game status indicator for yourself.",
   "BSI_DESKTOP_SWITCH_PRESERVE_STATUS_DESC": "Displays the desktop status indicator even if the user is active on web or mobile.",
+  "BSI_MOBILE_SWITCH_MATCH_COLOR_DESC": "Fills the mobile status indicator with the corresponding color of their status; requires the mobile \"Avatar Status\" setting to be enabled.",
   "BSI_MOBILE_SWITCH_PRESERVE_STATUS_DESC": "Displays the mobile status indicator even if the user is active on desktop.",
   "BSI_WEB_SWITCH_PRESERVE_STATUS_DESC": "Displays the web status indicator even if the user is active on desktop or mobile."
 }

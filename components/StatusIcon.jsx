@@ -13,7 +13,7 @@
  * your needs please document your changes and make backups before you update.
  *
  *
- * @copyright Copyright (c) 2020 GriefMoDz
+ * @copyright Copyright (c) 2020-2021 GriefMoDz
  * @license   OSL-3.0 (Open Software License ("OSL") v. 3.0)
  * @link      https://github.com/GriefMoDz/better-status-indicators
  *
@@ -33,50 +33,51 @@ const { Icon } = require('powercord/components');
 const Flux = getModule([ 'useStateFromStores' ], false);
 const Tooltip = getModuleByDisplayName('Tooltip', false);
 
-const statusStore = getModule([ 'isMobileOnline' ], false);
-const statusUtils = getModule([ 'getStatusColor' ], false);
-const authStore = getModule([ 'initialize', 'getFingerprint' ], false);
-const activityUtils = getModule([ 'isGameActivity', 'renderActivity' ], false);
-
 const { humanizeStatus } = getModule([ 'humanizeStatus' ], false);
+const { getStatusColor } = getModule([ 'getStatusColor' ], false);
+const { isStreaming } = getModule([ 'isGameActivity', 'renderActivity' ], false);
+const { getId: getCurrentUserId } = getModule([ 'initialize', 'getFingerprint' ], false);
 
-function renderStatusIcon (props, states) {
-  const showOnBots = props.getSetting('streamShowOnBots', true);
-  const showOnSelf = props.getSetting('streamShowOnSelf', false);
-  if ((props.user.bot && !showOnBots) || (props.user.id === authStore.getId() && !showOnSelf)) {
-    return null;
-  }
+const statusStore = getModule([ 'isMobileOnline' ], false);
+const classes = getModule([ 'member', 'ownerIcon' ], false);
 
-  const matchStatus = props.getSetting('streamMatchStatus', true);
-  const settingsKey = props.location.replace(/^(.)|-(.)/g, (match) => match.toUpperCase()).replace(/-/g, '');
+function renderStatusIcon ({ props, settings }, states) {
+  const locationKey = props.location.replace(/^(.)|-(.)/g, (match) => match.toUpperCase()).replace(/-/g, '');
 
   // eslint-disable-next-line multiline-ternary
-  return props.getSetting(`stream${settingsKey}`, true) && states.isStreaming ? React.createElement(Tooltip, {
+  return props.getSetting(`stream${locationKey}`, true) ? React.createElement(Tooltip, {
     text: Messages.BSI_STREAMING_AS_STATUS.format({ status: humanizeStatus(states.status) }),
     hideOnClick: false
-  }, (props) => React.createElement(Icon, Object.assign({}, props, {
+  }, (props) => React.createElement(Icon, {
     name: 'Activity',
-    className: `bsi-statusIcon ${getModule([ 'member', 'ownerIcon' ], false).icon}`,
-    color: matchStatus ? states.statusColor : 'currentColor'
-  }))) : null;
+    color: settings.matchStatus ? states.statusColor : 'currentColor',
+    className: `bsi-statusIcon ${classes.icon}`,
+    ...props
+  })) : null;
 }
 
 module.exports = React.memo(props => {
-  if (!props.user) {
+  const { getSetting } = props;
+
+  const settings = {
+    showOnBots: getSetting('streamShowOnBots', true),
+    showOnSelf: getSetting('streamShowOnSelf', false),
+    matchStatus: getSetting('streamMatchStatus', true)
+  };
+
+  if (!props.user || (props.user.bot && !settings.showOnBots) || (props.user.id === getCurrentUserId() && !settings.showOnSelf)) {
     return null;
   }
 
-  const userStatus = statusStore.getStatus(props.user.id);
-  const userActivities = statusStore.getActivities(props.user.id);
   const states = Flux.useStateFromStoresObject([ statusStore ], () => ({
-    status: userStatus,
-    statusColor: statusUtils.getStatusColor(userStatus),
-    isStreaming: activityUtils.isStreaming(userActivities)
+    status: props.status || statusStore.getStatus(props.user.id),
+    statusColor: getStatusColor(props.status || statusStore.getStatus(props.user.id)),
+    isStreaming: isStreaming(props.activities || statusStore.getActivities(props.user.id))
   }));
 
   if (!states.isStreaming) {
     return null;
   }
 
-  return renderStatusIcon(props, states);
+  return renderStatusIcon({ props, settings }, states);
 });
