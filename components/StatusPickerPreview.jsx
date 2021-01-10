@@ -75,7 +75,7 @@ class StatusPickerPreview extends React.PureComponent {
   render () {
     return <div className={[ classes.menu, this.props.className ].join(' ')} role='menu' id='bsi-status-picker'>
       <AdvancedScrollerThin className='bsi-status-scroller'>
-        {[ 'ONLINE', 'IDLE', 'DND', 'OFFLINE', 'STREAMING' ].map(status =>
+        {[ 'ONLINE', 'IDLE', 'DND', 'OFFLINE', 'INVISIBLE', 'STREAMING' ].map(status =>
           <StatusMenuItem
             status={constants.StatusTypes[status]}
             separate={status !== 'STREAMING'}

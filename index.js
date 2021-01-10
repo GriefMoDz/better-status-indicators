@@ -84,6 +84,11 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     const _this = this;
 
+    /* CSS Status Variables */
+    if (getSetting('themeVariables', false)) {
+      this._refreshStatusVariables(true);
+    }
+
     /* Refresh Status Icons on Locale Change */
     this.handleRefreshIcons = () => this._refreshStatusIcons(true);
     FluxDispatcher.subscribe('I18N_LOAD_SUCCESS', this.handleRefreshIcons);
@@ -100,8 +105,9 @@ module.exports = class BetterStatusIndicators extends Plugin {
       setTimeout(() => window.DiscordNative.gpuSettings.setEnableHardwareAcceleration(enable), 1e3);
     };
 
-    /* Mobile Status Indicator */
     const statusStore = await getModule([ 'isMobileOnline' ]);
+
+    /* Mobile Status Indicator */
     this.inject('bsi-mobile-status-online', statusStore, 'isMobileOnline', function ([ userId ], res) {
       const showOnSelf = userId === _this.currentUserId && getSetting('mobileShowOnSelf', false);
       const clientStatus = showOnSelf ? clientStatusStore.getCurrentClientStatus() : this.getState().clientStatuses[userId];
@@ -135,6 +141,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
           return getSetting('streamingStatusColor', '#643da7');
         case 'offline':
           return getSetting('offlineStatusColor', '#636b75');
+        case 'invisible':
+          return getSetting('invisibleStatusColor', '#747f8d');
       }
 
       return color;
@@ -240,6 +248,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
       return [ isTyping, status, lastStatus, isMobile, lastIsMobile ];
     }, true);
 
+    const userStore = await getModule([ 'getCurrentUser' ]);
+
     this.inject('bsi-mobile-status-default-mask', avatarModule, 'default', (args, res) => {
       const { size, status, isMobile, isTyping } = args[0];
       const foreignObject = findInReactTree(res, n => n?.type === 'foreignObject');
@@ -282,8 +292,6 @@ module.exports = class BetterStatusIndicators extends Plugin {
       return res;
     });
 
-    avatarModule.default.Sizes = avatarModule.Sizes;
-
     this.inject('bsi-true-status-color', avatarModule, 'default', (args) => {
       if (getSetting('trueStatusColor', false) && args[0].statusColor && args[0].statusColor === '#ffffff') {
         args[0].statusColor = statusModule.getStatusColor(args[0].status);
@@ -291,6 +299,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
       return args;
     }, true);
+
+    avatarModule.default.Sizes = avatarModule.Sizes;
 
     /* Status Indicators */
     const ConnectedStatusIcon = this.settings.connectStore(StatusIcon);
@@ -309,7 +319,6 @@ module.exports = class BetterStatusIndicators extends Plugin {
       return res;
     });
 
-    const userStore = await getModule([ 'getCurrentUser' ]);
     const NameTag = await getModule(m => m.default?.displayName === 'NameTag');
     this.inject('bsi-name-tag-web-status', NameTag, 'default', ([ props ], res) => {
       const user = userStore.findByTag(props.name, props.discriminator);
@@ -344,6 +353,26 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     const { container } = await getModule([ 'container', 'base' ]);
     await waitFor(`.${container}`).then(this.handleRefreshIcons);
+  }
+
+  _refreshStatusVariables (mount) {
+    if (mount) {
+      return this.loadStylesheet('./variables.scss');
+    }
+
+    for (const id in this.styles) {
+      const stylesheet = this.styles[id];
+      const filename = stylesheet.compiler.file;
+
+      if (filename.endsWith('variables.scss')) {
+        stylesheet.compiler.on('src-update', stylesheet.compile);
+        stylesheet.compiler.disableWatcher();
+
+        document.getElementById(`style-${this.entityID}-${id}`).remove();
+
+        delete this.styles[id];
+      }
+    }
   }
 
   _refreshStatusIcons (initialize = false, restore = false) {

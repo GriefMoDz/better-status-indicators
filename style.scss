@@ -48,6 +48,10 @@
   }
 }
 
+.message-2qnXI6 .avatar-1BDn8e {
+  overflow: visible;
+}
+
 $statuses: (
   "online",
   "idle",
@@ -132,8 +136,26 @@ $status-colors: (
     margin: 10px 0 8px 0;
   }
 
-  &-card .icon-3oSHuZ {
-    margin-left: 1px;
+  &-card, &-module-card {
+    &:hover {
+      background: var(--background-modifier-hover) !important;
+
+      .icon-3oSHuZ {
+        color: var(--interactive-hover);
+      }
+    }
+
+    &:active {
+      background: var(--background-modifier-active) !important;
+
+      .icon-3oSHuZ {
+        color: var(--interactive-active);
+      }
+    }
+
+    .icon-3oSHuZ {
+      margin-left: 1px;
+    }
   }
 
   .breadcrumbs-SOzMJD + &-status-display-title {
@@ -145,10 +167,19 @@ $status-colors: (
   margin-bottom: 20px;
 }
 
+html.reduce-motion {
+  .bsi-settings-tab-bar ~ div > [data-list-id='color-picker'] {
+    animation: fade-in 0.5s;
+  }
+
+  #bsi-status-picker {
+    transition: width .25s ease-in-out;
+  }
+}
+
 /* Status Color Picker */
 #bsi-status-picker {
   width: 190px;
-  height: 219px;
   transition: width .45s ease-in-out;
 
   &.animate {
@@ -191,19 +222,6 @@ $status-colors: (
   &:not([class*='disabled']):focus-within,
   &:not([class*='disabled']):hover {
     border-color: rgba(114, 137, 218, .3);
-  }
-}
-
-/* Status Color Variables */
-:root {
-  @each $status, $color in $status-colors {
-    --bsi-#{$status}-color: #{$color};
-  }
-}
-
-@each $status, $color in $status-colors {
-  .wrapper-3t9DeA foreignObject + rect[fill='#{$color}'][mask*='status-#{$status}'] {
-    fill: var(--bsi-#{$status}-color);
   }
 }
 

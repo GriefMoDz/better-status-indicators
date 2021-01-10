@@ -32,6 +32,7 @@ const { Divider, Flex, FormTitle, Icon, TabBar, Text, modal: { Confirm } } = req
 const { ColorPickerInput, SwitchItem, RadioGroup } = require('powercord/components/settings');
 const { open: openModal } = require('powercord/modal');
 
+const ModuleCard = require('./ModuleCard');
 const SettingsCard = require('./SettingsCard');
 const StatusPickerPreview = require('./StatusPickerPreview');
 const TextInputWithButton = require('./TextInputWithButton');
@@ -39,6 +40,8 @@ const TextInputWithButton = require('./TextInputWithButton');
 const colorUtils = getModule([ 'isValidHex' ], false);
 const Breadcrumbs = getModuleByDisplayName('Breadcrumbs', false);
 const breadcrumbClasses = getModule([ 'breadcrumb', 'breadcrumbActive' ], false);
+
+const modules = require('../modules');
 
 function formatClientTranslation (translation, args) {
   const key = translation === 'DISPLAY_TITLE' ? 'CLIENT_DISPLAY_TITLE' : `CLIENT_SWITCH_${translation}`;
@@ -57,7 +60,7 @@ function handleAvatarStatusChange () {
   }, React.createElement(Text, {}, Messages.BSI_MOBILE_AVATAR_STATUS_MODAL_BODY)));
 }
 
-// @todo: Make settings dynamic to improve readibility and performance
+// @todo: Make settings dynamic to improve readability and performance
 module.exports = class Settings extends React.PureComponent {
   constructor (props) {
     super(props);
@@ -110,6 +113,7 @@ module.exports = class Settings extends React.PureComponent {
 
         {section === 0 && selectedItem === 'SETTINGS' && this.renderSettings()}
         {section === 0 && selectedItem === 'CUSTOMIZE' && this.renderCustomize()}
+        {section === 0 && selectedItem === 'MODULES' && this.renderModules()}
 
         {section === 1 && this.renderDesktopSettings()}
         {section === 2 && this.renderMobileSettings()}
@@ -135,6 +139,9 @@ module.exports = class Settings extends React.PureComponent {
           <TabBar.Item className={item} selectedItem={this.state.selectedItem} id='CUSTOMIZE'>
             {Messages.BSI_CUSTOMIZE}
           </TabBar.Item>
+          <TabBar.Item className={item} selectedItem={this.state.selectedItem} id='MODULES'>
+            {Messages.BSI_MODULES}
+          </TabBar.Item>
         </TabBar>
       </div>
     );
@@ -150,7 +157,7 @@ module.exports = class Settings extends React.PureComponent {
         <Flex>
           <Flex.Child basis='70%'>
             <></> {/* Workaround for constructing a flex child */}
-            {[ 'online', 'idle', 'dnd', 'offline', 'streaming' ].map(status => {
+            {[ 'online', 'idle', 'dnd', 'offline', 'invisible', 'streaming' ].map(status => {
               const defaultColor = this.statusColors[status.toUpperCase()];
               const settingsKey = `${status}StatusColor`;
 
@@ -172,7 +179,7 @@ module.exports = class Settings extends React.PureComponent {
           </Flex.Child>
         </Flex>
 
-        <Text size={Text.Sizes.SIZE_12} style={{ marginTop: 10 }}>{Messages.BSI_STATUS_COLOR_CHANGE_NOTE}</Text>
+        <Text size={Text.Sizes.SIZE_12} style={{ marginTop: 10 }}>{Messages.BSI_STATUS_COLOR_CHANGE_NOTE.format({})}</Text>
       </Flex>
 
       {activeColorPicker && <ColorPickerInput
@@ -201,8 +208,10 @@ module.exports = class Settings extends React.PureComponent {
       <SwitchItem
         note='Adds some variables that are useful for themes (i.e. custom status colors).'
         value={getSetting('themeVariables', false)}
-        onChange={() => toggleSetting('themeVariables', false)}
-        disabled
+        onChange={(state) => {
+          toggleSetting('themeVariables', false);
+          this.props.main._refreshStatusVariables(state);
+        }}
       >
         Theme Variables
       </SwitchItem>
@@ -263,6 +272,22 @@ module.exports = class Settings extends React.PureComponent {
       >
         {Messages.BSI_TRUE_STATUS}
       </SwitchItem>
+    </>;
+  }
+
+  renderModules () {
+    const availableModules = Object.keys(modules);
+
+    return <>
+      <FormTitle className="bsi-settings-status-display-title">Available Modules ({availableModules.length})</FormTitle>
+      {availableModules.map(key => {
+        const mod = modules[key];
+        return <ModuleCard
+          name={mod.name}
+          description={mod.description || 'No description given.'}
+          icon={mod.icon ? (props) => React.createElement(Icon, { name: mod.icon, ...props }) : null}
+        />;
+      })}
     </>;
   }
 
