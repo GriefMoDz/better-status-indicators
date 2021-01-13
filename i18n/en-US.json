@@ -38,5 +38,10 @@
   "BSI_DESKTOP_SWITCH_PRESERVE_STATUS_DESC": "Displays the desktop status indicator even if the user is active on web or mobile.",
   "BSI_MOBILE_SWITCH_MATCH_COLOR_DESC": "Fills the mobile status indicator with the corresponding color of their status; requires the mobile \"Avatar Status\" setting to be enabled.",
   "BSI_MOBILE_SWITCH_PRESERVE_STATUS_DESC": "Displays the mobile status indicator even if the user is active on desktop.",
-  "BSI_WEB_SWITCH_PRESERVE_STATUS_DESC": "Displays the web status indicator even if the user is active on desktop or mobile."
+  "BSI_WEB_SWITCH_PRESERVE_STATUS_DESC": "Displays the web status indicator even if the user is active on desktop or mobile.",
+  "BSI_AVAILABLE_MODULES": "Available Modules ({count, number})",
+  "BSI_MODULES_CHANGE_NOTE": "**Note**: Due to limitations, some modules and settings won't take affect straight away. To fix this, please either go to a different guild or channel.",
+  "BSI_MODULE_SETTINGS_HIDDEN": "Settings have been hidden as this module is __**disabled**__. Click here to enable it back:",
+  "BSI_MODULE_ENABLE": "Enable Module",
+  "BSI_MODULE_DISABLE": "Disable Module"
 }

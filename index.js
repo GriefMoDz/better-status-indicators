@@ -43,6 +43,7 @@ const Settings = require('./components/Settings');
 const i18n = require('./i18n');
 
 const injectionIds = [];
+const modules = require('./modules');
 const clientStatusStore = require('./stores/clientStatusStore');
 
 module.exports = class BetterStatusIndicators extends Plugin {
@@ -104,6 +105,15 @@ module.exports = class BetterStatusIndicators extends Plugin {
       toggleSetting('seenHardwareAccelerationNotice', enable);
       setTimeout(() => window.DiscordNative.gpuSettings.setEnableHardwareAcceleration(enable), 1e3);
     };
+
+    for (const modId of modules.keys()) {
+      const mod = await modules.load(modId);
+      const disabledModules = getSetting('disabledModules', []);
+
+      if (!disabledModules.includes(modId)) {
+        mod.startModule();
+      }
+    }
 
     const statusStore = await getModule([ 'isMobileOnline' ]);
 
@@ -479,5 +489,9 @@ module.exports = class BetterStatusIndicators extends Plugin {
     FluxDispatcher.unsubscribe('I18N_LOAD_SUCCESS', this.handleRefreshIcons);
 
     this._refreshStatusIcons(false, true);
+
+    for (const modId of modules.keys()) {
+      modules.unload(modId);
+    }
   }
 };

@@ -26,10 +26,30 @@
  * SOFTWARE.
  */
 
-require('fs')
-  .readdirSync(__dirname)
-  .filter(file => file !== 'index.js')
-  .forEach(filename => {
-    const moduleName = filename.split('.')[0];
-    exports[moduleName] = require(`${__dirname}/${filename}`);
-  });
+const fs = require('fs');
+const modules = fs.readdirSync(__dirname).filter(file => file !== 'index.js').map(filename => filename.split('.')[0]);
+
+module.exports = {
+  availableModules: {},
+
+  keys () {
+    return new Set(modules);
+  },
+
+  async load (modId) {
+    const mod = await require(`./${modId}`);
+    if (mod) {
+      this.availableModules[modId] = mod;
+
+      return mod;
+    }
+  },
+
+  async unload (modId) {
+    const mod = this.availableModules[modId];
+    await mod.moduleWillUnload();
+
+    const modulePath = require.resolve(`./${modId}`);
+    delete require.cache[modulePath];
+  }
+};

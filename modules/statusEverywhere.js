@@ -35,8 +35,48 @@ module.exports = {
   name: 'Status Everywhere',
   description: 'Displays user statuses in places where Discord usually doesn\'t even bother.',
   icon: 'Status',
+  settings: {
+    'se-typingStatus': {
+      type: 'radio',
+      name: 'Typing Status Display',
+      description: 'Set whether or not the typing status indicator should be displayed in chat avatars, and for who.',
+      defaultValue: 'others',
+      options: [ {
+        name: 'Show for self and others',
+        value: 'self+others'
+      }, {
+        name: 'Show for others',
+        value: 'others'
+      }, {
+        name: 'Hidden',
+        value: 'hidden'
+      } ]
+    },
+    'se-mobileStatus': {
+      type: 'radio',
+      name: 'Mobile Status Display',
+      description: 'Set whether or not the mobile status indicator should be displayed, and for who.',
+      defaultValue: 'others',
+      options: [ {
+        name: 'Show for self and others',
+        value: 'self+others'
+      }, {
+        name: 'Show for others',
+        value: 'others'
+      }, {
+        name: 'Hidden',
+        value: 'hidden'
+      } ]
+    }
+  },
+
+  get currentUserId () {
+    return window.DiscordNative.crashReporter.getMetadata().user_id;
+  },
 
   async startModule () {
+    const { getSetting } = powercord.api.settings._fluxProps('better-status-indicators');
+
     FluxDispatcher.subscribe('GUILD_MEMBERS_REQUEST', this.handleMissingStatuses);
 
     const avatarModule = await getModule([ 'AnimatedAvatar' ]);
@@ -55,10 +95,13 @@ module.exports = {
         return res;
       }
 
+      const mobileStatus = getSetting('se-mobileStatus', 'others');
+      const mobileStatusState = mobileStatus === 'self+others' ? true : mobileStatus === 'others' ? userId !== this.currentUserId : false;
+
       const { size } = props;
-      const ConnectedAvatar = Flux.connectStores([ statusStore ], () => ({
+      const ConnectedAvatar = Flux.connectStores([ statusStore, powercord.api.settings.store ], () => ({
         status: statusStore.getStatus(userId),
-        isMobile: statusStore.isMobileOnline(userId)
+        isMobile: mobileStatusState && statusStore.isMobileOnline(userId)
       }))(Avatar);
 
       return React.createElement(ConnectedAvatar, {
@@ -77,8 +120,11 @@ module.exports = {
         size: Avatar.Sizes.SIZE_40
       };
 
-      const ConnectedAvatar = Flux.connectStores([ typingStore ], () => ({
-        isTyping: typingStore.isTyping(message.channel_id, message.author.id)
+      const typingStatus = getSetting('se-typingStatus', 'others');
+      const typingStatusState = typingStatus === 'self+others' ? true : typingStatus === 'others' ? defaultProps.userId !== this.currentUserId : false;
+
+      const ConnectedAvatar = Flux.connectStores([ typingStore, powercord.api.settings.store ], () => ({
+        isTyping: typingStatusState && typingStore.isTyping(message.channel_id, message.author.id)
       }))(Avatar);
 
       const AvatarWithPopout = findInReactTree(res, n => n.type?.displayName === 'Popout');
@@ -97,9 +143,6 @@ module.exports = {
 
           return res;
         })(AvatarWithPopout.props.children);
-      } else {
-        const Avatar = res.props.children[0];
-        Object.assign(Avatar, { type: ConnectedAvatar, props: { ...Avatar.props, ...defaultProps } });
       }
 
       return res;

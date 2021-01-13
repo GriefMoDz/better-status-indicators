@@ -27,11 +27,17 @@
  */
 
 /* eslint-disable object-property-newline */
-const { React, getModule, getModuleByDisplayName } = require('powercord/webpack');
+const { React, getModule, getModuleByDisplayName, i18n: { Messages } } = require('powercord/webpack');
 const { Card, Clickable, Flex, Icon, Text } = require('powercord/components');
+const { default: Button } = getModule([ 'ButtonLink' ], false);
+
+const Components = require('powercord/components/settings');
+const modules = require('../modules');
 
 const Caret = getModuleByDisplayName('Caret', false);
 const IntegrationInfo = getModuleByDisplayName('IntegrationInfo', false);
+const FormDivider = getModuleByDisplayName('FormDivider', false);
+
 const classes = getModule([ 'card', 'pulseBorder' ], false);
 
 class ModuleCard extends React.PureComponent {
@@ -44,12 +50,80 @@ class ModuleCard extends React.PureComponent {
     };
   }
 
+  handleModuleState (state) {
+    const { getSetting, updateSetting } = this.props;
+
+    const moduleId = this.props.id;
+    const disabledModules = getSetting('disabledModules', []);
+
+    (state ? modules.availableModules[moduleId].startModule() : modules.unload(moduleId)).then(() => {
+      if (state) {
+        disabledModules.splice(disabledModules.indexOf(moduleId), 1);
+      } else {
+        disabledModules.push(moduleId);
+      }
+
+      updateSetting('disabledModules', disabledModules);
+    });
+  }
+
   handleExpand () {
     this.setState({ expanded: !this.state.expanded });
 
     if (typeof this.props.onToggleExpand === 'function') {
       this.props.onToggleExpand(this.state.expanded);
     }
+  }
+
+  renderSettings () {
+    // eslint-disable-next-line no-empty-pattern
+    const { getSetting, toggleSetting, updateSetting } = this.props;
+
+    const disabledModules = getSetting('disabledModules', []);
+    if (disabledModules.includes(this.props.id)) {
+      return <div>
+        <FormDivider className={classes.topDivider} style={{ marginBottom: 0 }} />
+        <Flex style={{ padding: '5px 0' }}>
+          <Text style={{ padding: 10 }}>{this.parser.parse(Messages.BSI_MODULE_SETTINGS_HIDDEN.plainFormat({}))}</Text>
+          <Button style={{ alignSelf: 'center' }} size={Button.Sizes.SMALL} color={Button.Colors.GREEN} look={Button.Looks.OUTLINED} onClick={() => this.handleModuleState(true)}>{Messages.BSI_MODULE_ENABLE}</Button>
+        </Flex>
+      </div>;
+    }
+
+    const elements = [];
+    const settings = Object.keys(this.props.settings);
+
+    settings.forEach(key => {
+      const setting = this.props.settings[key];
+
+      switch (setting.type) {
+        case 'radio':
+          return elements.push(React.createElement(Components.RadioGroup, {
+            options: setting.options,
+            note: setting.description || '',
+            value: getSetting(key, setting.defaultValue),
+            onChange: (e) => updateSetting(key, e.value)
+          }, setting.name));
+        case 'switch':
+          elements.push(React.createElement(Components.SwitchItem, {
+            note: setting.description || '',
+            value: getSetting(key, setting.defaultValue),
+            onChange: () => toggleSetting(key, setting.defaultValue)
+          }, setting.name));
+      }
+    });
+
+    return <div className={classes.body}>
+      <FormDivider className={classes.topDivider} />
+      <Flex>
+        <Flex.Child>{elements}</Flex.Child>
+      </Flex>
+      <Flex direction={Flex.Direction.VERTICAL}>
+        <Flex>
+          <Button style={{ marginLeft: 'auto' }} size={Button.Sizes.SMALL} color={Button.Colors.RED} look={Button.Looks.OUTLINED} onClick={() => this.handleModuleState(false)}>{Messages.BSI_MODULE_DISABLE}</Button>
+        </Flex>
+      </Flex>
+    </div>;
   }
 
   render () {
@@ -66,7 +140,7 @@ class ModuleCard extends React.PureComponent {
           <Caret className={classes.expandIcon} expanded={expanded} aria-hidden={true} />
         </Flex>
       </Clickable>
-    </Flex>, expanded && <Text style={{ padding: 10 }}>{this.parser.parse('Coming Soon! :slight_smile:')}</Text> ];
+    </Flex>, expanded && this.renderSettings() ];
   }
 }
 

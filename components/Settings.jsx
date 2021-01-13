@@ -41,7 +41,7 @@ const colorUtils = getModule([ 'isValidHex' ], false);
 const Breadcrumbs = getModuleByDisplayName('Breadcrumbs', false);
 const breadcrumbClasses = getModule([ 'breadcrumb', 'breadcrumbActive' ], false);
 
-const modules = require('../modules');
+const { availableModules } = require('../modules');
 
 function formatClientTranslation (translation, args) {
   const key = translation === 'DISPLAY_TITLE' ? 'CLIENT_DISPLAY_TITLE' : `CLIENT_SWITCH_${translation}`;
@@ -276,16 +276,22 @@ module.exports = class Settings extends React.PureComponent {
   }
 
   renderModules () {
-    const availableModules = Object.keys(modules);
+    const modules = Object.keys(availableModules);
+    const settingsProps = (({ getSetting, toggleSetting, updateSetting }) => ({ getSetting, toggleSetting, updateSetting }))(this.props);
 
     return <>
-      <FormTitle className="bsi-settings-status-display-title">Available Modules ({availableModules.length})</FormTitle>
-      {availableModules.map(key => {
-        const mod = modules[key];
+      <FormTitle className="bsi-settings-status-display-title">{Messages.BSI_AVAILABLE_MODULES.format({ count: modules.length })}</FormTitle>
+      <Text size={Text.Sizes.SIZE_12} style={{ marginBottom: 10 }}>{Messages.BSI_MODULES_CHANGE_NOTE.format({})}</Text>
+
+      {modules.map(modId => {
+        const mod = availableModules[modId];
         return <ModuleCard
+          id={modId}
           name={mod.name}
           description={mod.description || 'No description given.'}
           icon={mod.icon ? (props) => React.createElement(Icon, { name: mod.icon, ...props }) : null}
+          settings={mod.settings || []}
+          {...settingsProps}
         />;
       })}
     </>;

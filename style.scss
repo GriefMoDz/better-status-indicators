@@ -138,6 +138,30 @@ $status-colors: (
 
   &-card, &-module-card {
     &:hover {
+      .icon-3oSHuZ {
+        color: var(--interactive-hover);
+      }
+    }
+
+    &:active {
+      .icon-3oSHuZ {
+        color: var(--interactive-active);
+      }
+    }
+
+    .icon-3oSHuZ {
+      margin-left: 1px;
+    }
+  }
+
+  &-module-card {
+    div[role='radiogroup'] > div:not([aria-checked='true']):not(:hover) {
+      background-color: var(--background-secondary-alt);
+    }
+  }
+
+  &-card {
+    &:hover {
       background: var(--background-modifier-hover) !important;
 
       .icon-3oSHuZ {
@@ -151,10 +175,6 @@ $status-colors: (
       .icon-3oSHuZ {
         color: var(--interactive-active);
       }
-    }
-
-    .icon-3oSHuZ {
-      margin-left: 1px;
     }
   }
 
