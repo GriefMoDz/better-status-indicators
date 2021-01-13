@@ -108,7 +108,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     for (const modId of modules.keys()) {
       const mod = await modules.load(modId);
-      const disabledModules = getSetting('disabledModules', []);
+      const disabledModules = getSetting('disabledModules', [ 'statusEverywhere' ]);
 
       if (!disabledModules.includes(modId)) {
         mod.startModule();

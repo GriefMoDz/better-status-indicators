@@ -54,7 +54,7 @@ class ModuleCard extends React.PureComponent {
     const { getSetting, updateSetting } = this.props;
 
     const moduleId = this.props.id;
-    const disabledModules = getSetting('disabledModules', []);
+    const disabledModules = getSetting('disabledModules', [ 'statusEverywhere' ]);
 
     (state ? modules.availableModules[moduleId].startModule() : modules.unload(moduleId)).then(() => {
       if (state) {
@@ -79,7 +79,7 @@ class ModuleCard extends React.PureComponent {
     // eslint-disable-next-line no-empty-pattern
     const { getSetting, toggleSetting, updateSetting } = this.props;
 
-    const disabledModules = getSetting('disabledModules', []);
+    const disabledModules = getSetting('disabledModules', [ 'statusEverywhere' ]);
     if (disabledModules.includes(this.props.id)) {
       return <div>
         <FormDivider className={classes.topDivider} style={{ marginBottom: 0 }} />
