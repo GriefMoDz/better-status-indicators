@@ -67,6 +67,12 @@ module.exports = {
         name: 'Hidden',
         value: 'hidden'
       } ]
+    },
+    'se-reducedStatuses': {
+      type: 'switch',
+      name: 'Reduced Statuses',
+      description: 'Scales down status indicators in chat for those that find them too obtrusive.',
+      defaultValue: false
     }
   },
 
@@ -144,7 +150,8 @@ module.exports = {
           const originalProps = res.props;
           res = React.createElement('span', {}, React.createElement(ConnectedAvatar, {
             ...originalProps,
-            ...defaultProps
+            ...defaultProps,
+            className: [ originalProps.className, getSetting('se-reducedStatuses', false) && 'bsi-reduced-statuses' ].filter(Boolean).join(' ')
           }));
 
           return res;

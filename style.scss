@@ -50,6 +50,54 @@
 
 .message-2qnXI6 .avatar-1BDn8e {
   overflow: visible;
+
+  &.bsi-reduced-statuses {
+    foreignObject:not([mask*='#svg-mask-avatar-default']) {
+      &[mask*='#svg-mask-avatar-status-mobile'] {
+        mask: url(#svg-mask-avatar-status-mobile-80);
+    
+        &+ rect {
+          width: 10px;
+          height: 14px;
+          x: 30;
+          y: 26;
+        }
+      }
+    
+      &[mask*='#svg-mask-avatar-status-typing'] {
+        mask: url(#svg-mask-avatar-status-typing-80);
+
+        &+ rect {
+          width: 18px;
+          height: 9px;
+          x: 25;
+          y: 30;
+
+          + svg circle {
+            r: 1.5;
+
+            @for $i from 0 to 3 {
+              &:nth-child(#{$i + 1}) {
+                cy: 3.5;
+                cx: 5 * ($i + 1);
+              }
+            }
+          }
+        }
+      }
+
+      &:not([mask*='#svg-mask-avatar-status-mobile']):not([mask*='#svg-mask-avatar-status-typing']) {
+        mask: url(#svg-mask-avatar-status-round-80);
+
+        &+ rect {
+          width: 9px;
+          height: 9px;
+          x: 30;
+          y: 30;
+        }
+      }
+    }
+  }
 }
 
 $statuses: (
