@@ -27,7 +27,7 @@
  */
 
 /* eslint-disable object-property-newline */
-const { React, Flux, FluxDispatcher, getModule } = require('powercord/webpack');
+const { React, Flux, FluxDispatcher, getModule, i18n: { Messages } } = require('powercord/webpack');
 const { inject, uninject } = require('powercord/injector');
 const { findInReactTree } = require('powercord/util');
 
@@ -39,8 +39,8 @@ module.exports = {
     'se-typingStatus': {
       type: 'radio',
       name: 'Typing Status Display',
-      description: 'Set whether or not the typing status indicator should be displayed in chat avatars, and for who.',
-      defaultValue: 'others',
+      description: Messages.BSI_STATUS_EVERYWHERE_TYPING_STATUS_DESC.format({}),
+      defaultValue: 'hidden',
       options: [ {
         name: 'Show for self and others',
         value: 'self+others'
@@ -95,13 +95,16 @@ module.exports = {
         return res;
       }
 
-      const mobileStatus = getSetting('se-mobileStatus', 'others');
-      const mobileStatusState = mobileStatus === 'self+others' ? true : mobileStatus === 'others' ? userId !== this.currentUserId : false;
+      const getMobileStatusState = () => {
+        const mobileStatus = getSetting('se-mobileStatus', 'others');
+
+        return mobileStatus === 'self+others' ? true : mobileStatus === 'others' ? userId !== this.currentUserId : false;
+      };
 
       const { size } = props;
       const ConnectedAvatar = Flux.connectStores([ statusStore, powercord.api.settings.store ], () => ({
         status: statusStore.getStatus(userId),
-        isMobile: mobileStatusState && statusStore.isMobileOnline(userId)
+        isMobile: getMobileStatusState() && statusStore.isMobileOnline(userId)
       }))(Avatar);
 
       return React.createElement(ConnectedAvatar, {
@@ -120,11 +123,14 @@ module.exports = {
         size: Avatar.Sizes.SIZE_40
       };
 
-      const typingStatus = getSetting('se-typingStatus', 'others');
-      const typingStatusState = typingStatus === 'self+others' ? true : typingStatus === 'others' ? defaultProps.userId !== this.currentUserId : false;
+      const getTypingStatusState = () => {
+        const typingStatus = getSetting('se-typingStatus', 'others');
+
+        return typingStatus === 'self+others' ? true : typingStatus === 'others' ? defaultProps.userId !== this.currentUserId : false;
+      };
 
       const ConnectedAvatar = Flux.connectStores([ typingStore, powercord.api.settings.store ], () => ({
-        isTyping: typingStatusState && typingStore.isTyping(message.channel_id, message.author.id)
+        isTyping: getTypingStatusState() && typingStore.isTyping(message.channel_id, defaultProps.userId)
       }))(Avatar);
 
       const AvatarWithPopout = findInReactTree(res, n => n.type?.displayName === 'Popout');

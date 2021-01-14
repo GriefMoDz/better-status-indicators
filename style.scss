@@ -61,20 +61,28 @@ $statuses: (
 
 @mixin avatarStatusCutout ($width: 32, $height: 10px, $x: 22, $y: 22, $avatar-status: false, $mask: avatar-default) {
   @each $status in $statuses {
-    .wrapper-3t9DeA foreignObject[width='#{$width}'][data-bsi-mobile-avatar-status='#{$avatar-status}'][data-bsi-status='#{$status}'] {
-      &:not([mask*='#{$mask}']) {
-        mask: url(#svg-mask-avatar-status-round-#{$width});
+    .wrapper-3t9DeA[data-bsi-mobile-avatar-status='#{$avatar-status}'][data-bsi-status='#{$status}'] {
+      foreignObject[width='#{$width}'] {
+        &:not([mask*='#{$mask}']) {
+          mask: url(#svg-mask-avatar-status-round-#{$width});
+        }
+
+        &::after {
+          display: none !important;
+        }
+
+        + rect {
+          mask: url(#svg-mask-status-#{$status});
+          height: $height;
+          x: $x;
+          y: $y;
+        }
       }
 
-      &::after {
-        display: none !important;
-      }
-
-      + rect {
-        mask: url(#svg-mask-status-#{$status});
-        height: $height;
-        x: $x;
-        y: $y; 
+      + svg > foreignObject[width='#{$width}'] {
+        &:not([mask*='#{$mask}']) {
+          mask: url(#svg-mask-avatar-status-round-#{$width});
+        }
       }
     }
   }
@@ -100,7 +108,7 @@ $status-colors: (
 );
 
 @each $status, $color in $status-colors {
-  .wrapper-3t9DeA foreignObject[mask*='mobile'][data-bsi-status='#{$status}']:after {
+  .wrapper-3t9DeA[data-bsi-status='#{$status}'] foreignObject[mask*='mobile']:after {
     background: var(--rs-#{$status}-color, #{$color}) !important;
   }
 }

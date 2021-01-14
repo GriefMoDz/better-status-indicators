@@ -265,8 +265,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
       const foreignObject = findInReactTree(res, n => n?.type === 'foreignObject');
 
       if (isMobile && !isTyping) {
-        foreignObject.props['data-bsi-status'] = status;
-        foreignObject.props['data-bsi-mobile-avatar-status'] = getSetting('mobileAvatarStatus', true);
+        res.props['data-bsi-status'] = status;
+        res.props['data-bsi-mobile-avatar-status'] = getSetting('mobileAvatarStatus', true);
       }
 
       if (status !== 'online' && isMobile && !isTyping) {
