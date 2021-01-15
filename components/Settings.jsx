@@ -229,7 +229,7 @@ module.exports = class Settings extends React.PureComponent {
         hasNextSection={true}
         name={Messages.FORM_LABEL_DESKTOP_ONLY}
         onButtonClick={() => this.setState({ section: 1 })}
-        details={[ { text: `6 ${Messages.SETTINGS}` } ]}
+        details={[ { text: `7 ${Messages.SETTINGS}` } ]}
         icon={(props) => React.createElement(Icon, { name: 'Monitor', ...props })}
       />
 
@@ -247,7 +247,7 @@ module.exports = class Settings extends React.PureComponent {
         hasNextSection={true}
         name={Messages.BSI_WEB}
         onButtonClick={() => this.setState({ section: 3 })}
-        details={[ { text: `7 ${Messages.SETTINGS}` } ]}
+        details={[ { text: `8 ${Messages.SETTINGS}` } ]}
         icon={(props) => React.createElement(Icon, { name: 'Public', ...props })}
       />
 
@@ -258,7 +258,7 @@ module.exports = class Settings extends React.PureComponent {
         hasNextSection={true}
         name={Messages.STATUS_STREAMING}
         onButtonClick={() => this.setState({ section: 4 })}
-        details={[ { text: `6 ${Messages.SETTINGS}` } ]}
+        details={[ { text: `7 ${Messages.SETTINGS}` } ]}
         icon={(props) => React.createElement(Icon, { name: 'Activity', ...props })}
       />
 
@@ -302,6 +302,13 @@ module.exports = class Settings extends React.PureComponent {
 
     return <>
       <FormTitle className="bsi-settings-status-display-title">{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'Desktop' })}</FormTitle>
+      <SwitchItem
+        note={formatClientTranslation('MESSAGE_HEADERS_DESC', { client: 'desktop' })}
+        value={getSetting('desktopMessageHeaders', false)}
+        onChange={() => toggleSetting('desktopMessageHeaders', false)}
+      >
+        {Messages.BSI_CLIENT_SWITCH_MESSAGE_HEADERS}
+      </SwitchItem>
       <SwitchItem
         note={formatClientTranslation('MEMBERS_LIST_DESC', { client: 'desktop' })}
         value={getSetting('desktopMembersList', false)}
@@ -391,6 +398,13 @@ module.exports = class Settings extends React.PureComponent {
     return <>
       <FormTitle className="bsi-settings-status-display-title">{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'Web' })}</FormTitle>
       <SwitchItem
+        note={formatClientTranslation('MESSAGE_HEADERS_DESC', { client: 'web' })}
+        value={getSetting('webMessageHeaders', false)}
+        onChange={() => toggleSetting('webMessageHeaders', false)}
+      >
+        {Messages.BSI_CLIENT_SWITCH_MESSAGE_HEADERS}
+      </SwitchItem>
+      <SwitchItem
         note={formatClientTranslation('MEMBERS_LIST_DESC', { client: 'web' })}
         value={getSetting('webMembersList', true)}
         onChange={() => toggleSetting('webMembersList', true)}
@@ -448,6 +462,13 @@ module.exports = class Settings extends React.PureComponent {
 
     return <>
       <FormTitle className="bsi-settings-status-display-title">{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'Streaming' })}</FormTitle>
+      <SwitchItem
+        note={formatClientTranslation('MESSAGE_HEADERS_DESC', { client: 'game' })}
+        value={getSetting('streamMessageHeaders', true)}
+        onChange={() => toggleSetting('streamMessageHeaders', true)}
+      >
+        {Messages.BSI_CLIENT_SWITCH_MESSAGE_HEADERS}
+      </SwitchItem>
       <SwitchItem
         note={formatClientTranslation('MEMBERS_LIST_DESC', { client: 'game' })}
         value={getSetting('streamMembersList', true)}

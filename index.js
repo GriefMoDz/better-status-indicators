@@ -316,8 +316,27 @@ module.exports = class BetterStatusIndicators extends Plugin {
     const ConnectedStatusIcon = this.settings.connectStore(StatusIcon);
     const ConnectedClientStatuses = this.settings.connectStore(ClientStatuses);
 
+    const MessageHeader = await getModule([ 'MessageTimestamp' ]);
+    this.inject('bsi-message-header-client-status', MessageHeader, 'default', ([ { message: { author: user } } ], res) => {
+      const defaultProps = { user, location: 'message-headers' };
+      const usernameHeader = findInReactTree(res, n => Array.isArray(n?.props?.children) && n.props.children.find(c => c?.props?.message));
+
+      usernameHeader.props.children[0].type = (oldMethod => (props) => {
+        const res = oldMethod(props);
+
+        res.props.children.splice(2, 0, [
+          React.createElement(ConnectedStatusIcon, defaultProps),
+          React.createElement(ConnectedClientStatuses, defaultProps)
+        ]);
+
+        return res;
+      })(usernameHeader.props.children[0].type);
+
+      return res;
+    });
+
     const MemberListItem = await getModuleByDisplayName('MemberListItem');
-    this.inject('bsi-member-list-web-status', MemberListItem.prototype, 'renderDecorators', function (_, res) {
+    this.inject('bsi-member-list-client-status', MemberListItem.prototype, 'renderDecorators', function (_, res) {
       const { activities, status, user } = this.props;
       const defaultProps = { user, location: 'members-list' };
 
@@ -330,7 +349,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     });
 
     const NameTag = await getModule(m => m.default?.displayName === 'NameTag');
-    this.inject('bsi-name-tag-web-status', NameTag, 'default', ([ props ], res) => {
+    this.inject('bsi-name-tag-client-status', NameTag, 'default', ([ props ], res) => {
       const user = userStore.findByTag(props.name, props.discriminator);
       const defaultProps = { user, location: 'user-popout-modal' };
 
@@ -345,7 +364,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     NameTag.default.displayName = 'NameTag';
 
     const PrivateChannel = await getModuleByDisplayName('PrivateChannel');
-    this.inject('bsi-dm-channel-web-status', PrivateChannel.prototype, 'render', function (_, res) {
+    this.inject('bsi-dm-channel-client-status', PrivateChannel.prototype, 'render', function (_, res) {
       if (!this.props.user || res.props.decorators) {
         return res;
       }

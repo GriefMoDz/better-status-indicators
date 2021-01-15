@@ -54,9 +54,10 @@ function renderClientStatus (client, props, states) {
 
   const matchStatus = props.getSetting(`${client}MatchStatus`, false);
   const locationKey = props.location.replace(/^(.)|-(.)/g, (match) => match.toUpperCase()).replace(/-/g, '');
+  const defaultValue = locationKey === 'MessageHeaders' ? client === 'mobile' : client !== 'desktop';
 
   // eslint-disable-next-line multiline-ternary
-  return props.getSetting(`${client}${locationKey}`, client !== 'desktop') && clientOnline ? React.createElement(Tooltip, {
+  return props.getSetting(`${client}${locationKey}`, defaultValue) && clientOnline ? React.createElement(Tooltip, {
     text: Messages.BSI_CLIENT_SIGNED_IN.format({ clientCapitalized }),
     hideOnClick: false
   }, (props) => React.createElement(Icon, {

@@ -6,5 +6,5 @@
   "BSI_TRUE_STATUS": "True Status Colour",
   "BSI_CLIENT_SWITCH_MATCH_COLOR_DESC": "Fills the {client} status indicator with the corresponding colour of their status.",
   "BSI_CLIENT_SWITCH_MATCH_COLOR": "Match Status Colour",
-  "BSI_MOBILE_SWITCH_MATCH_COLOR_DESC": "Fills the mobile status indicator with the corresponding colour of their status; requires the mobile \"Avatar Status\" setting to be enabled."
+  "BSI_MOBILE_SWITCH_MATCH_COLOR_DESC": "Fills the mobile status indicator with the corresponding colour of their status; requires the mobile \"Avatar Status\" setting to be disabled."
 }

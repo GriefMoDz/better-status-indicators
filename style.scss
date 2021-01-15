@@ -30,10 +30,7 @@
 .bsi-clientStatuses svg, .bsi-statusIcon {
   color: var(--channels-default);
   margin-left: 4px;
-}
-
-.bsi-statusIcon {
-  top: 0;
+  vertical-align: -.5px;
 }
 
 .peopleListItem-2nzedh .userInfo-2zN2z8 {
@@ -48,10 +45,31 @@
   }
 }
 
+.message-2qnXI6 {
+  .bsi-clientStatuses, .bsi-statusIcon {
+    display: inline;
+  }
+}
+
 .message-2qnXI6 .avatar-1BDn8e {
   overflow: visible;
 
   &.bsi-reduced-statuses {
+    &[data-bsi-mobile-avatar-status='false'] {
+      foreignObject:not([mask*='#svg-mask-avatar-default']) {
+        &[mask*='#svg-mask-avatar-status-mobile'] {
+          mask: url(#svg-mask-avatar-status-round-80);
+
+          &+ rect {
+            width: 9px;
+            height: 9px;
+            x: 30;
+            y: 30;
+          }
+        }
+      }
+    }
+
     foreignObject:not([mask*='#svg-mask-avatar-default']) {
       &[mask*='#svg-mask-avatar-status-mobile'] {
         mask: url(#svg-mask-avatar-status-mobile-80);
@@ -137,6 +155,7 @@ $statuses: (
 }
 
 @include avatarStatusCutout();
+@include avatarStatusCutout(40, 12px, 28, 28);
 @include avatarStatusCutout(80, 16px, 60, 60);
 
 /** Theme Compatibility **/
