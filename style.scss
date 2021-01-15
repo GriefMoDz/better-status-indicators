@@ -55,7 +55,7 @@
     foreignObject:not([mask*='#svg-mask-avatar-default']) {
       &[mask*='#svg-mask-avatar-status-mobile'] {
         mask: url(#svg-mask-avatar-status-mobile-80);
-    
+
         &+ rect {
           width: 10px;
           height: 14px;
@@ -63,14 +63,14 @@
           y: 26;
         }
       }
-    
+
       &[mask*='#svg-mask-avatar-status-typing'] {
         mask: url(#svg-mask-avatar-status-typing-80);
 
         &+ rect {
           width: 18px;
           height: 9px;
-          x: 25;
+          x: 24;
           y: 30;
 
           + svg circle {
@@ -79,7 +79,7 @@
             @for $i from 0 to 3 {
               &:nth-child(#{$i + 1}) {
                 cy: 3.5;
-                cx: 5 * ($i + 1);
+                cx: 4.5 * ($i + 1);
               }
             }
           }

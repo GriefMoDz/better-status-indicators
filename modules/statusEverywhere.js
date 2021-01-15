@@ -27,7 +27,7 @@
  */
 
 /* eslint-disable object-property-newline */
-const { React, Flux, FluxDispatcher, getModule, i18n: { Messages } } = require('powercord/webpack');
+const { React, Flux, getModule, i18n: { Messages } } = require('powercord/webpack');
 const { inject, uninject } = require('powercord/injector');
 const { findInReactTree } = require('powercord/util');
 
@@ -83,11 +83,12 @@ module.exports = {
   async startModule () {
     const { getSetting } = powercord.api.settings._fluxProps('better-status-indicators');
 
-    FluxDispatcher.subscribe('GUILD_MEMBERS_REQUEST', this.handleMissingStatuses);
-
     const avatarModule = await getModule([ 'AnimatedAvatar' ]);
     const statusStore = await getModule([ 'isMobileOnline' ]);
     const userStore = await getModule([ 'getCurrentUser' ]);
+    const guildStore = await getModule([ 'getGuildId' ]);
+
+    const { useSubscribeGuildMembers } = await getModule([ 'useSubscribeGuildMembers' ]);
 
     const Avatar = avatarModule.default;
     inject('bsi-module-status-everywhere-avatar', avatarModule, 'default', ([ props ], res) => {
@@ -112,6 +113,14 @@ module.exports = {
         status: statusStore.getStatus(userId),
         isMobile: getMobileStatusState() && statusStore.isMobileOnline(userId)
       }))(Avatar);
+
+      const guildId = guildStore.getGuildId();
+      const guildMember = React.useMemo(() => {
+        const members = {};
+        return guildId !== null ? (members[guildId] = [ userId ], members) : {};
+      }, [ guildId, userId ]);
+
+      useSubscribeGuildMembers(guildMember);
 
       return React.createElement(ConnectedAvatar, {
         ...props,
@@ -163,19 +172,7 @@ module.exports = {
   },
 
   moduleWillUnload () {
-    FluxDispatcher.unsubscribe('GUILD_MEMBERS_REQUEST', this.handleMissingStatuses);
-
     uninject('bsi-module-status-everywhere-avatar');
     uninject('bsi-module-status-everywhere-chat-avatar');
-  },
-
-  handleMissingStatuses (data) {
-    if (data.userIds) {
-      FluxDispatcher.dirtyDispatch({
-        type: 'GUILD_SUBSCRIPTIONS_MEMBERS_ADD',
-        guildId: data.guildIds[0],
-        userIds: data.userIds
-      });
-    }
   }
 };
