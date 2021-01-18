@@ -37,6 +37,8 @@ const { getStatusColor } = getModule([ 'getStatusColor' ], false);
 const { getId: getCurrentUserId } = getModule([ 'initialize', 'getFingerprint' ], false);
 
 const statusStore = getModule([ 'isMobileOnline' ], false);
+const classes = getModule([ 'member', 'ownerIcon' ], false);
+
 const clientStatusStore = require('../stores/clientStatusStore');
 const clientIcons = Object.freeze({
   web: 'Public',
@@ -44,16 +46,18 @@ const clientIcons = Object.freeze({
   mobile: 'MobileDevice'
 });
 
+const Lodash = window._;
+
 function renderClientStatus (client, props, states) {
   if (props.user.bot && !props.getSetting(`${client}ShowOnBots`, true)) {
     return null;
   }
 
-  const clientCapitalized = client.charAt(0).toUpperCase() + client.slice(1);
+  const clientCapitalized = Lodash.capitalize(client);
   const clientOnline = states[`is${clientCapitalized}Online`];
 
   const matchStatus = props.getSetting(`${client}MatchStatus`, false);
-  const locationKey = props.location.replace(/^(.)|-(.)/g, (match) => match.toUpperCase()).replace(/-/g, '');
+  const locationKey = Lodash.upperFirst(Lodash.camelCase(props.location));
   const defaultValue = locationKey === 'MessageHeaders' ? client === 'mobile' : client !== 'desktop';
 
   // eslint-disable-next-line multiline-ternary
@@ -63,7 +67,7 @@ function renderClientStatus (client, props, states) {
   }, (props) => React.createElement(Icon, {
     name: clientIcons[client],
     color: matchStatus ? states.statusColor : 'currentColor',
-    className: `bsi-${client}Icon ${getModule([ 'member', 'ownerIcon' ], false).icon}`,
+    className: `bsi-${client}Icon ${classes.icon}`,
     ...props
   })) : null;
 }

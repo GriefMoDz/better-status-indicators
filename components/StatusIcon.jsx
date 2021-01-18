@@ -41,8 +41,10 @@ const { getId: getCurrentUserId } = getModule([ 'initialize', 'getFingerprint' ]
 const statusStore = getModule([ 'isMobileOnline' ], false);
 const classes = getModule([ 'member', 'ownerIcon' ], false);
 
+const Lodash = window._;
+
 function renderStatusIcon ({ props, settings }, states) {
-  const locationKey = props.location.replace(/^(.)|-(.)/g, (match) => match.toUpperCase()).replace(/-/g, '');
+  const locationKey = Lodash.upperFirst(Lodash.camelCase(props.location));
 
   // eslint-disable-next-line multiline-ternary
   return props.getSetting(`stream${locationKey}`, true) ? React.createElement(Tooltip, {
