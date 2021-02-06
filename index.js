@@ -331,8 +331,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
     });
 
     const UsernameHeader = await getModule(m =>
-      Object.keys(m).length === 1 && typeof (m?.__powercordOriginal_default || m.default) === 'function' &&
-      (m?.__powercordOriginal_default || m.default).toString().includes('onPopoutRequestClose')
+      typeof (m?.__powercordOriginal_default || m.default) === 'function' &&
+      (m?.__powercordOriginal_default || m.default).toString().includes('withMentionPrefix')
     );
 
     this.inject('bsi-message-header-client-status2', UsernameHeader, 'default', ([ { __BsiDefaultProps: defaultProps } ], res) => {

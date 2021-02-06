@@ -158,6 +158,21 @@ $statuses: (
 @include avatarStatusCutout(40, 12px, 28, 28);
 @include avatarStatusCutout(80, 16px, 60, 60);
 
+/** Plugin Compatibility **/
+
+/* BDFDB */
+.supporter-Z3FfwL.hasBadge-4rT8_u:not(.customSupporter-thxL4U) {
+  .avatar-1BDn8e {
+    left: initial;
+    margin-top: initial;
+  }
+
+  width: 40px;
+  height: 40px;
+  left: 16px;
+  position: absolute;
+}
+
 /** Theme Compatibility **/
 
 /* Settings Icons */
