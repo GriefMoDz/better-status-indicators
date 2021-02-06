@@ -75,12 +75,11 @@ class ModuleCard extends React.PureComponent {
     }
   }
 
-  renderSettings () {
+  renderSettings (disabled) {
     // eslint-disable-next-line no-empty-pattern
     const { getSetting, toggleSetting, updateSetting } = this.props;
 
-    const disabledModules = getSetting('disabledModules', [ 'statusEverywhere' ]);
-    if (disabledModules.includes(this.props.id)) {
+    if (disabled) {
       return <div>
         <FormDivider className={classes.topDivider} style={{ marginBottom: 0 }} />
         <Flex style={{ padding: '5px 0' }}>
@@ -129,6 +128,9 @@ class ModuleCard extends React.PureComponent {
   render () {
     const { expanded } = this.state;
 
+    const disabledModules = this.props.getSetting('disabledModules', [ 'statusEverywhere' ]);
+    const disabled = disabledModules.includes(this.props.id);
+
     return [ <Flex direction={Flex.Direction.VERTICAL}>
       <Clickable className={classes.header} aria-expanded={expanded} onClick={this.handleExpand.bind(this)}>
         <Flex align={Flex.Align.CENTER}>
@@ -140,7 +142,7 @@ class ModuleCard extends React.PureComponent {
           <Caret className={classes.expandIcon} expanded={expanded} aria-hidden={true} />
         </Flex>
       </Clickable>
-    </Flex>, expanded && this.renderSettings() ];
+    </Flex>, expanded && this.renderSettings(disabled) ];
   }
 }
 

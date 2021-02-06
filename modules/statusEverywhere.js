@@ -129,6 +129,9 @@ module.exports = {
       });
     });
 
+    const { default: GuildMemberSubscriptions } = await getModule(m => m.default?.prototype?.checkForLeaks);
+    inject('bsi-module-status-everywhere-silence-leaks', GuildMemberSubscriptions.prototype, 'checkForLeaks', () => false, true);
+
     const typingStore = await getModule([ 'isTyping' ]);
     const MessageHeader = await getModule([ 'MessageTimestamp' ]);
     inject('bsi-module-status-everywhere-chat-avatar', MessageHeader, 'default', ([ props ], res) => {
@@ -139,7 +142,7 @@ module.exports = {
       };
 
       const getTypingStatusState = () => {
-        const typingStatus = getSetting('se-typingStatus', 'others');
+        const typingStatus = getSetting('se-typingStatus', 'hidden');
 
         return typingStatus === 'self+others' ? true : typingStatus === 'others' ? defaultProps.userId !== this.currentUserId : false;
       };
@@ -173,6 +176,7 @@ module.exports = {
 
   moduleWillUnload () {
     uninject('bsi-module-status-everywhere-avatar');
+    uninject('bsi-module-status-everywhere-silence-leaks');
     uninject('bsi-module-status-everywhere-chat-avatar');
   }
 };

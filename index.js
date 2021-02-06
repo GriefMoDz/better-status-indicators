@@ -261,6 +261,10 @@ module.exports = class BetterStatusIndicators extends Plugin {
     const userStore = await getModule([ 'getCurrentUser' ]);
 
     this.inject('bsi-mobile-status-default-mask', avatarModule, 'default', (args, res) => {
+      if (!args[0].status) {
+        return res;
+      }
+
       const { size, status, isMobile, isTyping } = args[0];
       const foreignObject = findInReactTree(res, n => n?.type === 'foreignObject');
 
@@ -303,7 +307,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     });
 
     this.inject('bsi-true-status-color', avatarModule, 'default', (args) => {
-      if (getSetting('trueStatusColor', false) && args[0].statusColor && args[0].statusColor === '#ffffff') {
+      if (getSetting('trueStatusColor', false) && args[0].status && args[0].statusColor && args[0].statusColor === '#ffffff') {
         args[0].statusColor = statusModule.getStatusColor(args[0].status);
       }
 
@@ -317,20 +321,25 @@ module.exports = class BetterStatusIndicators extends Plugin {
     const ConnectedClientStatuses = this.settings.connectStore(ClientStatuses);
 
     const MessageHeader = await getModule([ 'MessageTimestamp' ]);
-    this.inject('bsi-message-header-client-status', MessageHeader, 'default', ([ { message: { author: user } } ], res) => {
+    this.inject('bsi-message-header-client-status1', MessageHeader, 'default', ([ { message: { author: user } } ], res) => {
       const defaultProps = { user, location: 'message-headers' };
       const usernameHeader = findInReactTree(res, n => Array.isArray(n?.props?.children) && n.props.children.find(c => c?.props?.message));
 
-      usernameHeader.props.children[0].type = (oldMethod => (props) => {
-        const res = oldMethod(props);
+      usernameHeader.props.children[0].props.__BsiDefaultProps = defaultProps;
 
-        res.props.children.splice(2, 0, [
-          React.createElement(ConnectedStatusIcon, defaultProps),
-          React.createElement(ConnectedClientStatuses, defaultProps)
-        ]);
+      return res;
+    });
 
-        return res;
-      })(usernameHeader.props.children[0].type);
+    const UsernameHeader = await getModule(m =>
+      Object.keys(m).length === 1 && typeof (m?.__powercordOriginal_default || m.default) === 'function' &&
+      (m?.__powercordOriginal_default || m.default).toString().includes('onPopoutRequestClose')
+    );
+
+    this.inject('bsi-message-header-client-status2', UsernameHeader, 'default', ([ { __BsiDefaultProps: defaultProps } ], res) => {
+      res.props.children.splice(2, 0, [
+        React.createElement(ConnectedStatusIcon, defaultProps),
+        React.createElement(ConnectedClientStatuses, defaultProps)
+      ]);
 
       return res;
     });
