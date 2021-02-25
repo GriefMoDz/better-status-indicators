@@ -73,7 +73,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     this.loadStylesheet('./style.scss');
     powercord.api.i18n.loadAllStrings(i18n);
     powercord.api.settings.registerSettings('better-status-indicators', {
-      category: this.entityID,
+      category: 'better-status-indicators',
       label: 'Better Status Indicators',
       render: (props) => React.createElement(Settings, {
         ...props,
@@ -119,6 +119,10 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     /* Mobile Status Indicator */
     this.inject('bsi-mobile-status-online', statusStore, 'isMobileOnline', function ([ userId ], res) {
+      if (getSetting('mobileDisabled', false)) {
+        return false;
+      }
+
       const showOnSelf = userId === _this.currentUserId && getSetting('mobileShowOnSelf', false);
       const clientStatus = showOnSelf ? clientStatusStore.getCurrentClientStatus() : this.getState().clientStatuses[userId];
       if (clientStatus && clientStatus.mobile && (getSetting('mobilePreserveStatus', false) ? true : !clientStatus.desktop)) {
@@ -325,7 +329,9 @@ module.exports = class BetterStatusIndicators extends Plugin {
       const defaultProps = { user, location: 'message-headers' };
       const usernameHeader = findInReactTree(res, n => Array.isArray(n?.props?.children) && n.props.children.find(c => c?.props?.message));
 
-      usernameHeader.props.children[0].props.__BsiDefaultProps = defaultProps;
+      if (usernameHeader?.props?.children && usernameHeader?.props?.children[0] && usernameHeader?.props?.children[0].props) {
+        usernameHeader.props.children[0].props.__BsiDefaultProps = defaultProps;
+      }
 
       return res;
     });

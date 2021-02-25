@@ -27,7 +27,7 @@
  */
 
 /* eslint-disable object-property-newline */
-const { React, getModule } = require('powercord/webpack');
+const { React, Flux, getModule } = require('powercord/webpack');
 const ReactHooks = {};
 
 ReactHooks.Spring = getModule([ 'useSpring' ], false);
@@ -37,7 +37,7 @@ const uuid = getModule([ 'v4', 'parse' ], false);
 const classes = getModule([ 'wrapper', 'avatar' ], false);
 const statusModule = getModule([ 'getStatusMask' ], false);
 
-module.exports = React.memo(props => {
+const AnimatedStatus = React.memo(props => {
   const { status, color, className, style } = props;
 
   const isMobile = props.isMobile !== void 0 && props.isMobile;
@@ -53,13 +53,18 @@ module.exports = React.memo(props => {
     [ !color ? statusModule.getStatusColor(status) : color ]
   )[0].fill;
 
+  const statusMask = statusModule.renderStatusMask(statusDimensions, size, maskId);
+  if (props.getSetting('statusDisplay', 'default') === 'solid') {
+    delete statusMask.props.children[1];
+  }
+
   return React.createElement('svg', {
     width: size,
     height: Math.ceil(size * 1.5),
     viewBox: `0 0 ${size} ${Math.ceil(size * 1.5)}`,
     className: [ classes.mask, className ].filter(Boolean).join(' '),
     style
-  }, void 0, statusModule.renderStatusMask(statusDimensions, size, maskId), React.createElement(ReactHooks.Spring.animated.rect, {
+  }, void 0, statusMask, React.createElement(ReactHooks.Spring.animated.rect, {
     x: 0,
     y: 0,
     width: size,
@@ -68,3 +73,7 @@ module.exports = React.memo(props => {
     mask: `url(#${maskId})`
   }));
 });
+
+module.exports = Flux.connectStores([ powercord.api.settings.store ], () => ({
+  ...powercord.api.settings._fluxProps('better-status-indicators')
+}))(AnimatedStatus);

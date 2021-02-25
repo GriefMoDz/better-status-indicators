@@ -48,16 +48,16 @@ function formatClientTranslation (translation, args) {
   return Messages[`BSI_${key}`].format(args);
 }
 
-function handleAvatarStatusChange () {
+function handleSettingChangeAndReload (headerText, setting) {
   return openModal(() => React.createElement(Confirm, {
-    header: Messages.BSI_MOBILE_AVATAR_STATUS_MODAL_HEADER,
+    header: headerText,
     confirmText: Messages.OKAY,
     cancelText: Messages.CANCEL,
     onConfirm: () => {
-      this.props.toggleSetting('mobileAvatarStatus', true);
+      this.props.toggleSetting(setting, true);
       setTimeout(() => location.reload(), 1e3);
     }
-  }, React.createElement(Text, {}, Messages.BSI_MOBILE_AVATAR_STATUS_MODAL_BODY)));
+  }, React.createElement(Text, {}, Messages.BSI_CHANGE_SETTING_MODAL_BODY)));
 }
 
 // @todo: Make settings dynamic to improve readability and performance
@@ -238,7 +238,7 @@ module.exports = class Settings extends React.PureComponent {
         hasNextSection={true}
         name={Messages.BSI_MOBILE}
         onButtonClick={() => this.setState({ section: 2 })}
-        details={[ { text: `4 ${Messages.SETTINGS}` } ]}
+        details={[ { text: `5 ${Messages.SETTINGS}` } ]}
         icon={(props) => React.createElement(Icon, { name: 'MobileDevice', ...props })}
       />
 
@@ -361,9 +361,17 @@ module.exports = class Settings extends React.PureComponent {
     return <>
       <FormTitle className="bsi-settings-status-display-title">{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'Mobile' })}</FormTitle>
       <SwitchItem
+        note={Messages.BSI_MOBILE_SWITCH_DISABLE_STATUS_DESC}
+        value={getSetting('mobileDisabled', false)}
+        onChange={handleSettingChangeAndReload.bind(this, Messages.BSI_MOBILE_DISABLE_STATUS_MODAL_HEADER, 'mobileDisabled')}
+      >
+        {Messages.BSI_MOBILE_SWITCH_DISABLE_STATUS}
+      </SwitchItem>
+      <SwitchItem
         note={Messages.BSI_MOBILE_SWITCH_PRESERVE_STATUS_DESC}
         value={getSetting('mobilePreserveStatus', false)}
         onChange={() => toggleSetting('mobilePreserveStatus', false)}
+        disabled={getSetting('mobileDisabled', false)}
       >
         {Messages.BSI_CLIENT_SWITCH_PRESERVE_STATUS}
       </SwitchItem>
@@ -371,14 +379,15 @@ module.exports = class Settings extends React.PureComponent {
         note={formatClientTranslation('SHOW_ON_SELF_DESC', { client: 'mobile' })}
         value={getSetting('mobileShowOnSelf', false)}
         onChange={() => toggleSetting('mobileShowOnSelf', false)}
-        disabled={getSetting('mobilePreserveStatus', false) === false}
+        disabled={getSetting('mobileDisabled', false) || getSetting('mobilePreserveStatus', false) === false}
       >
         {Messages.BSI_CLIENT_SWITCH_SHOW_ON_SELF}
       </SwitchItem>
       <SwitchItem
         note={formatClientTranslation('AVATAR_STATUS_DESC', { client: 'mobile' })}
         value={getSetting('mobileAvatarStatus', true)}
-        onChange={handleAvatarStatusChange.bind(this)}
+        onChange={handleSettingChangeAndReload.bind(this, Messages.BSI_MOBILE_AVATAR_STATUS_MODAL_HEADER, 'mobileAvatarStatus')}
+        disabled={getSetting('mobileDisabled', false)}
       >
         {Messages.BSI_CLIENT_SWITCH_AVATAR_STATUS}
       </SwitchItem>
@@ -386,6 +395,7 @@ module.exports = class Settings extends React.PureComponent {
         note={Messages.BSI_MOBILE_SWITCH_MATCH_COLOR_DESC}
         value={getSetting('mobileMatchStatus', false)}
         onChange={() => toggleSetting('mobileMatchStatus', false)}
+        disabled={getSetting('mobileDisabled', false)}
       >
         {Messages.BSI_CLIENT_SWITCH_MATCH_COLOR}
       </SwitchItem>
