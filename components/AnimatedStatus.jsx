@@ -54,7 +54,7 @@ const AnimatedStatus = React.memo(props => {
   )[0].fill;
 
   const statusMask = statusModule.renderStatusMask(statusDimensions, size, maskId);
-  if (props.getSetting('statusDisplay', 'default') === 'solid') {
+  if (props.getSetting('statusDisplay', 'default') === 'solid' && !isMobile) {
     delete statusMask.props.children[1];
   }
 

@@ -27,7 +27,7 @@
  */
 
 /* eslint-disable object-property-newline */
-const { React, Flux, getModule, i18n: { Messages } } = require('powercord/webpack');
+const { React, Flux, getModule, getModuleByDisplayName, i18n: { Messages } } = require('powercord/webpack');
 const { inject, uninject } = require('powercord/injector');
 const { findInReactTree } = require('powercord/util');
 
@@ -120,17 +120,31 @@ module.exports = {
         return guildId !== null ? (members[guildId] = [ userId ], members) : {};
       }, [ guildId, userId ]);
 
-      useSubscribeGuildMembers(guildMember);
+      if (guildId && guildMember) {
+        useSubscribeGuildMembers(guildMember);
+      }
 
       return React.createElement(ConnectedAvatar, {
         ...props,
-        statusTooltip: size.split('_').pop() >= 40,
+        statusTooltip: size.split('_').pop() >= 32,
         size
       });
     });
 
     const { default: GuildMemberSubscriptions } = await getModule(m => m.default?.prototype?.checkForLeaks);
     inject('bsi-module-status-everywhere-silence-leaks', GuildMemberSubscriptions.prototype, 'checkForLeaks', () => false, true);
+
+    const MemberListItem = await getModuleByDisplayName('MemberListItem');
+    inject('bsi-module-status-everywhere-members-list', MemberListItem.prototype, 'renderAvatar', function (_, res) {
+      if (res) {
+        res = React.createElement(Avatar, {
+          ...res.props,
+          userId: this.props.user.id
+        });
+      }
+
+      return res;
+    });
 
     const typingStore = await getModule([ 'isTyping' ]);
     const MessageHeader = await getModule([ 'MessageTimestamp' ]);
@@ -177,6 +191,7 @@ module.exports = {
   moduleWillUnload () {
     uninject('bsi-module-status-everywhere-avatar');
     uninject('bsi-module-status-everywhere-silence-leaks');
+    uninject('bsi-module-status-everywhere-members-list');
     uninject('bsi-module-status-everywhere-chat-avatar');
   }
 };
