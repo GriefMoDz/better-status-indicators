@@ -37,38 +37,40 @@ const uuid = getModule([ 'v4', 'parse' ], false);
 const classes = getModule([ 'wrapper', 'avatar' ], false);
 const statusModule = getModule([ 'getStatusMask' ], false);
 
+const config = { tension: 600, friction: 70 };
+
 const AnimatedStatus = React.memo(props => {
-  const { status, color, className, style } = props;
+  const { status, className } = props;
+  const { Spring, Basic } = ReactHooks;
 
   const isMobile = props.isMobile !== void 0 && props.isMobile;
-  const size = props.size !== void 0 ? props.size : 8;
-  const config = { tension: 600, friction: 70 };
+  const color = props.color ?? statusModule.getStatusColor(status);
+  const size = props.size ?? 8;
 
-  const maskId = ReactHooks.Basic.useLazyValue((() => uuid.v4()));
-
-  const statusValues = React.useMemo((() => statusModule.getStatusValues({ size, status, isMobile })), [ size, status, isMobile ]);
-  const statusDimensions = ReactHooks.Spring.useSpring({ config, to: statusValues });
-  const statusColor = ReactHooks.Spring.useSpring(
-    { config, fill: !color ? statusModule.getStatusColor(status) : color },
-    [ !color ? statusModule.getStatusColor(status) : color ]
+  const statusValues = React.useMemo(() => statusModule.getStatusValues({ size, status, isMobile }), [ size, status, isMobile ]);
+  const statusDimensions = Spring.useSpring({ config, to: statusValues });
+  const statusHeight = Math.ceil(size * 1.5);
+  const statusColor = Spring.useSpring(
+    { config, fill: color },
+    [ color ]
   )[0].fill;
 
+  const maskId = Basic.useLazyValue(() => uuid.v4());
   const statusMask = statusModule.renderStatusMask(statusDimensions, size, maskId);
   if (props.getSetting('statusDisplay', 'default') === 'solid' && !isMobile) {
     delete statusMask.props.children[1];
   }
 
-  return React.createElement('svg', {
+  return React.createElement('svg', Object.assign({}, props, {
     width: size,
-    height: Math.ceil(size * 1.5),
-    viewBox: `0 0 ${size} ${Math.ceil(size * 1.5)}`,
-    className: [ classes.mask, className ].filter(Boolean).join(' '),
-    style
-  }, void 0, statusMask, React.createElement(ReactHooks.Spring.animated.rect, {
+    height: statusHeight,
+    viewBox: `0 0 ${size} ${statusHeight}`,
+    className: [ classes.mask, className ].filter(Boolean).join(' ')
+  }), void 0, statusMask, React.createElement(Spring.animated.rect, {
     x: 0,
     y: 0,
     width: size,
-    height: Math.ceil(size * 1.5),
+    height: statusHeight,
     fill: statusColor,
     mask: `url(#${maskId})`
   }));

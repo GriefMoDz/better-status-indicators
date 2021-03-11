@@ -47,6 +47,7 @@
   "BSI_AVAILABLE_MODULES": "Available Modules ({count, number})",
   "BSI_MODULES_CHANGE_NOTE": "**Note**: Due to limitations, some modules and settings won't take affect straight away. To fix this, please either go to a different guild or channel.",
   "BSI_MODULE_SETTINGS_HIDDEN": "Settings have been hidden as the module is __**disabled**__. Click here to enable it back:",
+  "BSI_MODULE_SETTINGS_MISSING": "Settings aren't available for this module. :smiling_face_with_tear:",
   "BSI_STATUS_EVERYWHERE_TYPING_STATUS_DESC": "Set whether or not the typing status indicator should be displayed in chat avatars, and for who. **Disclaimer**: Enabling this may impact performance on slower hardware. Please proceed with caution.",
   "BSI_MODULE_ENABLE": "Enable Module",
   "BSI_MODULE_DISABLE": "Disable Module"

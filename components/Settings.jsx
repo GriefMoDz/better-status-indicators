@@ -291,6 +291,7 @@ module.exports = class Settings extends React.PureComponent {
           description={mod.description || 'No description given.'}
           icon={mod.icon ? (props) => React.createElement(Icon, { name: mod.icon, ...props }) : null}
           settings={mod.settings || []}
+          main={this.props.main}
           {...settingsProps}
         />;
       })}

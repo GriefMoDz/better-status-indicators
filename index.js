@@ -53,7 +53,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     this.AnimatedAvatarStatus = null;
     this.classes = {
       ...getModule([ 'wrapper', 'avatar' ], false),
-      disableFlex: getModule([ 'disableFlex' ], false).disableFlex
+      avatarWrapper: getModule([ 'avatarHint', 'avatarWrapper' ], false).avatarWrapper
     };
   }
 
@@ -71,6 +71,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
   async startPlugin () {
     this.loadStylesheet('./style.scss');
+
     powercord.api.i18n.loadAllStrings(i18n);
     powercord.api.settings.registerSettings('better-status-indicators', {
       category: 'better-status-indicators',
@@ -106,18 +107,18 @@ module.exports = class BetterStatusIndicators extends Plugin {
       setTimeout(() => window.DiscordNative.gpuSettings.setEnableHardwareAcceleration(enable), 1e3);
     };
 
+    /* Module Loader */
     for (const modId of modules.keys()) {
       const mod = await modules.load(modId);
       const disabledModules = getSetting('disabledModules', [ 'statusEverywhere' ]);
 
       if (!disabledModules.includes(modId)) {
-        mod.startModule();
+        mod.startModule(this);
       }
     }
 
-    const statusStore = await getModule([ 'isMobileOnline' ]);
-
     /* Mobile Status Indicator */
+    const statusStore = await getModule([ 'isMobileOnline' ]);
     this.inject('bsi-mobile-status-online', statusStore, 'isMobileOnline', function ([ userId ], res) {
       if (getSetting('mobileDisabled', false)) {
         return false;
@@ -239,15 +240,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
       res = res.type(originalProps);
 
-      const { isMobile, defaultStatus, status, size, streaming, style, className } = originalProps;
-      res.props.children = (props) => React.createElement('div', Object.assign({}, props, {
-        className: [ this.classes.disableFlex, className ].filter(Boolean).join(' '),
-        style
-      }), React.createElement(StatusComponent, {
-        isMobile,
-        status: streaming ? statusModule.StatusTypes.STREAMING : status || defaultStatus,
-        size
-      }));
+      const tooltipChildren = res.props.children(originalProps);
+      tooltipChildren.props.children.type = StatusComponent;
 
       return res;
     });
@@ -264,12 +258,12 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     const userStore = await getModule([ 'getCurrentUser' ]);
 
-    this.inject('bsi-mobile-status-default-mask', avatarModule, 'default', (args, res) => {
-      if (!args[0].status) {
+    this.inject('bsi-mobile-status-default-mask', avatarModule, 'default', ([ props ], res) => {
+      if (!props.status) {
         return res;
       }
 
-      const { size, status, isMobile, isTyping } = args[0];
+      const { size, status, isMobile, isTyping } = props;
       const foreignObject = findInReactTree(res, n => n?.type === 'foreignObject');
 
       if (isMobile && !isTyping) {
@@ -295,12 +289,12 @@ module.exports = class BetterStatusIndicators extends Plugin {
       return res;
     });
 
-    this.inject('bsi-mobile-status-animated-mask', avatarModule.AnimatedAvatar, 'type', (args, res) => {
+    this.inject('bsi-mobile-status-animated-mask', avatarModule.AnimatedAvatar, 'type', ([ props ], res) => {
       if (!this.AnimatedAvatarStatus && res.props.fromStatus) {
         this.AnimatedAvatarStatus = res.type;
       }
 
-      if (this.AnimatedAvatarStatus && args[0].status !== 'online' && args[0].isMobile && !args[0].isTyping) {
+      if (this.AnimatedAvatarStatus && props.status !== 'online' && props.isMobile && !props.isTyping) {
         res.type = (props) => React.createElement(AnimatedAvatarStatus, {
           ...props,
           component: this.AnimatedAvatarStatus
@@ -319,6 +313,36 @@ module.exports = class BetterStatusIndicators extends Plugin {
     }, true);
 
     avatarModule.default.Sizes = avatarModule.Sizes;
+
+    /* Avatar Status Indicator - Hardware Acceleration Disabled: Fixes */
+    if (!this.hardwareAccelerationIsEnabled) {
+      const Avatar = avatarModule.default;
+      const UserProfileBody = await this._getUserProfileBody();
+      this.inject('bsi-user-profile-avatar-status', UserProfileBody.prototype, 'renderHeader', (_, res) => {
+        if (Array.isArray(res.props?.children) && res.props.children[0]) {
+          res.props.children[0].type = Avatar;
+        }
+
+        return res;
+      });
+
+      const UserPopout = await this._getUserPopout();
+      this.inject('bsi-user-popout-avatar-status', UserPopout.prototype, 'renderHeader', (_, res) => {
+        const avatarContainer = findInReactTree(res, n => n?.props?.className.includes(this.classes.avatarWrapper));
+        if (avatarContainer) {
+          avatarContainer.props.children[0].type = Avatar;
+        }
+
+        return res;
+      });
+
+      const PrivateChannel = await getModuleByDisplayName('PrivateChannel');
+      inject('bsi-user-dm-avatar-status', PrivateChannel.prototype, 'renderAvatar', (_, res) => {
+        res.type = Avatar;
+
+        return res;
+      });
+    }
 
     /* Status Indicators */
     const ConnectedStatusIcon = this.settings.connectStore(StatusIcon);
@@ -397,6 +421,41 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     const { container } = await getModule([ 'container', 'base' ]);
     await waitFor(`.${container}`).then(this.handleRefreshIcons);
+  }
+
+  async _getUserPopout () {
+    const ConnectedUserPopout = await getModuleByDisplayName('ConnectedUserPopout');
+
+    const owo = React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentDispatcher.current;
+    const ogUseMemo = owo.useMemo;
+    const ogUseState = owo.useState;
+    const ogUseEffect = owo.useEffect;
+    const ogUseLayoutEffect = owo.useLayoutEffect;
+    const ogUseRef = owo.useRef;
+
+    owo.useMemo = (fn) => fn();
+    owo.useState = (value) => [ value, () => void 0 ];
+    owo.useEffect = () => null;
+    owo.useLayoutEffect = () => null;
+    owo.useRef = () => ({});
+
+    const res = new ConnectedUserPopout({ user: { isNonUserBot: () => void 0 } }).type;
+
+    owo.useMemo = ogUseMemo;
+    owo.useState = ogUseState;
+    owo.useEffect = ogUseEffect;
+    owo.useLayoutEffect = ogUseLayoutEffect;
+    owo.useRef = ogUseRef;
+
+    return res;
+  }
+
+  async _getUserProfileBody () {
+    const UserProfile = (await getModuleByDisplayName('UserProfile')).prototype.render().type
+      .prototype.render.call({ memoizedGetStateFromStores: () => null }).type.render().type
+      .prototype.render.call({ props: { forwardedRef: null } }).type;
+
+    return UserProfile;
   }
 
   _refreshStatusVariables (mount) {
@@ -510,9 +569,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
   }
 
   inject (...args) {
-    injectionIds.push(args[0]);
-
-    return inject(...args);
+    return (injectionIds.push(args[0]), inject(...args));
   }
 
   pluginWillUnload () {

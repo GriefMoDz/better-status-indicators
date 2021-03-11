@@ -76,12 +76,8 @@ module.exports = {
     }
   },
 
-  get currentUserId () {
-    return window.DiscordNative.crashReporter.getMetadata().user_id;
-  },
-
-  async startModule () {
-    const { getSetting } = powercord.api.settings._fluxProps('better-status-indicators');
+  async startModule (main) {
+    const { getSetting } = powercord.api.settings._fluxProps(main.entityID);
 
     const avatarModule = await getModule([ 'AnimatedAvatar' ]);
     const statusStore = await getModule([ 'isMobileOnline' ]);
@@ -90,8 +86,11 @@ module.exports = {
 
     const { useSubscribeGuildMembers } = await getModule([ 'useSubscribeGuildMembers' ]);
 
-    const Avatar = avatarModule.default;
-    inject('bsi-module-status-everywhere-avatar', avatarModule, 'default', ([ props ], res) => {
+    const Avatar = main.hardwareAccelerationIsEnabled ? avatarModule.AnimatedAvatar : avatarModule.default;
+    const proposedAvatarModule = main.hardwareAccelerationIsEnabled ? avatarModule.AnimatedAvatar : avatarModule;
+    const proposedAvatarMethod = main.hardwareAccelerationIsEnabled ? 'type' : 'default';
+
+    inject('bsi-module-status-everywhere-avatar', proposedAvatarModule, proposedAvatarMethod, ([ props ], res) => {
       if (props.status || props.size === 'SIZE_16' || props.size === 'SIZE_100') {
         return res;
       }
@@ -105,7 +104,7 @@ module.exports = {
       const getMobileStatusState = () => {
         const mobileStatus = getSetting('se-mobileStatus', 'others');
 
-        return mobileStatus === 'self+others' ? true : mobileStatus === 'others' ? userId !== this.currentUserId : false;
+        return mobileStatus === 'self+others' ? true : mobileStatus === 'others' ? userId !== main.currentUserId : false;
       };
 
       const { size } = props;
@@ -152,13 +151,13 @@ module.exports = {
       const { message } = props;
       const defaultProps = {
         userId: message.author.id,
-        size: Avatar.Sizes.SIZE_40
+        size: avatarModule.Sizes.SIZE_40
       };
 
       const getTypingStatusState = () => {
         const typingStatus = getSetting('se-typingStatus', 'hidden');
 
-        return typingStatus === 'self+others' ? true : typingStatus === 'others' ? defaultProps.userId !== this.currentUserId : false;
+        return typingStatus === 'self+others' ? true : typingStatus === 'others' ? defaultProps.userId !== main.currentUserId : false;
       };
 
       const ConnectedAvatar = Flux.connectStores([ typingStore, powercord.api.settings.store ], () => ({

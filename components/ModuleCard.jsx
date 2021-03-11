@@ -41,9 +41,10 @@ const FormDivider = getModuleByDisplayName('FormDivider', false);
 const classes = getModule([ 'card', 'pulseBorder' ], false);
 
 class ModuleCard extends React.PureComponent {
-  constructor () {
-    super();
+  constructor (props) {
+    super(props);
 
+    this.main = props.main;
     this.parser = getModule([ 'parse', 'parseTopic' ], false);
     this.state = {
       expanded: false
@@ -56,7 +57,7 @@ class ModuleCard extends React.PureComponent {
     const moduleId = this.props.id;
     const disabledModules = getSetting('disabledModules', [ 'statusEverywhere' ]);
 
-    (state ? modules.availableModules[moduleId].startModule() : modules.unload(moduleId)).then(() => {
+    (state ? modules.availableModules[moduleId].startModule(this.main) : modules.unload(moduleId)).then(() => {
       if (state) {
         disabledModules.splice(disabledModules.indexOf(moduleId), 1);
       } else {
@@ -79,6 +80,20 @@ class ModuleCard extends React.PureComponent {
     // eslint-disable-next-line no-empty-pattern
     const { getSetting, toggleSetting, updateSetting } = this.props;
 
+    const settings = Object.keys(this.props.settings);
+
+    if (settings.length === 0) {
+      const buttonColor = disabled ? 'GREEN' : 'RED';
+
+      return <div>
+        <FormDivider className={classes.topDivider} style={{ marginBottom: 0 }} />
+        <Flex style={{ padding: '5px 0' }}>
+          <Text style={{ padding: 10 }}>{this.parser.parse(Messages.BSI_MODULE_SETTINGS_MISSING)}</Text>
+          <Button style={{ alignSelf: 'center' }} size={Button.Sizes.SMALL} color={Button.Colors[buttonColor]} look={Button.Looks.OUTLINED} onClick={() => this.handleModuleState(disabled)}>{Messages[`BSI_MODULE_${disabled ? 'ENABLE' : 'DISABLE'}`]}</Button>
+        </Flex>
+      </div>;
+    }
+
     if (disabled) {
       return <div>
         <FormDivider className={classes.topDivider} style={{ marginBottom: 0 }} />
@@ -90,7 +105,6 @@ class ModuleCard extends React.PureComponent {
     }
 
     const elements = [];
-    const settings = Object.keys(this.props.settings);
 
     settings.forEach(key => {
       const setting = this.props.settings[key];
@@ -114,12 +128,12 @@ class ModuleCard extends React.PureComponent {
 
     return <div className={classes.body}>
       <FormDivider className={classes.topDivider} />
-      <Flex>
+      {elements.length > 0 && <Flex>
         <Flex.Child>{elements}</Flex.Child>
-      </Flex>
+      </Flex>}
       <Flex direction={Flex.Direction.VERTICAL}>
         <Flex>
-          <Button style={{ marginLeft: 'auto' }} size={Button.Sizes.SMALL} color={Button.Colors.RED} look={Button.Looks.OUTLINED} onClick={() => this.handleModuleState(false)}>{Messages.BSI_MODULE_DISABLE}</Button>
+          <Button style={{ marginLeft: elements.length > 0 ? 'auto' : '' }} size={Button.Sizes.SMALL} color={Button.Colors.RED} look={Button.Looks.OUTLINED} onClick={() => this.handleModuleState(false)}>{Messages.BSI_MODULE_DISABLE}</Button>
         </Flex>
       </Flex>
     </div>;
