@@ -40,12 +40,12 @@ const statusModule = getModule([ 'getStatusMask' ], false);
 const config = { tension: 600, friction: 70 };
 
 const AnimatedStatus = React.memo(props => {
-  const { status, className } = props;
+  const { status, className, style } = props;
   const { Spring, Basic } = ReactHooks;
 
   const isMobile = props.isMobile !== void 0 && props.isMobile;
-  const color = props.color ?? statusModule.getStatusColor(status);
-  const size = props.size ?? 8;
+  const color = props.color ? props.color : statusModule.getStatusColor(status);
+  const size = props.size ? props.size : 8;
 
   const statusValues = React.useMemo(() => statusModule.getStatusValues({ size, status, isMobile }), [ size, status, isMobile ]);
   const statusDimensions = Spring.useSpring({ config, to: statusValues });
@@ -61,12 +61,13 @@ const AnimatedStatus = React.memo(props => {
     delete statusMask.props.children[1];
   }
 
-  return React.createElement('svg', Object.assign({}, props, {
+  return React.createElement('svg', {
     width: size,
     height: statusHeight,
     viewBox: `0 0 ${size} ${statusHeight}`,
-    className: [ classes.mask, className ].filter(Boolean).join(' ')
-  }), void 0, statusMask, React.createElement(Spring.animated.rect, {
+    className: [ classes.mask, className ].filter(Boolean).join(' '),
+    style
+  }, statusMask, React.createElement(Spring.animated.rect, {
     x: 0,
     y: 0,
     width: size,

@@ -91,23 +91,13 @@ module.exports = {
     const proposedAvatarMethod = main.hardwareAccelerationIsEnabled ? 'type' : 'default';
 
     inject('bsi-module-status-everywhere-avatar', proposedAvatarModule, proposedAvatarMethod, ([ props ], res) => {
-      if (props.status || props.size === 'SIZE_16' || props.size === 'SIZE_100') {
-        return res;
-      }
-
-      const userId = props.userId || props.src.split('/')[4];
-      const user = userStore.getUser(userId);
-      if (!user || (user && user.isNonUserBot())) {
-        return res;
-      }
-
       const getMobileStatusState = () => {
         const mobileStatus = getSetting('se-mobileStatus', 'others');
 
         return mobileStatus === 'self+others' ? true : mobileStatus === 'others' ? userId !== main.currentUserId : false;
       };
 
-      const { size } = props;
+      const userId = props.userId || props.src.split('/')[4];
       const ConnectedAvatar = Flux.connectStores([ statusStore, powercord.api.settings.store ], () => ({
         status: statusStore.getStatus(userId),
         isMobile: getMobileStatusState() && statusStore.isMobileOnline(userId)
@@ -122,6 +112,17 @@ module.exports = {
       if (guildId && guildMember) {
         useSubscribeGuildMembers(guildMember);
       }
+
+      if (props.status || props.size === 'SIZE_16' || props.size === 'SIZE_100') {
+        return res;
+      }
+
+      const user = userStore.getUser(userId);
+      if (!user || (user && user.isNonUserBot())) {
+        return res;
+      }
+
+      const { size } = props;
 
       return React.createElement(ConnectedAvatar, {
         ...props,
