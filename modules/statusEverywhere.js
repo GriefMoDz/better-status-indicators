@@ -92,16 +92,6 @@ module.exports = {
 
     inject('bsi-module-status-everywhere-avatar', proposedAvatarModule, proposedAvatarMethod, ([ props ], res) => {
       const userId = props.userId || props.src.split('/')[4];
-      const getMobileStatusState = () => {
-        const mobileStatus = getSetting('se-mobileStatus', 'others');
-
-        return mobileStatus === 'self+others' ? true : mobileStatus === 'others' ? userId !== main.currentUserId : false;
-      };
-
-      const ConnectedAvatar = Flux.connectStores([ statusStore, powercord.api.settings.store ], () => ({
-        status: statusStore.getStatus(userId),
-        isMobile: getMobileStatusState() && statusStore.isMobileOnline(userId)
-      }))(Avatar);
 
       const guildId = guildStore.getGuildId();
       const guildMember = React.useMemo(() => {
@@ -109,9 +99,7 @@ module.exports = {
         return guildId !== null ? (members[guildId] = [ userId ], members) : {};
       }, [ guildId, userId ]);
 
-      if (guildId && guildMember) {
-        useSubscribeGuildMembers(guildMember);
-      }
+      useSubscribeGuildMembers(guildMember);
 
       if (props.status || props.size === 'SIZE_16' || props.size === 'SIZE_100') {
         return res;
@@ -123,6 +111,17 @@ module.exports = {
       }
 
       const { size } = props;
+
+      const getMobileStatusState = () => {
+        const mobileStatus = getSetting('se-mobileStatus', 'others');
+
+        return mobileStatus === 'self+others' ? true : mobileStatus === 'others' ? userId !== main.currentUserId : false;
+      };
+
+      const ConnectedAvatar = Flux.connectStores([ statusStore, powercord.api.settings.store ], () => ({
+        status: statusStore.getStatus(userId),
+        isMobile: getMobileStatusState() && statusStore.isMobileOnline(userId)
+      }))(Avatar);
 
       return React.createElement(ConnectedAvatar, {
         ...props,
