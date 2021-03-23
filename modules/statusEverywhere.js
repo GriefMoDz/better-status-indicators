@@ -84,7 +84,7 @@ module.exports = {
     const userStore = await getModule([ 'getCurrentUser' ]);
     const guildStore = await getModule([ 'getGuildId' ]);
 
-    const { useSubscribeGuildMembers } = await getModule([ 'useSubscribeGuildMembers' ]);
+    const useSubscribeGuildMembers = (await getModule([ 'useSubscribeGuildMembers' ])).default;
 
     const Avatar = main.hardwareAccelerationIsEnabled ? avatarModule.AnimatedAvatar : avatarModule.default;
     const proposedAvatarModule = main.hardwareAccelerationIsEnabled ? avatarModule.AnimatedAvatar : avatarModule;
@@ -92,14 +92,6 @@ module.exports = {
 
     inject('bsi-module-status-everywhere-avatar', proposedAvatarModule, proposedAvatarMethod, ([ props ], res) => {
       const userId = props.userId || props.src.split('/')[4];
-
-      const guildId = guildStore.getGuildId();
-      const guildMember = React.useMemo(() => {
-        const members = {};
-        return guildId !== null ? (members[guildId] = [ userId ], members) : {};
-      }, [ guildId, userId ]);
-
-      useSubscribeGuildMembers(guildMember);
 
       if (props.status || props.size === 'SIZE_16' || props.size === 'SIZE_100') {
         return res;
@@ -121,7 +113,12 @@ module.exports = {
       const ConnectedAvatar = Flux.connectStores([ statusStore, powercord.api.settings.store ], () => ({
         status: statusStore.getStatus(userId),
         isMobile: getMobileStatusState() && statusStore.isMobileOnline(userId)
-      }))(Avatar);
+      }))(useSubscribeGuildMembers(() => {
+        const members = {};
+        const guildId = guildStore.getGuildId();
+
+        return guildId ? (members[guildId] = [ userId ], members) : {};
+      })(Avatar));
 
       return React.createElement(ConnectedAvatar, {
         ...props,

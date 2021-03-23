@@ -420,7 +420,12 @@ module.exports = class BetterStatusIndicators extends Plugin {
   }
 
   async _getUserPopout () {
+    const userStore = await getModule([ 'getCurrentUser' ]);
     const ConnectedUserPopout = await getModuleByDisplayName('ConnectedUserPopout');
+
+    const ogGetCurrentUser = userStore.getCurrentUser;
+
+    userStore.getCurrentUser = () => ({ id: 0 });
 
     const owo = React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentDispatcher.current;
     const ogUseMemo = owo.useMemo;
@@ -442,6 +447,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
     owo.useEffect = ogUseEffect;
     owo.useLayoutEffect = ogUseLayoutEffect;
     owo.useRef = ogUseRef;
+
+    userStore.getCurrentUser = ogGetCurrentUser;
 
     return res;
   }
