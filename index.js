@@ -261,6 +261,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     this.inject('bsi-mobile-status-default-mask', avatarModule, 'default', ([ props ], res) => {
       const { size, status, isMobile, isTyping } = props;
       const foreignObject = findInReactTree(res, n => n?.type === 'foreignObject');
+      foreignObject.props.children.props.style = {width: "40px"};
 
       if (status && isMobile && !isTyping) {
         res.props['data-bsi-status'] = status;
