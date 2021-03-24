@@ -189,9 +189,21 @@ $status-colors: (
   "streaming": #643da7
 );
 
+.message-2qnXI6 .wrapper-3t9DeA foreignObject[mask*='mobile'][width='40'] img {
+  width: 40px;
+}
+
 @each $status, $color in $status-colors {
-  .wrapper-3t9DeA[data-bsi-status='#{$status}'] foreignObject[mask*='mobile']:after {
-    background: var(--rs-#{$status}-color, #{$color}) !important;
+  $status-color: var(--rs-#{$status}-color, #{$color}) !important;
+
+  .wrapper-3t9DeA[data-bsi-status='#{$status}'] {
+    foreignObject[mask*='mobile']:after {
+      background: $status-color;
+    }
+
+    rect[mask*='mobile'] {
+      stroke: $status-color;
+    }
   }
 }
 
