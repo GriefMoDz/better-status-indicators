@@ -118,7 +118,7 @@
   }
 }
 
-$statuses: (
+$avatar-statuses: (
   "online",
   "idle",
   "dnd",
@@ -126,7 +126,7 @@ $statuses: (
 );
 
 @mixin avatarStatusCutout ($width: 32, $height: 10px, $x: 22, $y: 22, $avatar-status: false, $mask: avatar-default) {
-  @each $status in $statuses {
+  @each $status in $avatar-statuses {
     .wrapper-3t9DeA[data-bsi-mobile-avatar-status='#{$avatar-status}'][data-bsi-status='#{$status}'] {
       foreignObject[width='#{$width}'] {
         &:not([mask*='#{$mask}']) {
@@ -157,6 +157,35 @@ $statuses: (
 @include avatarStatusCutout();
 @include avatarStatusCutout(40, 12px, 28, 28);
 @include avatarStatusCutout(80, 16px, 60, 60);
+
+$statuses: (
+  "online",
+  "idle",
+  "dnd",
+  "offline",
+  "invisible",
+  "streaming"
+);
+
+.bsi-theme-variables {
+  #bsi-status-picker .item-1tOPte:nth-last-of-type(4) .status-1AY8sU, #status-picker-invisible .status-1AY8sU {
+    background-color: var(--bsi-invisible-color) !important;
+  }
+}
+
+@each $status in $statuses {
+  .bsi-theme-variables {
+    .wrapper-3t9DeA {
+      &[data-bsi-status=#{$status}] rect[mask='url(#svg-mask-status-online-mobile)'], rect[mask='url(#svg-mask-status-#{$status})'] {
+        fill: var(--bsi-#{$status}-color) !important;
+      }
+    }
+
+    foreignObject[mask='url(#svg-mask-status-#{$status})'] div {
+      background-color: var(--bsi-#{$status}-color) !important;
+    }
+  }
+}
 
 /** Plugin Compatibility **/
 
@@ -194,15 +223,11 @@ $status-colors: (
 }
 
 @each $status, $color in $status-colors {
-  $status-color: var(--rs-#{$status}-color, #{$color}) !important;
+  $status-color: var(--rs-#{$status}-color, $color) !important;
 
   .wrapper-3t9DeA[data-bsi-status='#{$status}'] {
     foreignObject[mask*='mobile']:after {
       background: $status-color;
-    }
-
-    rect[mask*='mobile'] {
-      stroke: $status-color;
     }
   }
 }

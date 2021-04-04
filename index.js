@@ -39,10 +39,8 @@ const AnimatedStatus = require('./components/AnimatedStatus');
 const ClientStatuses = require('./components/ClientStatuses');
 const StatusIcon = require('./components/StatusIcon');
 const Settings = require('./components/Settings');
-// const WebMask = require('./components/WebMask');
 const i18n = require('./i18n');
 
-const injectionIds = [];
 const modules = require('./modules');
 const clientStatusStore = require('./stores/clientStatusStore');
 
@@ -51,10 +49,15 @@ module.exports = class BetterStatusIndicators extends Plugin {
     super();
 
     this.AnimatedAvatarStatus = null;
+    this.injectionIds = [];
     this.classes = {
       ...getModule([ 'wrapper', 'avatar' ], false),
       avatarWrapper: getModule([ 'avatarHint', 'avatarWrapper' ], false).avatarWrapper
     };
+  }
+
+  get color () {
+    return '#43b581';
   }
 
   get clientStatusStore () {
@@ -84,11 +87,9 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     const { getSetting, toggleSetting } = powercord.api.settings._fluxProps(this.entityID);
 
-    const _this = this;
-
-    /* CSS Status Variables */
+    /* Theme Status Variables */
     if (getSetting('themeVariables', false)) {
-      this._refreshStatusVariables(true);
+      this._refreshStatusVariables();
     }
 
     /* Refresh Status Icons on Locale Change */
@@ -118,6 +119,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
     }
 
     /* Mobile Status Indicator */
+    const _this = this;
+
     const statusStore = await getModule([ 'isMobileOnline' ]);
     this.inject('bsi-mobile-status-online', statusStore, 'isMobileOnline', function ([ userId ], res) {
       if (getSetting('mobileDisabled', false)) {
@@ -188,31 +191,6 @@ module.exports = class BetterStatusIndicators extends Plugin {
     }, true);
 
     const Mask = await getModule([ 'MaskLibrary' ]);
-    /*
-     * const FocusRingScope = await getModule(m => m.default?.displayName === 'FocusRingScope');
-     * this.inject('bsi-web-status-mask', FocusRingScope, 'default', (args) => {
-     * if (args[0].containerRef?.current !== document.body) {
-     *  return args;
-     * }
-     *
-     * const MaskLibrary = args[0].children[0];
-     * const originalType = MaskLibrary?.type?.type;
-     *
-     * if (originalType) {
-     *  MaskLibrary.type = (props) => {
-     *    const res = originalType(props);
-     *    res.props.children.push(React.createElement(WebMask));
-     *
-     *    return res;
-     *  };
-     * }
-     *
-     * return args;
-     * }, true);
-     *
-     * FocusRingScope.default.displayName = 'FocusRingScope';
-     */
-
     const statusColors = this._getDefaultStatusColors();
     this.inject('bsi-mobile-status', statusModule, 'Status', ([ { isMobile, status, size, color } ], res) => {
       const statusStyle = res.props.children.props.style;
@@ -350,7 +328,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       const usernameHeader = findInReactTree(res, n => Array.isArray(n?.props?.children) && n.props.children.find(c => c?.props?.message));
 
       if (usernameHeader?.props?.children && usernameHeader?.props?.children[0] && usernameHeader?.props?.children[0].props) {
-        usernameHeader.props.children[0].props.__BsiDefaultProps = defaultProps;
+        usernameHeader.props.children[0].props.__bsiDefaultProps = defaultProps;
       }
 
       return res;
@@ -361,7 +339,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       (m?.__powercordOriginal_default || m.default).toString().includes('withMentionPrefix')
     );
 
-    this.inject('bsi-message-header-client-status2', UsernameHeader, 'default', ([ { __BsiDefaultProps: defaultProps } ], res) => {
+    this.inject('bsi-message-header-client-status2', UsernameHeader, 'default', ([ { __bsiDefaultProps: defaultProps } ], res) => {
       res.props.children.splice(2, 0, [
         React.createElement(ConnectedStatusIcon, defaultProps),
         React.createElement(ConnectedClientStatuses, defaultProps)
@@ -383,9 +361,18 @@ module.exports = class BetterStatusIndicators extends Plugin {
       return res;
     });
 
+    const DiscordTag = await getModule(m => m.default?.displayName === 'DiscordTag');
+    this.inject('bsi-name-tag-client-status1', DiscordTag, 'default', ([ { user } ], res) => {
+      res.props.user = user;
+
+      return res;
+    });
+
+    DiscordTag.default.displayName = 'DiscordTag';
+
     const NameTag = await getModule(m => m.default?.displayName === 'NameTag');
-    this.inject('bsi-name-tag-client-status', NameTag, 'default', ([ props ], res) => {
-      const user = userStore.findByTag(props.name, props.discriminator);
+    this.inject('bsi-name-tag-client-status2', NameTag, 'default', ([ props ], res) => {
+      const user = props.user || userStore.findByTag(props.name, props.discriminator);
       const defaultProps = { user, location: 'user-popout-modal' };
 
       res.props.children.splice(2, 0, [
@@ -461,24 +448,30 @@ module.exports = class BetterStatusIndicators extends Plugin {
     return UserProfile;
   }
 
-  _refreshStatusVariables (mount) {
-    if (mount) {
-      return this.loadStylesheet('./variables.scss');
-    }
+  _refreshStatusVariables (unmount = false) {
+    const currentStatusVariables = document.querySelector(`#${this.entityID}-status-variables`);
 
-    for (const id in this.styles) {
-      const stylesheet = this.styles[id];
-      const filename = stylesheet.compiler.file;
+    if (!unmount) {
+      const statuses = Object.values(StatusTypes).filter(status => status !== 'unknown');
 
-      if (filename.endsWith('variables.scss')) {
-        stylesheet.compiler.on('src-update', stylesheet.compile);
-        stylesheet.compiler.disableWatcher();
+      const statusVariables = document.createElement('style');
+      statusVariables.setAttribute('id', `${this.entityID}-status-variables`);
+      statusVariables.textContent = `:root {\n\t${statuses.map(status => (
+        `--bsi-${status}-color: ${this.settings.get(`${status}StatusColor`, null)};`
+      )).join('\n\t')}\n}\n`;
 
-        document.getElementById(`style-${this.entityID}-${id}`).remove();
+      document.body.classList.add('bsi-theme-variables');
 
-        delete this.styles[id];
+      if (currentStatusVariables) {
+        return currentStatusVariables.replaceWith(statusVariables);
       }
+
+      return document.head.appendChild(statusVariables);
     }
+
+    currentStatusVariables.textContent = '';
+
+    document.body.classList.remove('bsi-theme-variables');
   }
 
   _refreshStatusIcons (initialize = false, restore = false) {
@@ -566,17 +559,19 @@ module.exports = class BetterStatusIndicators extends Plugin {
       UNKNOWN: 'STATUS_GREY'
     };
 
-    return Object.assign({}, ...Object.keys(StatusTypes).map(status => ({
-      [status]: Colors[statusColors[status]]
-    })));
+    Object.keys(StatusTypes).forEach(status => statusColors[status] = Colors[statusColors[status]]);
+
+    return statusColors;
   }
 
   inject (...args) {
-    return (injectionIds.push(args[0]), inject(...args));
+    this.injectionIds.push(args[0]);
+
+    return inject(...args);
   }
 
   pluginWillUnload () {
-    injectionIds.forEach(injectionId => uninject(injectionId));
+    this.injectionIds.forEach(id => uninject(id));
 
     powercord.api.settings.unregisterSettings('better-status-indicators');
 

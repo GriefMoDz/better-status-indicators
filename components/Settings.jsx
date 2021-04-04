@@ -167,7 +167,7 @@ module.exports = class Settings extends React.PureComponent {
                 buttonColor={getSetting(settingsKey, defaultColor)}
                 buttonIcon='fas fa-palette'
                 onButtonClick={() => this.setState({ activeColorPicker: activeColorPicker === status ? '' : status })}
-                onChange={(value) => updateSetting(settingsKey, value === '' ? defaultColor : value)}
+                onChange={(value) => ((updateSetting(settingsKey, value === '' ? defaultColor : value), this.props.main._refreshStatusVariables()))}
                 defaultValue={getSetting(settingsKey, defaultColor)}
               />;
             })}
@@ -185,7 +185,7 @@ module.exports = class Settings extends React.PureComponent {
       {activeColorPicker && <ColorPickerInput
         default={colorUtils.hex2int(this.statusColors[activeColorPicker.toUpperCase()])}
         value={colorUtils.hex2int(getSetting(`${activeColorPicker}StatusColor`, '000000'))}
-        onChange={(value) => updateSetting(`${activeColorPicker}StatusColor`, colorUtils.int2hex(value))}
+        onChange={(value) => ((updateSetting(`${activeColorPicker}StatusColor`, colorUtils.int2hex(value)), this.props.main._refreshStatusVariables()))}
       />}
 
       {!activeColorPicker && <Divider/>}
@@ -206,14 +206,14 @@ module.exports = class Settings extends React.PureComponent {
       </RadioGroup>
 
       <SwitchItem
-        note='Adds some variables that are useful for themes (i.e. custom status colors).'
+        note={Messages.BSI_THEME_VARIABLES_DESC}
         value={getSetting('themeVariables', false)}
         onChange={(state) => {
           toggleSetting('themeVariables', false);
-          this.props.main._refreshStatusVariables(state);
+          this.props.main._refreshStatusVariables(!state);
         }}
       >
-        Theme Variables
+        {Messages.BSI_THEME_VARIABLES}
       </SwitchItem>
     </>;
   }

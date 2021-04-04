@@ -17,6 +17,8 @@
   "BSI_STATUS_DISPLAY_SOLID_OPT": "Solid: Simple and minimalistic.",
   "BSI_STATUS_DISPLAY_DEFAULT_OPT": "Default: Modern, beautiful, and easy on your eyes.",
   "BSI_STATUS_DISPLAY_CLASSIC_OPT": "Classic: Tried and true color-blind mode.",
+  "BSI_THEME_VARIABLES_DESC": "Adds some variables that are useful for themes (i.e. predefined status colors).",
+  "BSI_THEME_VARIABLES": "Theme Variables",
   "BSI_TRUE_STATUS_DESC": "Displays all statuses with their true color when a user is performing an activity.",
   "BSI_TRUE_STATUS": "True Status Color",
   "BSI_CLIENT_DISPLAY_TITLE": "{clientCapitalized} Status Display",
