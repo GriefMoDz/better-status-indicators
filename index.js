@@ -457,7 +457,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       const statusVariables = document.createElement('style');
       statusVariables.setAttribute('id', `${this.entityID}-status-variables`);
       statusVariables.textContent = `:root {\n\t${statuses.map(status => (
-        `--bsi-${status}-color: ${this.settings.get(`${status}StatusColor`, null)};`
+        `--bsi-${status}-color: ${this.settings.get(`${status}StatusColor`, this._getDefaultStatusColors()[status.toUpperCase()])};`
       )).join('\n\t')}\n}\n`;
 
       document.body.classList.add('bsi-theme-variables');

@@ -168,20 +168,26 @@ $statuses: (
 );
 
 .bsi-theme-variables {
-  #bsi-status-picker .item-1tOPte:nth-last-of-type(4) .status-1AY8sU, #status-picker-invisible .status-1AY8sU {
+  #bsi-status-picker .item-1tOPte:not(.focused-3afm-j):nth-last-of-type(4) .status-1AY8sU,
+  #status-picker-invisible .status-1AY8sU {
     background-color: var(--bsi-invisible-color) !important;
+  }
+
+  .avatarWrapper-2yR4wp .wrapper-3t9DeA rect[mask='url(#svg-mask-status-offline)'] {
+    fill: var(--bsi-invisible-color) !important;
   }
 }
 
 @each $status in $statuses {
   .bsi-theme-variables {
     .wrapper-3t9DeA {
-      &[data-bsi-status=#{$status}] rect[mask='url(#svg-mask-status-online-mobile)'], rect[mask='url(#svg-mask-status-#{$status})'] {
+      &[data-bsi-status=#{$status}] rect[mask='url(#svg-mask-status-online-mobile)'],
+      rect[mask='url(#svg-mask-status-#{$status})']:not([fill='#ffffff']) {
         fill: var(--bsi-#{$status}-color) !important;
       }
     }
 
-    foreignObject[mask='url(#svg-mask-status-#{$status})'] div {
+    foreignObject[mask='url(#svg-mask-status-#{$status})'] div:not([style*='background-color: currentcolor;']) {
       background-color: var(--bsi-#{$status}-color) !important;
     }
   }
