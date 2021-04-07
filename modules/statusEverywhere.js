@@ -143,7 +143,11 @@ module.exports = {
     });
 
     const typingStore = await getModule([ 'isTyping' ]);
-    const MessageHeader = await getModule([ 'MessageTimestamp' ]);
+    const MessageHeader = getModule([ 'MessageTimestamp' ], false) || getModule(m => (
+      typeof (m?.__powercordOriginal_default || m.default) === 'function' &&
+      (m?.__powercordOriginal_default || m.default).toString().includes('headerText')
+    ), false);
+
     inject('bsi-module-status-everywhere-chat-avatar', MessageHeader, 'default', ([ props ], res) => {
       const { message } = props;
       const defaultProps = {

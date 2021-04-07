@@ -322,7 +322,11 @@ module.exports = class BetterStatusIndicators extends Plugin {
     const ConnectedStatusIcon = this.settings.connectStore(StatusIcon);
     const ConnectedClientStatuses = this.settings.connectStore(ClientStatuses);
 
-    const MessageHeader = await getModule([ 'MessageTimestamp' ]);
+    const MessageHeader = getModule([ 'MessageTimestamp' ], false) || getModule(m => (
+      typeof (m?.__powercordOriginal_default || m.default) === 'function' &&
+      (m?.__powercordOriginal_default || m.default).toString().includes('headerText')
+    ), false);
+
     this.inject('bsi-message-header-client-status1', MessageHeader, 'default', ([ { message: { author: user } } ], res) => {
       const defaultProps = { user, location: 'message-headers' };
       const usernameHeader = findInReactTree(res, n => Array.isArray(n?.props?.children) && n.props.children.find(c => c?.props?.message));
