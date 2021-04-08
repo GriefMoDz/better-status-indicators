@@ -143,10 +143,10 @@ module.exports = {
     });
 
     const typingStore = await getModule([ 'isTyping' ]);
-    const MessageHeader = getModule([ 'MessageTimestamp' ], false) || getModule(m => (
-      typeof (m?.__powercordOriginal_default || m.default) === 'function' &&
-      (m?.__powercordOriginal_default || m.default).toString().includes('headerText')
-    ), false);
+    const MessageHeader = await getModule(m => {
+      const defaultMethod = m.__powercordOriginal_default ?? m.default;
+      return (typeof defaultMethod === 'function' ? defaultMethod : null)?.toString().includes('showTimestampOnHover');
+    });
 
     inject('bsi-module-status-everywhere-chat-avatar', MessageHeader, 'default', ([ props ], res) => {
       const { message } = props;

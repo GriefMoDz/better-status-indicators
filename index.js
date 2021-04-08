@@ -322,11 +322,12 @@ module.exports = class BetterStatusIndicators extends Plugin {
     const ConnectedStatusIcon = this.settings.connectStore(StatusIcon);
     const ConnectedClientStatuses = this.settings.connectStore(ClientStatuses);
 
-    const MessageHeader = getModule([ 'MessageTimestamp' ], false) || getModule(m => (
-      typeof (m?.__powercordOriginal_default || m.default) === 'function' &&
-      (m?.__powercordOriginal_default || m.default).toString().includes('headerText')
-    ), false);
+    const getDefaultMethodByKeyword = (mdl, keyword) => {
+      const defaultMethod = mdl.__powercordOriginal_default ?? mdl.default;
+      return typeof defaultMethod === 'function' ? defaultMethod.toString().includes(keyword) : null;
+    };
 
+    const MessageHeader = await getModule(m => getDefaultMethodByKeyword(m, 'showTimestampOnHover'));
     this.inject('bsi-message-header-client-status1', MessageHeader, 'default', ([ { message: { author: user } } ], res) => {
       const defaultProps = { user, location: 'message-headers' };
       const usernameHeader = findInReactTree(res, n => Array.isArray(n?.props?.children) && n.props.children.find(c => c?.props?.message));
@@ -338,11 +339,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       return res;
     });
 
-    const UsernameHeader = await getModule(m =>
-      typeof (m?.__powercordOriginal_default || m.default) === 'function' &&
-      (m?.__powercordOriginal_default || m.default).toString().includes('withMentionPrefix')
-    );
-
+    const UsernameHeader = await getModule(m => getDefaultMethodByKeyword(m, 'withMentionPrefix'));
     this.inject('bsi-message-header-client-status2', UsernameHeader, 'default', ([ { __bsiDefaultProps: defaultProps } ], res) => {
       res.props.children.splice(2, 0, [
         React.createElement(ConnectedStatusIcon, defaultProps),
@@ -350,6 +347,21 @@ module.exports = class BetterStatusIndicators extends Plugin {
       ]);
 
       return res;
+    });
+
+    [ 'ChannelMessage', 'InboxMessage' ].forEach(async component => {
+      const mdl = await getModule(m => m.type?.displayName === component);
+      if (mdl) {
+        this.inject(`bsi-message-header-fix-${component}`, mdl, 'type', (_, res) => {
+          if (res.props.childrenHeader) {
+            res.props.childrenHeader.type.type = MessageHeader.default;
+          }
+
+          return res;
+        });
+
+        mdl.type.displayName = component;
+      }
     });
 
     const MemberListItem = await getModuleByDisplayName('MemberListItem');

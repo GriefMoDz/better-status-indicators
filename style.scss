@@ -27,6 +27,10 @@
  */
 
 /** General **/
+.bsi-clientStatuses, .bsi-statusIcon {
+  display: inline-block;
+}
+
 .bsi-clientStatuses svg, .bsi-statusIcon {
   color: var(--channels-default);
   margin-left: 4px;
@@ -42,12 +46,6 @@
     .bsi-clientStatuses, .bsi-statusIcon {
       visibility: visible;
     }
-  }
-}
-
-.message-2qnXI6 {
-  .bsi-clientStatuses, .bsi-statusIcon {
-    display: inline;
   }
 }
 
