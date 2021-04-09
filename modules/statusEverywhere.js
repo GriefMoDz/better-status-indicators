@@ -33,7 +33,7 @@ const { findInReactTree } = require('powercord/util');
 
 module.exports = {
   name: 'Status Everywhere',
-  description: 'Displays user statuses in places where Discord usually doesn\'t even bother.',
+  description: 'Displays user statuses in places where Discord usually doesn\'t even bother to.',
   icon: 'Status',
   settings: {
     'se-typingStatus': {

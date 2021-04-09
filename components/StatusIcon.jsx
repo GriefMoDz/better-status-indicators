@@ -34,7 +34,6 @@ const Flux = getModule([ 'useStateFromStores' ], false);
 const Tooltip = getModuleByDisplayName('Tooltip', false);
 
 const { humanizeStatus } = getModule([ 'humanizeStatus' ], false);
-const { getStatusColor } = getModule([ 'getStatusColor' ], false);
 const { isStreaming } = getModule([ 'isGameActivity', 'renderActivity' ], false);
 const { getId: getCurrentUserId } = getModule([ 'initialize', 'getFingerprint' ], false);
 
@@ -70,6 +69,8 @@ module.exports = React.memo(props => {
   if (!props.user || (props.user.bot && !settings.showOnBots) || (props.user.id === getCurrentUserId() && !settings.showOnSelf)) {
     return null;
   }
+
+  const { getStatusColor } = getModule([ 'getStatusColor' ], false);
 
   const states = Flux.useStateFromStoresObject([ statusStore ], () => ({
     status: props.status || statusStore.getStatus(props.user.id),

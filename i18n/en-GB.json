@@ -1,11 +1,13 @@
 {
   "BSI_CUSTOMIZE": "Customise",
+  "BSI_RESTORE_DEFAULT_COLORS": "Restore Default Colours",
   "BSI_STATUS_COLOR_PICKER": "Status Colour Picker",
-  "BSI_STATUS_COLOR_CHANGE_NOTE": "**Note**: Due to limitations, colour changes won't take affect straight away. To fix this, please either go to a different guild or channel. If you've modified the \"Invisible\" colour, you may need to change your status.",
+  "BSI_STATUS_COLOR_CHANGE_NOTE": "**Note**: Due to limitations, colour changes won't take effect straight away. To fix this, please either go to a different guild or channel. If you've modified the \"Invisible\" colour, you may need to change your status.",
   "BSI_STATUS_DISPLAY_CLASSIC_OPT": "Classic: Tried and true colour-blind mode.",
   "BSI_THEME_VARIABLES_DESC": "Adds some variables that are useful for themes (i.e. predefined status colours).",
+  "BSI_TRUE_STATUS_DESC": "Forces all statuses to their true colour whenever a user is performing an activity.",
   "BSI_TRUE_STATUS": "True Status Colour",
-  "BSI_CLIENT_SWITCH_MATCH_COLOR_DESC": "Fills the {client} status indicator with the corresponding colour of their status.",
+  "BSI_CLIENT_SWITCH_MATCH_COLOR_DESC": "Fills the {client} status indicator with the corresponding colour of the users' status.",
   "BSI_CLIENT_SWITCH_MATCH_COLOR": "Match Status Colour",
-  "BSI_MOBILE_SWITCH_MATCH_COLOR_DESC": "Fills the mobile status indicator with the corresponding colour of their status; requires the mobile \"Avatar Status\" setting to be disabled."
+  "BSI_MOBILE_SWITCH_MATCH_COLOR_DESC": "Fills the mobile status indicator with the corresponding colour of the users' status; requires the mobile \"Avatar Status\" setting to be disabled."
 }

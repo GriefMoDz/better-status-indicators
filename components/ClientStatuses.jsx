@@ -33,7 +33,6 @@ const { Icon } = require('powercord/components');
 const Flux = getModule([ 'useStateFromStores' ], false);
 const Tooltip = getModuleByDisplayName('Tooltip', false);
 
-const { getStatusColor } = getModule([ 'getStatusColor' ], false);
 const { getId: getCurrentUserId } = getModule([ 'initialize', 'getFingerprint' ], false);
 
 const statusStore = getModule([ 'isMobileOnline' ], false);
@@ -85,7 +84,10 @@ function isClientOnline (client, props) {
 
   const states = {
     web: { preserve: true, nonPreserve: !clientStatus.desktop && !clientStatus.mobile },
-    desktop: { preserve: clientStatus.web || clientStatus.mobile, nonPreserve: !clientStatus.web && !clientStatus.mobile },
+    desktop: {
+      preserve: clientStatus.web || clientStatus.mobile || props.getSetting('desktopUniversalStatus', false),
+      nonPreserve: !clientStatus.web && !clientStatus.mobile
+    },
     mobile: { preserve: clientStatus.desktop || clientStatus.web || true, nonPreserve: !clientStatus.web && !clientStatus.desktop }
   };
 
@@ -96,6 +98,8 @@ module.exports = React.memo(props => {
   if (!props.user) {
     return null;
   }
+
+  const { getStatusColor } = getModule([ 'getStatusColor' ], false);
 
   const states = Flux.useStateFromStoresObject([ statusStore ], () => ({
     statusColor: getStatusColor(props.status || statusStore.getStatus(props.user.id)),

@@ -28,7 +28,7 @@
 
 /* eslint-disable object-property-newline */
 const { React, getModule, getModuleByDisplayName, i18n: { Messages } } = require('powercord/webpack');
-const { Divider, Flex, FormTitle, Icon, TabBar, Text, modal: { Confirm } } = require('powercord/components');
+const { Button, Divider, Flex, FormTitle, Icon, Icons, TabBar, Text, modal: { Confirm } } = require('powercord/components');
 const { ColorPickerInput, SwitchItem, RadioGroup } = require('powercord/components/settings');
 const { open: openModal } = require('powercord/modal');
 
@@ -38,6 +38,7 @@ const StatusPickerPreview = require('./StatusPickerPreview');
 const TextInputWithButton = require('./TextInputWithButton');
 
 const colorUtils = getModule([ 'isValidHex' ], false);
+const statusStore = getModule([ 'isMobileOnline' ], false);
 const Breadcrumbs = getModuleByDisplayName('Breadcrumbs', false);
 const breadcrumbClasses = getModule([ 'breadcrumb', 'breadcrumbActive' ], false);
 
@@ -151,13 +152,19 @@ module.exports = class Settings extends React.PureComponent {
     const { activeColorPicker } = this.state;
     const { getSetting, updateSetting, toggleSetting } = this.props;
 
+    const statuses = [ 'online', 'idle', 'dnd', 'offline', 'invisible', 'streaming' ];
+    const hasModifiedColor = statuses.some(status => {
+      const defaultColor = this.statusColors[status.toUpperCase()];
+      return getSetting(`${status}StatusColor`, defaultColor) !== defaultColor;
+    });
+
     return <>
       <Flex direction={Flex.Direction.VERTICAL}>
         <FormTitle>{Messages.BSI_STATUS_COLOR_PICKER} / {Messages.FORM_LABEL_VIDEO_PREVIEW}</FormTitle>
         <Flex>
           <Flex.Child basis='70%'>
             <></> {/* Workaround for constructing a flex child */}
-            {[ 'online', 'idle', 'dnd', 'offline', 'invisible', 'streaming' ].map(status => {
+            {statuses.map(status => {
               const defaultColor = this.statusColors[status.toUpperCase()];
               const settingsKey = `${status}StatusColor`;
 
@@ -171,6 +178,18 @@ module.exports = class Settings extends React.PureComponent {
                 defaultValue={getSetting(settingsKey, defaultColor)}
               />;
             })}
+
+            {hasModifiedColor && <Button
+              size={Button.Sizes.MIN}
+              color={Button.Colors.BRAND}
+              className='bsi-reset-colors-button'
+              onClick={() => statuses.forEach(status => {
+                updateSetting(`${status}StatusColor`, this.statusColors[status.toUpperCase()]);
+                this.props.main._refreshStatusVariables();
+              })}
+            >
+              {Messages.BSI_RESTORE_DEFAULT_COLORS}
+            </Button>}
           </Flex.Child>
 
           <Flex.Child basis='auto'>
@@ -229,7 +248,7 @@ module.exports = class Settings extends React.PureComponent {
         hasNextSection={true}
         name={Messages.FORM_LABEL_DESKTOP_ONLY}
         onButtonClick={() => this.setState({ section: 1 })}
-        details={[ { text: `7 ${Messages.SETTINGS}` } ]}
+        details={[ { text: `8 ${Messages.SETTINGS}` } ]}
         icon={(props) => React.createElement(Icon, { name: 'Monitor', ...props })}
       />
 
@@ -346,6 +365,14 @@ module.exports = class Settings extends React.PureComponent {
         {Messages.BSI_CLIENT_SWITCH_PRESERVE_STATUS}
       </SwitchItem>
       <SwitchItem
+        note={Messages.BSI_DESKTOP_SWITCH_UNIVERSAL_STATUS_DESC}
+        value={getSetting('desktopUniversalStatus', false)}
+        onChange={() => toggleSetting('desktopUniversalStatus', false)}
+        disabled={getSetting('desktopPreserveStatus', false) === false}
+      >
+        {Messages.BSI_DESKTOP_SWITCH_UNIVERSAL_STATUS} <Icons.FontAwesome icon='universal-access-regular' />
+      </SwitchItem>
+      <SwitchItem
         note={formatClientTranslation('SHOW_ON_SELF_DESC', { client: 'desktop' })}
         value={getSetting('desktopShowOnSelf', false)}
         onChange={() => toggleSetting('desktopShowOnSelf', false)}
@@ -371,7 +398,7 @@ module.exports = class Settings extends React.PureComponent {
       <SwitchItem
         note={Messages.BSI_MOBILE_SWITCH_PRESERVE_STATUS_DESC}
         value={getSetting('mobilePreserveStatus', false)}
-        onChange={() => toggleSetting('mobilePreserveStatus', false)}
+        onChange={() => ((toggleSetting('mobilePreserveStatus', false), statusStore.emitChange()))}
         disabled={getSetting('mobileDisabled', false)}
       >
         {Messages.BSI_CLIENT_SWITCH_PRESERVE_STATUS}
@@ -396,7 +423,7 @@ module.exports = class Settings extends React.PureComponent {
         note={Messages.BSI_MOBILE_SWITCH_MATCH_COLOR_DESC}
         value={getSetting('mobileMatchStatus', false)}
         onChange={() => toggleSetting('mobileMatchStatus', false)}
-        disabled={getSetting('mobileDisabled', false)}
+        disabled={getSetting('mobileDisabled', false) || getSetting('mobileAvatarStatus', true)}
       >
         {Messages.BSI_CLIENT_SWITCH_MATCH_COLOR}
       </SwitchItem>
@@ -474,35 +501,35 @@ module.exports = class Settings extends React.PureComponent {
     return <>
       <FormTitle className="bsi-settings-status-display-title">{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'Streaming' })}</FormTitle>
       <SwitchItem
-        note={formatClientTranslation('MESSAGE_HEADERS_DESC', { client: 'game' })}
+        note={formatClientTranslation('MESSAGE_HEADERS_DESC', { client: 'streaming' })}
         value={getSetting('streamMessageHeaders', true)}
         onChange={() => toggleSetting('streamMessageHeaders', true)}
       >
         {Messages.BSI_CLIENT_SWITCH_MESSAGE_HEADERS}
       </SwitchItem>
       <SwitchItem
-        note={formatClientTranslation('MEMBERS_LIST_DESC', { client: 'game' })}
+        note={formatClientTranslation('MEMBERS_LIST_DESC', { client: 'streaming' })}
         value={getSetting('streamMembersList', true)}
         onChange={() => toggleSetting('streamMembersList', true)}
       >
         {Messages.BSI_CLIENT_SWITCH_MEMBERS_LIST}
       </SwitchItem>
       <SwitchItem
-        note={formatClientTranslation('USER_POPOUT_MODAL_DESC', { client: 'game' })}
+        note={formatClientTranslation('USER_POPOUT_MODAL_DESC', { client: 'streaming' })}
         value={getSetting('streamUserPopoutModal', true)}
         onChange={() => toggleSetting('streamUserPopoutModal', true)}
       >
         {Messages.BSI_CLIENT_SWITCH_USER_POPOUT_MODAL}
       </SwitchItem>
       <SwitchItem
-        note={formatClientTranslation('DM_DESC', { client: 'game' })}
+        note={formatClientTranslation('DM_DESC', { client: 'streaming' })}
         value={getSetting('streamDirectMessages', true)}
         onChange={() => toggleSetting('streamDirectMessages', true)}
       >
         {Messages.BSI_CLIENT_SWITCH_DM}
       </SwitchItem>
       <SwitchItem
-        note={formatClientTranslation('MATCH_COLOR_DESC', { client: 'game' })}
+        note={formatClientTranslation('MATCH_COLOR_DESC', { client: 'streaming' })}
         value={getSetting('streamMatchStatus', true)}
         onChange={() => toggleSetting('streamMatchStatus', true)}
       >
@@ -516,7 +543,7 @@ module.exports = class Settings extends React.PureComponent {
         {Messages.BSI_CLIENT_SWITCH_SHOW_ON_SELF}
       </SwitchItem>
       <SwitchItem
-        note={formatClientTranslation('SHOW_ON_BOTS_DESC', { client: 'game' })}
+        note={formatClientTranslation('SHOW_ON_BOTS_DESC', { client: 'streaming' })}
         value={getSetting('streamShowOnBots', true)}
         onChange={() => toggleSetting('streamShowOnBots', true)}
       >
