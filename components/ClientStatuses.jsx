@@ -48,31 +48,36 @@ const clientIcons = Object.freeze({
 const Lodash = window._;
 
 function renderClientStatus (client, props, states) {
-  if (props.user.bot && !props.getSetting(`${client}ShowOnBots`, true)) {
-    return null;
-  }
-
   const clientCapitalized = Lodash.capitalize(client);
-  const clientOnline = states[`is${clientCapitalized}Online`];
+  const clientStatus = states.activeSessions[client];
 
   const matchStatus = props.getSetting(`${client}MatchStatus`, false);
-  const locationKey = Lodash.upperFirst(Lodash.camelCase(props.location));
-  const defaultValue = locationKey === 'MessageHeaders' ? client === 'mobile' : client !== 'desktop';
+
+  const { getStatusColor } = getModule([ 'getStatusColor' ], false);
 
   // eslint-disable-next-line multiline-ternary
-  return props.getSetting(`${client}${locationKey}`, defaultValue) && clientOnline ? React.createElement(Tooltip, {
+  return React.createElement(Tooltip, {
     text: Messages.BSI_CLIENT_SIGNED_IN.format({ clientCapitalized }),
     hideOnClick: false
   }, (props) => React.createElement(Icon, {
     name: clientIcons[client],
-    color: matchStatus ? states.statusColor : 'currentColor',
+    color: matchStatus ? getStatusColor(clientStatus) : 'currentColor',
     className: `bsi-${client}Icon ${classes.icon}`,
     ...props
-  })) : null;
+  }));
 }
 
-function isClientOnline (client, props) {
+function shouldClientStatusRender (client, props) {
   if (client === 'mobile' && props.getSetting('mobileAvatarStatus', true)) {
+    return false;
+  }
+
+  if (props.user.bot && !props.getSetting(`${client}ShowOnBots`, true)) {
+    return false;
+  }
+
+  const locationKey = Lodash.upperFirst(Lodash.camelCase(props.location));
+  if (!props.getSetting(`${client}${locationKey}`, locationKey === 'MessageHeaders' ? client === 'mobile' : client !== 'desktop')) {
     return false;
   }
 
@@ -91,7 +96,10 @@ function isClientOnline (client, props) {
     mobile: { preserve: clientStatus.desktop || clientStatus.web || true, nonPreserve: !clientStatus.web && !clientStatus.desktop }
   };
 
-  return clientStatus && clientStatus[client] && (props.getSetting(`${client}PreserveStatus`, false) ? states[client].preserve : states[client].nonPreserve);
+  return clientStatus[client] && (props.getSetting(`${client}PreserveStatus`, false)
+    ? states[client].preserve
+    : states[client].nonPreserve
+  );
 }
 
 module.exports = React.memo(props => {
@@ -99,22 +107,28 @@ module.exports = React.memo(props => {
     return null;
   }
 
+  const getActiveSessions = () => {
+    const isCurrentUser = props.user.id === getCurrentUserId();
+    return isCurrentUser ? clientStatusStore.getCurrentClientStatus() : statusStore.getState().clientStatuses[props.user.id];
+  };
+
   const { getStatusColor } = getModule([ 'getStatusColor' ], false);
 
   const states = Flux.useStateFromStoresObject([ statusStore ], () => ({
     statusColor: getStatusColor(props.status || statusStore.getStatus(props.user.id)),
-    isWebOnline: isClientOnline('web', props),
-    isDesktopOnline: isClientOnline('desktop', props),
-    isMobileOnline: isClientOnline('mobile', props)
+    activeSessions: getActiveSessions()
   }));
 
-  if (!states.isWebOnline && !states.isDesktopOnline && !states.isMobileOnline) {
+  const platforms = Object.keys(states.activeSessions || {});
+  if (platforms.length === 0) {
     return null;
   }
 
-  return React.createElement('div', { className: 'bsi-clientStatuses' }, [
-    renderClientStatus('web', props, states),
-    renderClientStatus('desktop', props, states),
-    renderClientStatus('mobile', props, states)
-  ]);
+  const clientStatuses = [];
+
+  platforms.forEach(platform => (
+    shouldClientStatusRender(platform, props) && clientStatuses.push(renderClientStatus(platform, props, states))
+  ));
+
+  return React.createElement('div', { className: 'bsi-clientStatuses' }, clientStatuses);
 });

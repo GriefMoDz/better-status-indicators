@@ -27,7 +27,7 @@
  */
 
 /* eslint-disable object-property-newline */
-const { React, FluxDispatcher, getModule, getModuleByDisplayName, i18n: { Messages }, constants: { Colors, StatusTypes } } = require('powercord/webpack');
+const { React, ReactDOM, getModule, getModuleByDisplayName, i18n: { Messages }, constants: { Colors, StatusTypes } } = require('powercord/webpack');
 const { Text, modal: { Confirm } } = require('powercord/components');
 const { findInReactTree, waitFor } = require('powercord/util');
 const { inject, uninject } = require('powercord/injector');
@@ -91,10 +91,6 @@ module.exports = class BetterStatusIndicators extends Plugin {
     if (getSetting('themeVariables', false)) {
       this._refreshStatusVariables();
     }
-
-    /* Refresh Status Icons on Locale Change */
-    this.handleRefreshIcons = () => this._refreshStatusIcons(true);
-    FluxDispatcher.subscribe('I18N_LOAD_SUCCESS', this.handleRefreshIcons);
 
     /* Hardware Acceleration Notice */
     if (!getSetting('seenHardwareAccelerationNotice', false) && !this.hardwareAccelerationIsEnabled) {
@@ -418,8 +414,46 @@ module.exports = class BetterStatusIndicators extends Plugin {
       return res;
     });
 
-    const { container } = await getModule([ 'container', 'base' ]);
-    await waitFor(`.${container}`).then(this.handleRefreshIcons);
+    inject('bsi-custom-status-masks', Mask.MaskLibrary, 'type', (_, res) => {
+      const masks = res.props.children;
+      const statusDisplay = getSetting('statusDisplay', 'default');
+
+      const filteredStatuses = [ 'idle', 'dnd', 'offline', 'streaming' ];
+      const statusMasks = masks.filter(mask => filteredStatuses.includes(mask.props.id.split('svg-mask-status-').pop()));
+      const idleStatusMask = statusMasks.find(mask => mask.props.id === 'svg-mask-status-idle');
+      const dndStatusMask = statusMasks.find(mask => mask.props.id === 'svg-mask-status-dnd');
+
+      switch (statusDisplay) {
+        case 'solid':
+          statusMasks.forEach(mask => {
+            mask.props.children = React.createElement('circle', {
+              fill: 'white',
+              cx: 0.5,
+              cy: 0.5,
+              r: 0.5
+            });
+          });
+
+          break;
+        case 'classic':
+          idleStatusMask.props.children[1] = React.createElement('polygon', {
+            fill: 'black',
+            points: '0.52, 0.51 0.84, 0.69 0.75, 0.81 0.37, 0.58 0.37, 0.15 0.52, 0.15'
+          });
+
+          Object.assign(dndStatusMask.props.children[1].props, { height: 0.15, y: 0.45 });
+
+          delete dndStatusMask.props.children[1].props.rx;
+          delete dndStatusMask.props.children[1].props.ry;
+      }
+
+      return res;
+    });
+
+    if (getSetting('statusDisplay', 'default') !== 'default') {
+      const { container } = await getModule([ 'container', 'base' ]);
+      await waitFor(`.${container}`).then(this._refreshMaskLibrary);
+    }
   }
 
   async _getUserPopout () {
@@ -490,62 +524,13 @@ module.exports = class BetterStatusIndicators extends Plugin {
     document.body.classList.remove('bsi-theme-variables');
   }
 
-  _refreshStatusIcons (initialize = false, restore = false) {
-    const MaskLibrary = document.querySelector('#app-mount > svg');
+  _refreshMaskLibrary () {
+    const Mask = getModule([ 'MaskLibrary' ], false);
 
-    const filteredStatuses = [ 'idle', 'dnd', 'offline', 'streaming' ];
-    const statusMasks = [ ...MaskLibrary.childNodes ].filter(node => filteredStatuses.includes(node.id.split('svg-mask-status-').pop()));
+    const tempMaskLibrary = document.createElement('div');
+    ReactDOM.render(React.createElement(Mask.MaskLibrary), tempMaskLibrary);
 
-    const restoreMasks = () => statusMasks.forEach(node => {
-      const clone = document.querySelector(`#${node.id}-original`).cloneNode(true);
-      clone.id = node.id;
-
-      MaskLibrary.replaceChild(clone, node);
-    });
-
-    if (initialize) {
-      statusMasks.forEach(node => {
-        const clone = node.cloneNode(true);
-        clone.id = `${node.id}-original`;
-
-        if (!MaskLibrary.querySelector(`#${clone.id}`)) {
-          MaskLibrary.appendChild(clone);
-        }
-      });
-    }
-
-    const statusDisplay = this.settings.get('statusDisplay', 'default');
-    if (statusDisplay !== 'default' && restore) {
-      restoreMasks();
-    }
-
-    switch (statusDisplay) {
-      case 'solid':
-        return statusMasks.forEach(node => node.childNodes[1].style = 'display: none;');
-      case 'classic':
-        statusMasks.forEach(node => node.childNodes[1].removeAttribute('style'));
-
-        return statusMasks.filter(node => [ 'idle', 'dnd' ].includes(node.id.split('svg-mask-status-').pop())).forEach(node => {
-          if (node.id.includes('dnd')) {
-            const rect = node.childNodes[1];
-            rect.setAttribute('height', '0.15');
-            rect.setAttribute('y', '0.45');
-
-            rect.removeAttribute('rx');
-            rect.removeAttribute('ry');
-          } else {
-            const pointers = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-            pointers.setAttribute('fill', 'black');
-            pointers.setAttribute('points', '0.52, 0.51 0.84, 0.69 0.75, 0.81 0.37, 0.58 0.37, 0.15 0.52, 0.15');
-
-            const innerCircle = node.childNodes[1];
-            node.replaceChild(pointers, innerCircle);
-          }
-
-          return node;
-        });
-      default: restoreMasks();
-    }
+    document.querySelector('#app-mount > svg').replaceWith(tempMaskLibrary.firstChild);
   }
 
   _hardwareAccelerationDisabled () {
@@ -591,9 +576,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     powercord.api.settings.unregisterSettings('better-status-indicators');
 
-    FluxDispatcher.unsubscribe('I18N_LOAD_SUCCESS', this.handleRefreshIcons);
-
-    this._refreshStatusIcons(false, true);
+    this._refreshMaskLibrary();
 
     for (const modId of modules.keys()) {
       modules.unload(modId);

@@ -218,7 +218,7 @@ module.exports = class Settings extends React.PureComponent {
         value={this.props.getSetting('statusDisplay', 'default')}
         onChange={e => {
           this.props.updateSetting('statusDisplay', e.value);
-          this.props.main._refreshStatusIcons();
+          this.props.main._refreshMaskLibrary();
         }}
       >
         {Messages.BSI_STATUS_DISPLAY}

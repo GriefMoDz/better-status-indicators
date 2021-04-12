@@ -61,8 +61,8 @@
           &+ rect {
             width: 9px;
             height: 9px;
-            x: 30;
-            y: 30;
+            x: 29.5;
+            y: 29.5;
           }
         }
       }
@@ -75,8 +75,8 @@
         &+ rect {
           width: 10px;
           height: 14px;
-          x: 30;
-          y: 26;
+          x: 29;
+          y: 25;
         }
       }
 
@@ -87,7 +87,7 @@
           width: 18px;
           height: 9px;
           x: 24;
-          y: 30;
+          y: 29.5;
 
           + svg circle {
             r: 1.5;
@@ -108,8 +108,8 @@
         &+ rect {
           width: 9px;
           height: 9px;
-          x: 30;
-          y: 30;
+          x: 29.5;
+          y: 29.5;
         }
       }
     }
@@ -330,6 +330,7 @@ html.reduce-motion {
 
 .bsi-reset-colors-button {
   width: 100%;
+  font-size: 13px;
 }
 
 /* Status Color Picker */
