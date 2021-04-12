@@ -30,8 +30,9 @@ const { React } = require('powercord/webpack');
 
 module.exports = React.memo(
   () => <mask id='svg-mask-status-online-desktop' maskContentUnits='objectBoundingBox' viewBox='0 0 1 1'>
-    <svg width="1" height="1" viewBox="2 2 20 20">
-      <path fill="white" d="M4 2.5C2.897 2.5 2 3.397 2 4.5V15.5C2 16.604 2.897 17.5 4 17.5H11V19.5H7V21.5H17V19.5H13V17.5H20C21.103 17.5 22 16.604 22 15.5V4.5C22 3.397 21.103 2.5 20 2.5H4ZM20 4.5V13.5H4V4.5H20Z" />
-    </svg>
+    <rect fill="white" x="0" y="0.025" width="1" height="0.75" rx="0.1" ry="0.1"></rect>
+    <rect fill="black" x="0.1" y="0.125" width="0.8" height="0.45"></rect>
+    <rect fill="white" x="0.450" y="0.772" width="0.1" height="0.105"></rect>
+    <rect fill="white" x="0.250" y="0.875" width="0.5" height="0.1"></rect>
   </mask>
 );

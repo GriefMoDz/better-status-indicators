@@ -107,7 +107,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     /* Module Loader */
     for (const modId of modules.keys()) {
       const mod = await modules.load(modId);
-      const disabledModules = getSetting('disabledModules', [ 'statusEverywhere' ]);
+      const disabledModules = getSetting('disabledModules', [ 'statusEverywhere', 'avatarStatuses' ]);
 
       if (!disabledModules.includes(modId)) {
         mod.startModule(this);
@@ -419,7 +419,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
       const statusDisplay = getSetting('statusDisplay', 'default');
 
       const filteredStatuses = [ 'idle', 'dnd', 'offline', 'streaming' ];
-      const statusMasks = masks.filter(mask => filteredStatuses.includes(mask.props.id.split('svg-mask-status-').pop()));
+
+      const statusMasks = masks.filter(mask => filteredStatuses.includes(mask.props.id?.split('svg-mask-status-').pop()));
       const idleStatusMask = statusMasks.find(mask => mask.props.id === 'svg-mask-status-idle');
       const dndStatusMask = statusMasks.find(mask => mask.props.id === 'svg-mask-status-dnd');
 

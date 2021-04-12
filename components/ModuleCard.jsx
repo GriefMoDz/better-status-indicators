@@ -55,7 +55,7 @@ class ModuleCard extends React.PureComponent {
     const { getSetting, updateSetting } = this.props;
 
     const moduleId = this.props.id;
-    const disabledModules = getSetting('disabledModules', [ 'statusEverywhere' ]);
+    const disabledModules = getSetting('disabledModules', [ 'statusEverywhere', 'avatarStatuses' ]);
 
     (state ? modules.availableModules[moduleId].startModule(this.main) : modules.unload(moduleId)).then(() => {
       if (state) {
@@ -142,7 +142,7 @@ class ModuleCard extends React.PureComponent {
   render () {
     const { expanded } = this.state;
 
-    const disabledModules = this.props.getSetting('disabledModules', [ 'statusEverywhere' ]);
+    const disabledModules = this.props.getSetting('disabledModules', [ 'statusEverywhere', 'avatarStatuses' ]);
     const disabled = disabledModules.includes(this.props.id);
 
     return [ <Flex direction={Flex.Direction.VERTICAL}>
