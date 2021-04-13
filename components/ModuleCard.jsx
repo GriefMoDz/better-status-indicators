@@ -55,16 +55,16 @@ class ModuleCard extends React.PureComponent {
     const { getSetting, updateSetting } = this.props;
 
     const moduleId = this.props.id;
-    const disabledModules = getSetting('disabledModules', [ 'statusEverywhere', 'avatarStatuses' ]);
+    const enabledModules = getSetting('enabledModules', []);
 
     (state ? modules.availableModules[moduleId].startModule(this.main) : modules.unload(moduleId)).then(() => {
       if (state) {
-        disabledModules.splice(disabledModules.indexOf(moduleId), 1);
+        enabledModules.push(moduleId);
       } else {
-        disabledModules.push(moduleId);
+        enabledModules.splice(enabledModules.indexOf(moduleId), 1);
       }
 
-      updateSetting('disabledModules', disabledModules);
+      updateSetting('enabledModules', enabledModules);
     });
   }
 
@@ -142,8 +142,8 @@ class ModuleCard extends React.PureComponent {
   render () {
     const { expanded } = this.state;
 
-    const disabledModules = this.props.getSetting('disabledModules', [ 'statusEverywhere', 'avatarStatuses' ]);
-    const disabled = disabledModules.includes(this.props.id);
+    const enabledModules = this.props.getSetting('enabledModules', []);
+    const disabled = !enabledModules.includes(this.props.id);
 
     return [ <Flex direction={Flex.Direction.VERTICAL}>
       <Clickable className={classes.header} aria-expanded={expanded} onClick={this.handleExpand.bind(this)}>

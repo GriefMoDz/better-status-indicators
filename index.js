@@ -85,7 +85,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       })
     });
 
-    const { getSetting, toggleSetting } = powercord.api.settings._fluxProps(this.entityID);
+    const { getSetting, toggleSetting, updateSetting } = powercord.api.settings._fluxProps(this.entityID);
 
     /* Theme Status Variables */
     if (getSetting('themeVariables', false)) {
@@ -105,11 +105,17 @@ module.exports = class BetterStatusIndicators extends Plugin {
     };
 
     /* Module Loader */
+    const disabledModules = getSetting('disabledModules');
+    if (disabledModules && disabledModules.length === 0) {
+      this.settings.delete('disabledModules');
+      updateSetting('enabledModules', [ 'statusEverywhere' ]);
+    }
+
     for (const modId of modules.keys()) {
       const mod = await modules.load(modId);
-      const disabledModules = getSetting('disabledModules', [ 'statusEverywhere', 'avatarStatuses' ]);
+      const enabledModules = getSetting('enabledModules', []);
 
-      if (!disabledModules.includes(modId)) {
+      if (enabledModules.includes(modId)) {
         mod.startModule(this);
       }
     }

@@ -87,8 +87,8 @@ function shouldClientStatusRender (client, props) {
     return false;
   }
 
-  const disabledModules = props.getSetting('disabledModules', [ 'statusEverywhere', 'avatarStatuses' ]);
-  if (!disabledModules.includes('avatarStatuses')) {
+  const enabledModules = props.getSetting('enabledModules', []);
+  if (enabledModules.includes('avatarStatuses')) {
     if (client === 'web' && clientStatus.desktop) {
       return false;
     }

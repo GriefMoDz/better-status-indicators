@@ -55,7 +55,7 @@ module.exports = {
     const Avatar = await getModule([ 'AnimatedAvatar' ]);
     inject('bsi-module-enhanced-avatar-status-indicators', Avatar, 'default', ([ props ], res) => {
       const userId = props.userId || props.src.split('/')[4];
-      const clientStatuses = statusStore.getState().clientStatuses[userId];
+      const clientStatuses = userId === main.currentUserId ? main.clientStatusStore.getCurrentClientStatus() : statusStore.getState().clientStatuses[userId];
       if (!clientStatuses || !props.status || props.isTyping || props.isMobile) {
         return res;
       }
