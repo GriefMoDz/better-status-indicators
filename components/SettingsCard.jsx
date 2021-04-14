@@ -27,7 +27,8 @@
  */
 
 const { React, getModule, getModuleByDisplayName } = require('powercord/webpack');
-const { Card, Clickable, Flex, Icon, Text } = require('powercord/components');
+const { Card, Clickable, Flex, Text } = require('powercord/components');
+const { RightCaret } = require('./Icons');
 
 const { default: Button } = getModule([ 'ButtonLink' ], false);
 
@@ -43,7 +44,7 @@ class SettingsCard extends React.PureComponent {
     if (hasNextSection) {
       return <Flex align={Flex.Align.CENTER}>
         <Text>{buttonText}</Text>
-        {hasNextSection ? <Icon name='RightCaret' width={10} height={10} className={classes.caret} /> : null}
+        {hasNextSection ? <RightCaret width={10} height={10} className={classes.caret} /> : null}
       </Flex>;
     }
 

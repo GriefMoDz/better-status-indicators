@@ -28,7 +28,7 @@
 
 /* eslint-disable object-property-newline */
 const { React, getModule, getModuleByDisplayName, i18n: { Messages } } = require('powercord/webpack');
-const { Icon } = require('powercord/components');
+const Icons = require('./Icons');
 
 const Flux = getModule([ 'useStateFromStores' ], false);
 const Tooltip = getModuleByDisplayName('Tooltip', false);
@@ -59,8 +59,7 @@ function renderClientStatus (client, props, states) {
   return React.createElement(Tooltip, {
     text: Messages.BSI_CLIENT_SIGNED_IN.format({ clientCapitalized }),
     hideOnClick: false
-  }, (props) => React.createElement(Icon, {
-    name: clientIcons[client],
+  }, (props) => React.createElement(Icons[clientIcons[client]], {
     color: matchStatus ? getStatusColor(clientStatus) : 'currentColor',
     className: `bsi-${client}Icon ${classes.icon}`,
     ...props

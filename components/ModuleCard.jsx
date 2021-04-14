@@ -28,11 +28,12 @@
 
 /* eslint-disable object-property-newline */
 const { React, getModule, getModuleByDisplayName, i18n: { Messages } } = require('powercord/webpack');
-const { Card, Clickable, Flex, Icon, Text } = require('powercord/components');
+const { Card, Clickable, Flex, Text } = require('powercord/components');
 const { default: Button } = getModule([ 'ButtonLink' ], false);
 
 const Components = require('powercord/components/settings');
 const modules = require('../modules');
+const Icons = require('./Icons');
 
 const Caret = getModuleByDisplayName('Caret', false);
 const IntegrationInfo = getModuleByDisplayName('IntegrationInfo', false);
@@ -151,7 +152,7 @@ class ModuleCard extends React.PureComponent {
           <IntegrationInfo
             name={this.props.name}
             icon={this.props.icon}
-            details={[ { icon: (props) => React.createElement(Icon, { name: 'Info', ...props }), text: this.props.description } ]}
+            details={[ { icon: (props) => React.createElement(Icons.Info, { ...props }), text: this.props.description } ]}
           />
           <Caret className={classes.expandIcon} expanded={expanded} aria-hidden={true} />
         </Flex>

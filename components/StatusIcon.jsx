@@ -28,7 +28,7 @@
 
 /* eslint-disable object-property-newline */
 const { React, getModule, getModuleByDisplayName, i18n: { Messages } } = require('powercord/webpack');
-const { Icon } = require('powercord/components');
+const { Activity } = require('./Icons');
 
 const Flux = getModule([ 'useStateFromStores' ], false);
 const Tooltip = getModuleByDisplayName('Tooltip', false);
@@ -49,8 +49,7 @@ function renderStatusIcon ({ props, settings }, states) {
   return props.getSetting(`stream${locationKey}`, true) ? React.createElement(Tooltip, {
     text: Messages.BSI_STREAMING_AS_STATUS.format({ status: humanizeStatus(states.status) }),
     hideOnClick: false
-  }, (props) => React.createElement(Icon, {
-    name: 'Activity',
+  }, (props) => React.createElement(Activity, {
     color: settings.matchStatus ? states.statusColor : 'currentColor',
     className: `bsi-statusIcon ${classes.icon}`,
     ...props

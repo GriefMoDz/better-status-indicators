@@ -28,10 +28,11 @@
 
 /* eslint-disable object-property-newline */
 const { React, getModule, getModuleByDisplayName, i18n: { Messages } } = require('powercord/webpack');
-const { Button, Divider, Flex, FormTitle, Icon, Icons, TabBar, Text, modal: { Confirm } } = require('powercord/components');
+const { Button, Divider, Flex, FormTitle, Icons: { FontAwesome }, TabBar, Text, modal: { Confirm } } = require('powercord/components');
 const { ColorPickerInput, SwitchItem, RadioGroup } = require('powercord/components/settings');
 const { open: openModal } = require('powercord/modal');
 
+const Icons = require('./Icons');
 const ModuleCard = require('./ModuleCard');
 const SettingsCard = require('./SettingsCard');
 const StatusPickerPreview = require('./StatusPickerPreview');
@@ -249,7 +250,7 @@ module.exports = class Settings extends React.PureComponent {
         name={Messages.FORM_LABEL_DESKTOP_ONLY}
         onButtonClick={() => this.setState({ section: 1 })}
         details={[ { text: `8 ${Messages.SETTINGS}` } ]}
-        icon={(props) => React.createElement(Icon, { name: 'Monitor', ...props })}
+        icon={(props) => React.createElement(Icons.Monitor, { ...props })}
       />
 
       <SettingsCard
@@ -258,7 +259,7 @@ module.exports = class Settings extends React.PureComponent {
         name={Messages.BSI_MOBILE}
         onButtonClick={() => this.setState({ section: 2 })}
         details={[ { text: `5 ${Messages.SETTINGS}` } ]}
-        icon={(props) => React.createElement(Icon, { name: 'MobileDevice', ...props })}
+        icon={(props) => React.createElement(Icons.MobileDevice, { ...props })}
       />
 
       <SettingsCard
@@ -267,7 +268,7 @@ module.exports = class Settings extends React.PureComponent {
         name={Messages.BSI_WEB}
         onButtonClick={() => this.setState({ section: 3 })}
         details={[ { text: `8 ${Messages.SETTINGS}` } ]}
-        icon={(props) => React.createElement(Icon, { name: 'Public', ...props })}
+        icon={(props) => React.createElement(Icons.Public, { ...props })}
       />
 
       <FormTitle className="bsi-settings-status-display-title">{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'Activity' })}</FormTitle>
@@ -278,7 +279,7 @@ module.exports = class Settings extends React.PureComponent {
         name={Messages.STATUS_STREAMING}
         onButtonClick={() => this.setState({ section: 4 })}
         details={[ { text: `7 ${Messages.SETTINGS}` } ]}
-        icon={(props) => React.createElement(Icon, { name: 'Activity', ...props })}
+        icon={(props) => React.createElement(Icons.Activity, { ...props })}
       />
 
       <Divider />
@@ -308,7 +309,7 @@ module.exports = class Settings extends React.PureComponent {
           id={modId}
           name={mod.name}
           description={mod.description || 'No description given.'}
-          icon={mod.icon ? (props) => React.createElement(Icon, { name: mod.icon, ...props }) : null}
+          icon={mod.icon ? (props) => React.createElement(Icons[mod.icon], { ...props }) : null}
           settings={mod.settings || []}
           main={this.props.main}
           {...settingsProps}
@@ -370,7 +371,7 @@ module.exports = class Settings extends React.PureComponent {
         onChange={() => toggleSetting('desktopUniversalStatus', false)}
         disabled={getSetting('desktopPreserveStatus', false) === false}
       >
-        {Messages.BSI_DESKTOP_SWITCH_UNIVERSAL_STATUS} <Icons.FontAwesome icon='universal-access-regular' />
+        {Messages.BSI_DESKTOP_SWITCH_UNIVERSAL_STATUS} <FontAwesome icon='universal-access-regular' />
       </SwitchItem>
       <SwitchItem
         note={formatClientTranslation('SHOW_ON_SELF_DESC', { client: 'desktop' })}
