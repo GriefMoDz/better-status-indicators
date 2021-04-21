@@ -83,6 +83,7 @@ module.exports = {
     const statusStore = await getModule([ 'isMobileOnline' ]);
     const userStore = await getModule([ 'getCurrentUser' ]);
     const guildStore = await getModule([ 'getGuildId' ]);
+    const activityStore = await getModule([ 'isGameActivity' ]);
 
     const useSubscribeGuildMembers = (await getModule([ 'useSubscribeGuildMembers' ])).default;
 
@@ -111,7 +112,9 @@ module.exports = {
       };
 
       const ConnectedAvatar = Flux.connectStores([ statusStore, powercord.api.settings.store ], () => ({
-        status: statusStore.getStatus(userId),
+        status: activityStore.isStreaming(props.activities || statusStore.getActivities(userId))
+          ? 'streaming'
+          : statusStore.getStatus(userId),
         isMobile: getMobileStatusState() && statusStore.isMobileOnline(userId)
       }))(useSubscribeGuildMembers(() => {
         const members = {};

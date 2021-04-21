@@ -36,13 +36,15 @@ const Tooltip = getModuleByDisplayName('Tooltip', false);
 const { getId: getCurrentUserId } = getModule([ 'initialize', 'getFingerprint' ], false);
 
 const statusStore = getModule([ 'isMobileOnline' ], false);
+const statusModule = getModule([ 'getStatusColor' ], false);
+
 const classes = getModule([ 'member', 'ownerIcon' ], false);
 
 const clientStatusStore = require('../stores/clientStatusStore');
 const clientIcons = Object.freeze({
-  web: 'Public',
-  desktop: 'Monitor',
-  mobile: 'MobileDevice'
+  web: Icons.Public,
+  desktop: Icons.Monitor,
+  mobile: Icons.MobileDevice
 });
 
 const Lodash = window._;
@@ -52,15 +54,13 @@ function renderClientStatus (client, props, states) {
   const clientStatus = states.activeSessions[client];
 
   const matchStatus = props.getSetting(`${client}MatchStatus`, false);
+  const iconColor = matchStatus ? statusModule.getStatusColor(clientStatus) : 'currentColor';
 
-  const { getStatusColor } = getModule([ 'getStatusColor' ], false);
-
-  // eslint-disable-next-line multiline-ternary
   return React.createElement(Tooltip, {
     text: Messages.BSI_CLIENT_SIGNED_IN.format({ clientCapitalized }),
     hideOnClick: false
-  }, (props) => React.createElement(Icons[clientIcons[client]], {
-    color: matchStatus ? getStatusColor(clientStatus) : 'currentColor',
+  }, (props) => React.createElement(clientIcons[client], {
+    color: iconColor,
     className: `bsi-${client}Icon ${classes.icon}`,
     ...props
   }));
@@ -112,33 +112,31 @@ function shouldClientStatusRender (client, props) {
   );
 }
 
+function getActiveSessions (userId) {
+  const isCurrentUser = userId === getCurrentUserId();
+  const activeSessions = isCurrentUser ? clientStatusStore.getCurrentClientStatus() : statusStore.getState().clientStatuses[userId];
+
+  return activeSessions || {};
+}
+
 module.exports = React.memo(props => {
   if (!props.user) {
     return null;
   }
 
-  const getActiveSessions = () => {
-    const isCurrentUser = props.user.id === getCurrentUserId();
-    return isCurrentUser ? clientStatusStore.getCurrentClientStatus() : statusStore.getState().clientStatuses[props.user.id];
-  };
-
-  const { getStatusColor } = getModule([ 'getStatusColor' ], false);
-
   const states = Flux.useStateFromStoresObject([ statusStore ], () => ({
-    statusColor: getStatusColor(props.status || statusStore.getStatus(props.user.id)),
-    activeSessions: getActiveSessions()
+    statusColor: statusModule.getStatusColor(props.status || statusStore.getStatus(props.user.id)),
+    activeSessions: getActiveSessions(props.user.id)
   }));
 
-  const platforms = Object.keys(states.activeSessions || {});
+  const platforms = Object.keys(states.activeSessions).filter(platform => shouldClientStatusRender(platform, props));
   if (platforms.length === 0) {
     return null;
   }
 
   const clientStatuses = [];
 
-  platforms.forEach(platform => (
-    shouldClientStatusRender(platform, props) && clientStatuses.push(renderClientStatus(platform, props, states))
-  ));
+  platforms.forEach(platform => clientStatuses.push(renderClientStatus(platform, props, states)));
 
   return React.createElement('div', { className: 'bsi-clientStatuses' }, clientStatuses);
 });
