@@ -37,6 +37,8 @@ const { humanizeStatus } = getModule([ 'humanizeStatus' ], false);
 const { isStreaming } = getModule([ 'isGameActivity', 'renderActivity' ], false);
 const { getId: getCurrentUserId } = getModule([ 'initialize', 'getFingerprint' ], false);
 
+const StatusUtils = getModule([ 'getStatusColor' ], false);
+
 const statusStore = getModule([ 'isMobileOnline' ], false);
 const classes = getModule([ 'member', 'ownerIcon' ], false);
 
@@ -69,11 +71,9 @@ module.exports = React.memo(props => {
     return null;
   }
 
-  const { getStatusColor } = getModule([ 'getStatusColor' ], false);
-
   const states = Flux.useStateFromStoresObject([ statusStore ], () => ({
     status: props.status || statusStore.getStatus(props.user.id),
-    statusColor: getStatusColor(props.status || statusStore.getStatus(props.user.id)),
+    statusColor: StatusUtils.getStatusColor(props.status || statusStore.getStatus(props.user.id)),
     isStreaming: isStreaming(props.activities || statusStore.getActivities(props.user.id))
   }));
 
