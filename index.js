@@ -420,7 +420,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       return res;
     });
 
-    inject('bsi-custom-status-masks', Mask.MaskLibrary, 'type', (_, res) => {
+    this.inject('bsi-custom-status-masks', Mask.MaskLibrary, 'type', (_, res) => {
       const masks = res.props.children;
       const statusDisplay = getSetting('statusDisplay', 'default');
 
@@ -579,10 +579,9 @@ module.exports = class BetterStatusIndicators extends Plugin {
   }
 
   pluginWillUnload () {
-    this.injectionIds.forEach(id => uninject(id));
-
     powercord.api.settings.unregisterSettings('better-status-indicators');
 
+    this.injectionIds.forEach(id => uninject(id));
     this._refreshMaskLibrary();
 
     for (const modId of modules.keys()) {

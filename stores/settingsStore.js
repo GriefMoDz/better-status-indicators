@@ -26,13 +26,8 @@
  * SOFTWARE.
  */
 
-const { React } = require('powercord/webpack');
+const { Flux, FluxDispatcher } = require('powercord/webpack');
 
-module.exports = React.memo(
-  () => <mask id='svg-mask-status-online-desktop' maskContentUnits='objectBoundingBox' viewBox='0 0 1 1'>
-    <rect fill="white" x="0" y="0.025" width="1" height="0.75" rx="0.1" ry="0.1"></rect>
-    <rect fill="black" x="0.1" y="0.125" width="0.8" height="0.45"></rect>
-    <rect fill="white" x="0.450" y="0.772" width="0.1" height="0.105"></rect>
-    <rect fill="white" x="0.250" y="0.875" width="0.5" height="0.1"></rect>
-  </mask>
-);
+class SettingsStore extends Flux.Store {}
+
+module.exports = new SettingsStore(FluxDispatcher, {});

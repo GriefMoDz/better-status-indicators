@@ -30,8 +30,7 @@ const { React, getModule } = require('powercord/webpack');
 const { findInReactTree } = require('powercord/util');
 const { inject, uninject } = require('powercord/injector');
 
-const WebMask = require('../components/WebMask');
-const DesktopMask = require('../components/DesktopMask');
+const Masks = require('../components/Masks');
 
 module.exports = {
   name: '[WIP] Enhanced Avatar Status',
@@ -43,7 +42,7 @@ module.exports = {
     /* Avatar Status Masks */
     const Mask = await getModule([ 'MaskLibrary' ]);
     inject('bsi-module-enhanced-avatar-status-masks', Mask.MaskLibrary, 'type', (_, res) => {
-      res.props.children.push(...[ React.createElement(WebMask), React.createElement(DesktopMask) ]);
+      res.props.children.push(...[ React.createElement(Masks.Web), React.createElement(Masks.Desktop) ]);
 
       return res;
     });
