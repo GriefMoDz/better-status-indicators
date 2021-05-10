@@ -41,7 +41,7 @@ const TextInputWithButton = require('./TextInputWithButton');
 const colorUtils = getModule([ 'isValidHex' ], false);
 const statusStore = getModule([ 'isMobileOnline' ], false);
 const Breadcrumbs = getModuleByDisplayName('Breadcrumbs', false);
-const breadcrumbClasses = getModule([ 'breadcrumb', 'breadcrumbActive' ], false);
+const breadcrumbClasses = getModule([ 'breadcrumbInactive', 'breadcrumbActive' ], false);
 
 const { availableModules } = require('../modules');
 

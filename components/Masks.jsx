@@ -26,10 +26,10 @@
  * SOFTWARE.
  */
 
- const { React } = require('powercord/webpack');
+const { React } = require('powercord/webpack');
 
- module.exports = {
-   Desktop: React.memo(
+module.exports = {
+  Desktop: React.memo(
     () => <mask id='svg-mask-status-online-desktop' maskContentUnits='objectBoundingBox' viewBox='0 0 1 1'>
       <rect fill="white" x="0" y="0.025" width="1" height="0.75" rx="0.1" ry="0.1"></rect>
       <rect fill="black" x="0.1" y="0.125" width="0.8" height="0.45"></rect>

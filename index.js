@@ -313,7 +313,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       });
 
       const PrivateChannel = await getModuleByDisplayName('PrivateChannel');
-      inject('bsi-user-dm-avatar-status', PrivateChannel.prototype, 'renderAvatar', (_, res) => {
+      this.inject('bsi-user-dm-avatar-status', PrivateChannel.prototype, 'renderAvatar', (_, res) => {
         res.type = Avatar;
 
         return res;
