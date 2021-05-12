@@ -79,7 +79,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     }
 
     const statusModule = getModule([ 'getStatusMask' ], false);
-    const getStatusColor = statusModule.__powercordOriginal_getStatusColor ?? status.getStatusColor;
+    const getStatusColor = statusModule.__powercordOriginal_getStatusColor ?? statusModule.getStatusColor;
 
     cache.defaultStatusColors = (Object.keys(StatusTypes)
       .reduce((statusColors, status) => ({ ...statusColors, [status]: getStatusColor(status.toLowerCase()) }), {})
