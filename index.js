@@ -27,7 +27,7 @@
  */
 
 /* eslint-disable object-property-newline */
-const { React, ReactDOM, getModule, getModuleByDisplayName, i18n: { Messages }, constants: { Colors, StatusTypes } } = require('powercord/webpack');
+const { React, ReactDOM, getModule, getModuleByDisplayName, i18n: { Messages }, constants: { StatusTypes } } = require('powercord/webpack');
 const { Text, modal: { Confirm } } = require('powercord/components');
 const { findInReactTree, waitFor } = require('powercord/util');
 const { inject, uninject } = require('powercord/injector');
@@ -44,12 +44,13 @@ const i18n = require('./i18n');
 const modules = require('./modules');
 const clientStatusStore = require('./stores/clientStatusStore');
 
+const cache = {};
+
 module.exports = class BetterStatusIndicators extends Plugin {
   constructor () {
     super();
 
     this.AnimatedAvatarStatus = null;
-    this.injectionIds = [];
     this.classes = {
       ...getModule([ 'wrapper', 'avatar' ], false),
       avatarWrapper: getModule([ 'avatarHint', 'avatarWrapper' ], false).avatarWrapper
@@ -70,6 +71,21 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
   get hardwareAccelerationIsEnabled () {
     return window.DiscordNative.gpuSettings.getEnableHardwareAcceleration();
+  }
+
+  get defaultStatusColors () {
+    if (cache.defaultStatusColors) {
+      return cache.defaultStatusColors;
+    }
+
+    const statusModule = getModule([ 'getStatusMask' ], false);
+    const getStatusColor = statusModule.__powercordOriginal_getStatusColor ?? status.getStatusColor;
+
+    cache.defaultStatusColors = (Object.keys(StatusTypes)
+      .reduce((statusColors, status) => ({ ...statusColors, [status]: getStatusColor(status.toLowerCase()) }), {})
+    );
+
+    return cache.defaultStatusColors;
   }
 
   async startPlugin () {
@@ -124,6 +140,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
     const _this = this;
 
     const statusStore = await getModule([ 'isMobileOnline' ]);
+    statusStore.emitChange();
+
     this.inject('bsi-mobile-status-online', statusStore, 'isMobileOnline', function ([ userId ], res) {
       if (getSetting('mobileDisabled', false)) {
         return false;
@@ -152,17 +170,17 @@ module.exports = class BetterStatusIndicators extends Plugin {
     this.inject('bsi-status-colors', statusModule, 'getStatusColor', ([ status ], color) => {
       switch (status) {
         case 'online':
-          return getSetting('onlineStatusColor', '#43b581');
+          return getSetting('onlineStatusColor', this.defaultStatusColors.ONLINE);
         case 'idle':
-          return getSetting('idleStatusColor', '#faa61a');
+          return getSetting('idleStatusColor', this.defaultStatusColors.IDLE);
         case 'dnd':
-          return getSetting('dndStatusColor', '#f04747');
+          return getSetting('dndStatusColor', this.defaultStatusColors.DND);
         case 'streaming':
-          return getSetting('streamingStatusColor', '#643da7');
+          return getSetting('streamingStatusColor', this.defaultStatusColors.STREAMING);
         case 'offline':
-          return getSetting('offlineStatusColor', '#636b75');
+          return getSetting('offlineStatusColor', this.defaultStatusColors.OFFLINE);
         case 'invisible':
-          return getSetting('invisibleStatusColor', '#747f8d');
+          return getSetting('invisibleStatusColor', this.defaultStatusColors.INVISIBLE);
       }
 
       return color;
@@ -193,11 +211,10 @@ module.exports = class BetterStatusIndicators extends Plugin {
     }, true);
 
     const Mask = await getModule([ 'MaskLibrary' ]);
-    const statusColors = this._getDefaultStatusColors();
     this.inject('bsi-mobile-status', statusModule, 'Status', ([ { isMobile, status, size, color } ], res) => {
       const statusStyle = res.props.children.props.style;
       if (!color) {
-        statusStyle.backgroundColor = getSetting(`${status}StatusColor`, statusColors[status.toUpperCase()]);
+        statusStyle.backgroundColor = getSetting(`${status}StatusColor`, this.defaultStatusColors[status.toUpperCase()]);
       }
 
       if (status !== 'online' && isMobile) {
@@ -514,7 +531,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       const statusVariables = document.createElement('style');
       statusVariables.setAttribute('id', `${this.entityID}-status-variables`);
       statusVariables.textContent = `:root {\n\t${statuses.map(status => (
-        `--bsi-${status}-color: ${this.settings.get(`${status}StatusColor`, this._getDefaultStatusColors()[status.toUpperCase()])};`
+        `--bsi-${status}-color: ${this.settings.get(`${status}StatusColor`, this.defaultStatusColors[status.toUpperCase()])};`
       )).join('\n\t')}\n}\n`;
 
       document.body.classList.add('bsi-theme-variables');
@@ -550,38 +567,24 @@ module.exports = class BetterStatusIndicators extends Plugin {
           header: Messages.SWITCH_HARDWARE_ACCELERATION,
           confirmText: Messages.OKAY,
           cancelText: Messages.CANCEL,
-          onConfirm: () => window.DiscordNative.gpuSettings.setEnableHardwareAcceleration(true)
+          onConfirm: () => window.DiscordNative.gpuSettings.setEnableHardwareAcceleration(!0)
         }, React.createElement(Text, {}, Messages.SWITCH_HARDWARE_ACCELERATION_BODY)))
       }
     });
   }
 
-  _getDefaultStatusColors () {
-    const statusColors = {
-      ONLINE: 'STATUS_GREEN',
-      IDLE: 'STATUS_YELLOW',
-      DND: 'STATUS_RED',
-      STREAMING: 'TWITCH',
-      OFFLINE: 'STATUS_GREY',
-      INVISIBLE: 'STATUS_GREY',
-      UNKNOWN: 'STATUS_GREY'
-    };
-
-    Object.keys(StatusTypes).forEach(status => statusColors[status] = Colors[statusColors[status]]);
-
-    return statusColors;
-  }
-
   inject (...args) {
-    this.injectionIds.push(args[0]);
+    if (!cache.injectionIds) {
+      cache.injectionIds = [];
+    }
 
-    return inject(...args);
+    return (inject(...args), cache.injectionIds.push(args[0]));
   }
 
   pluginWillUnload () {
     powercord.api.settings.unregisterSettings('better-status-indicators');
 
-    this.injectionIds.forEach(id => uninject(id));
+    cache.injectionIds.forEach(id => uninject(id));
     this._refreshMaskLibrary();
 
     for (const modId of modules.keys()) {

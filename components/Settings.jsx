@@ -67,7 +67,7 @@ module.exports = class Settings extends React.PureComponent {
   constructor (props) {
     super(props);
 
-    this.statusColors = props.main._getDefaultStatusColors();
+    this.defaultStatusColors = props.main.defaultStatusColors;
     this.state = {
       section: 0,
       selectedItem: 'SETTINGS',
@@ -155,7 +155,7 @@ module.exports = class Settings extends React.PureComponent {
 
     const statuses = [ 'online', 'idle', 'dnd', 'offline', 'invisible', 'streaming' ];
     const hasModifiedColor = statuses.some(status => {
-      const defaultColor = this.statusColors[status.toUpperCase()];
+      const defaultColor = this.defaultStatusColors[status.toUpperCase()];
       return getSetting(`${status}StatusColor`, defaultColor) !== defaultColor;
     });
 
@@ -166,7 +166,7 @@ module.exports = class Settings extends React.PureComponent {
           <Flex.Child basis='70%'>
             <></> {/* Workaround for constructing a flex child */}
             {statuses.map(status => {
-              const defaultColor = this.statusColors[status.toUpperCase()];
+              const defaultColor = this.defaultStatusColors[status.toUpperCase()];
               const settingsKey = `${status}StatusColor`;
 
               return <TextInputWithButton
@@ -185,7 +185,7 @@ module.exports = class Settings extends React.PureComponent {
               color={Button.Colors.BRAND}
               className='bsi-reset-colors-button'
               onClick={() => statuses.forEach(status => {
-                updateSetting(`${status}StatusColor`, this.statusColors[status.toUpperCase()]);
+                updateSetting(`${status}StatusColor`, this.defaultStatusColors[status.toUpperCase()]);
                 this.props.main._refreshStatusVariables();
               })}
             >
@@ -203,7 +203,7 @@ module.exports = class Settings extends React.PureComponent {
       </Flex>
 
       {activeColorPicker && <ColorPickerInput
-        default={colorUtils.hex2int(this.statusColors[activeColorPicker.toUpperCase()])}
+        default={colorUtils.hex2int(this.defaultStatusColors[activeColorPicker.toUpperCase()])}
         value={colorUtils.hex2int(getSetting(`${activeColorPicker}StatusColor`, '000000'))}
         onChange={(value) => ((updateSetting(`${activeColorPicker}StatusColor`, colorUtils.int2hex(value)), this.props.main._refreshStatusVariables()))}
       />}
