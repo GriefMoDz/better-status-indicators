@@ -307,9 +307,25 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     avatarModule.default.Sizes = avatarModule.Sizes;
 
+    const Avatar = avatarModule.default;
+    const NowPlayingHeader = await getModule(m => m.default?.displayName === 'NowPlayingHeader');
+    this.inject('bsi-now-playing-avatar-status', NowPlayingHeader, 'default', (_, res) => {
+      const originalType = res.type;
+
+      res.type = (props) => {
+        const res = originalType(props);
+        res.props.children[0].type = Avatar;
+
+        return res;
+      };
+
+      return res;
+    });
+
+    NowPlayingHeader.default.displayName = 'NowPlayingHeader';
+
     /* Avatar Status Indicator - Hardware Acceleration Disabled: Fixes */
     if (!this.hardwareAccelerationIsEnabled) {
-      const Avatar = avatarModule.default;
       const UserProfileBody = await this._getUserProfileBody();
       this.inject('bsi-user-profile-avatar-status', UserProfileBody.prototype, 'renderHeader', (_, res) => {
         if (Array.isArray(res.props?.children) && res.props.children[0]) {

@@ -240,15 +240,11 @@ $status-colors: (
 /** Settings **/
 .bsi-settings {
   &-title {
-    margin-bottom: 0px;
+    margin-bottom: 0;
   }
 
   &-tab-bar {
-    background-color: var(--background-secondary);
-    padding: 8px 10px;
-    border-radius: 25px;
     margin-bottom: 25px;
-    margin-left: -5px;
 
     .selected-3s45Ha {
       cursor: pointer !important;
@@ -363,7 +359,7 @@ html.reduce-motion {
   }
 
   .item-1tOPte {
-    margin: 5px 0px;
+    margin: 5px 0;
     cursor: default;
   }
 }
@@ -373,7 +369,7 @@ html.reduce-motion {
 
   &:focus-within [type='button']:not([class*='disabled']),
   &:hover [type='button']:not([class*='disabled']) {
-    width: 150px !important;
+    width: 160px !important;
   }
 
   &:not([class*='disabled']):focus-within,

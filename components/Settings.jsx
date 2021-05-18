@@ -28,7 +28,7 @@
 
 /* eslint-disable object-property-newline */
 const { React, getModule, getModuleByDisplayName, i18n: { Messages } } = require('powercord/webpack');
-const { Button, Divider, Flex, FormTitle, Icons: { FontAwesome }, TabBar, Text, modal: { Confirm } } = require('powercord/components');
+const { Button, Divider, Flex, FormTitle, Icons: { FontAwesome }, Text, modal: { Confirm } } = require('powercord/components');
 const { ColorPickerInput, SwitchItem, RadioGroup } = require('powercord/components/settings');
 const { open: openModal } = require('powercord/modal');
 
@@ -40,7 +40,6 @@ const TextInputWithButton = require('./TextInputWithButton');
 
 const colorUtils = getModule([ 'isValidHex' ], false);
 const statusStore = getModule([ 'isMobileOnline' ], false);
-const Breadcrumbs = getModuleByDisplayName('Breadcrumbs', false);
 const breadcrumbClasses = getModule([ 'breadcrumbInactive', 'breadcrumbActive' ], false);
 
 const { availableModules } = require('../modules');
@@ -61,6 +60,9 @@ function handleSettingChangeAndReload (headerText, setting) {
     }
   }, React.createElement(Text, {}, Messages.BSI_CHANGE_SETTING_MODAL_BODY)));
 }
+
+const TabBar = getModuleByDisplayName('TabBar', false);
+const Breadcrumbs = getModuleByDisplayName('Breadcrumbs', false);
 
 // @todo: Make settings dynamic to improve readability and performance
 module.exports = class Settings extends React.PureComponent {
@@ -126,26 +128,26 @@ module.exports = class Settings extends React.PureComponent {
   }
 
   renderTabBar () {
-    const { topPill, item } = getModule([ 'topPill' ], false);
+    const { tabBar, tabBarItem } = getModule([ 'tabBar', 'tabBarItem' ], false);
 
     return (
-      <div className='bsi-settings-tab-bar'>
-        <TabBar
-          selectedItem={this.state.selectedItem}
-          onItemSelect={selectedItem => this.setState({ section: 0, selectedItem })}
-          type={topPill}
-        >
-          <TabBar.Item className={item} selectedItem={this.state.selectedItem} id='SETTINGS'>
-            {Messages.SETTINGS}
-          </TabBar.Item>
-          <TabBar.Item className={item} selectedItem={this.state.selectedItem} id='CUSTOMIZE'>
-            {Messages.BSI_CUSTOMIZE}
-          </TabBar.Item>
-          <TabBar.Item className={item} selectedItem={this.state.selectedItem} id='MODULES'>
-            {Messages.BSI_MODULES}
-          </TabBar.Item>
-        </TabBar>
-      </div>
+      <TabBar
+        className={[ 'bsi-settings-tab-bar', tabBar ].join(' ')}
+        selectedItem={this.state.selectedItem}
+        onItemSelect={selectedItem => this.setState({ section: 0, selectedItem })}
+        look={TabBar.Looks.BRAND}
+        type={TabBar.Types.TOP}
+      >
+        <TabBar.Item className={tabBarItem} id='SETTINGS'>
+          {Messages.SETTINGS}
+        </TabBar.Item>
+        <TabBar.Item className={tabBarItem} id='CUSTOMIZE'>
+          {Messages.BSI_CUSTOMIZE}
+        </TabBar.Item>
+        <TabBar.Item className={tabBarItem} id='MODULES'>
+          {Messages.BSI_MODULES} ({Object.keys(availableModules).filter(modId => !availableModules[modId]?.hidden).length})
+        </TabBar.Item>
+      </TabBar>
     );
   }
 
@@ -161,7 +163,7 @@ module.exports = class Settings extends React.PureComponent {
 
     return <>
       <Flex direction={Flex.Direction.VERTICAL}>
-        <FormTitle>{Messages.BSI_STATUS_COLOR_PICKER} / {Messages.FORM_LABEL_VIDEO_PREVIEW}</FormTitle>
+        <FormTitle>{Messages.BSI_STATUS_COLOR_PICKER} & {Messages.FORM_LABEL_VIDEO_PREVIEW}</FormTitle>
         <Flex>
           <Flex.Child basis='70%'>
             <></> {/* Workaround for constructing a flex child */}
@@ -171,7 +173,7 @@ module.exports = class Settings extends React.PureComponent {
 
               return <TextInputWithButton
                 placeholder={`${status.charAt(0).toUpperCase()}${status.slice(1)} - ${defaultColor}`}
-                buttonText={`${activeColorPicker === status ? 'Close' : 'Open'} Color Picker`}
+                buttonText={activeColorPicker === status ? Messages.BSI_CLOSE_COLOR_PICKER : Messages.BSI_OPEN_COLOR_PICKER}
                 buttonColor={getSetting(settingsKey, defaultColor)}
                 buttonIcon='fas fa-palette'
                 onButtonClick={() => this.setState({ activeColorPicker: activeColorPicker === status ? '' : status })}
@@ -296,7 +298,7 @@ module.exports = class Settings extends React.PureComponent {
   }
 
   renderModules () {
-    const modules = Object.keys(availableModules);
+    const modules = Object.keys(availableModules).filter(modId => !availableModules[modId]?.hidden);
     const settingsProps = (({ getSetting, toggleSetting, updateSetting }) => ({ getSetting, toggleSetting, updateSetting }))(this.props);
 
     return <>
