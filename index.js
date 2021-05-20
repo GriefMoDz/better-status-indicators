@@ -336,10 +336,25 @@ module.exports = class BetterStatusIndicators extends Plugin {
       });
 
       const UserPopout = await this._getUserPopout();
-      this.inject('bsi-user-popout-avatar-status', UserPopout.prototype, 'renderHeader', (_, res) => {
-        const avatarContainer = findInReactTree(res, n => n?.props?.className.includes(this.classes.avatarWrapper));
-        if (avatarContainer) {
-          avatarContainer.props.children[0].type = Avatar;
+      this.inject('bsi-user-popout-avatar-status', UserPopout.prototype, 'renderHeader', function (_, res) {
+        const patchAvatarComponent = (res) => {
+          const avatarComponent = findInReactTree(res, n => n.props?.src && n.props?.isMobile);
+          if (avatarComponent) {
+            avatarComponent.type = Avatar;
+          }
+        }
+
+        if (this.props.showCustomProfiles) {
+          const originalType = res.type;
+          res.type = (props) => {
+            const res = originalType(props);
+
+            patchAvatarComponent(res);
+
+            return res;
+          }
+        } else {
+          patchAvatarComponent(res);
         }
 
         return res;
