@@ -509,12 +509,14 @@ module.exports = class BetterStatusIndicators extends Plugin {
     const ogUseState = owo.useState;
     const ogUseEffect = owo.useEffect;
     const ogUseLayoutEffect = owo.useLayoutEffect;
+    const ogUseCallback = owo.useCallback;
     const ogUseRef = owo.useRef;
 
     owo.useMemo = (fn) => fn();
     owo.useState = (value) => [ value, () => void 0 ];
     owo.useEffect = () => null;
     owo.useLayoutEffect = () => null;
+    owo.useCallback = (cb) => cb;
     owo.useRef = () => ({});
 
     const res = new ConnectedUserPopout({ user: { isNonUserBot: () => void 0 } }).type;
@@ -523,6 +525,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     owo.useState = ogUseState;
     owo.useEffect = ogUseEffect;
     owo.useLayoutEffect = ogUseLayoutEffect;
+    owo.ogUseCallback = ogUseCallback;
     owo.useRef = ogUseRef;
 
     userStore.getCurrentUser = ogGetCurrentUser;
