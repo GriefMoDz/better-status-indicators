@@ -262,6 +262,7 @@ $status-colors: (
 
   &-status-display-title {
     margin: 10px 0 8px 0;
+    font-family: var(--font-primary);
   }
 
   &-card, &-module-card {

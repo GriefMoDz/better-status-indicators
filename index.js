@@ -314,6 +314,10 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
       res.type = (props) => {
         const res = originalType(props);
+        if (props.priorityUser?.user?.id) {
+          res.props.children[0].props.isMobile = statusStore.isMobileOnline(props.priorityUser.user.id);
+        }
+
         res.props.children[0].type = Avatar;
 
         return res;
@@ -335,26 +339,11 @@ module.exports = class BetterStatusIndicators extends Plugin {
         return res;
       });
 
-      const UserPopout = await this._getUserPopout();
-      this.inject('bsi-user-popout-avatar-status', UserPopout.prototype, 'renderHeader', function (_, res) {
-        const patchAvatarComponent = (res) => {
-          const avatarComponent = findInReactTree(res, n => n.props?.src && n.props?.isMobile);
-          if (avatarComponent) {
-            avatarComponent.type = Avatar;
-          }
-        }
-
-        if (this.props.showCustomProfiles) {
-          const originalType = res.type;
-          res.type = (props) => {
-            const res = originalType(props);
-
-            patchAvatarComponent(res);
-
-            return res;
-          }
-        } else {
-          patchAvatarComponent(res);
+      const UserPopoutHeader = await getModule(m => m.default?.displayName === 'UserPopoutHeader');
+      this.inject('bsi-user-popout-avatar-status', UserPopoutHeader, 'default', (_, res) => {
+        const avatarComponent = findInReactTree(res, n => n.props?.hasOwnProperty('isMobile'));
+        if (avatarComponent) {
+          avatarComponent.type = Avatar;
         }
 
         return res;
@@ -509,43 +498,6 @@ module.exports = class BetterStatusIndicators extends Plugin {
       const { container } = await getModule([ 'container', 'base' ]);
       await waitFor(`.${container}`).then(this._refreshMaskLibrary);
     }
-  }
-
-  async _getUserPopout () {
-    const userStore = await getModule([ 'getCurrentUser' ]);
-    const ConnectedUserPopout = await getModuleByDisplayName('ConnectedUserPopout');
-
-    const ogGetCurrentUser = userStore.getCurrentUser;
-
-    userStore.getCurrentUser = () => ({ id: 0 });
-
-    const owo = React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentDispatcher.current;
-    const ogUseMemo = owo.useMemo;
-    const ogUseState = owo.useState;
-    const ogUseEffect = owo.useEffect;
-    const ogUseLayoutEffect = owo.useLayoutEffect;
-    const ogUseCallback = owo.useCallback;
-    const ogUseRef = owo.useRef;
-
-    owo.useMemo = (fn) => fn();
-    owo.useState = (value) => [ value, () => void 0 ];
-    owo.useEffect = () => null;
-    owo.useLayoutEffect = () => null;
-    owo.useCallback = (cb) => cb;
-    owo.useRef = () => ({});
-
-    const res = new ConnectedUserPopout({ user: { isNonUserBot: () => void 0 } }).type;
-
-    owo.useMemo = ogUseMemo;
-    owo.useState = ogUseState;
-    owo.useEffect = ogUseEffect;
-    owo.useLayoutEffect = ogUseLayoutEffect;
-    owo.ogUseCallback = ogUseCallback;
-    owo.useRef = ogUseRef;
-
-    userStore.getCurrentUser = ogGetCurrentUser;
-
-    return res;
   }
 
   async _getUserProfileBody () {
