@@ -502,10 +502,12 @@ module.exports = class BetterStatusIndicators extends Plugin {
       const changelog = sections.find(category => category.section === 'changelog');
       if (changelog) {
         const bsiSettingsPage = sections.find(category => category.section === 'better-status-indicators');
-        bsiSettingsPage.element = () => React.createElement(ErrorBoundary, {}, React.createElement(FormSection, {
-          title: 'Better Status Indicators',
-          tag: 'h1'
-        }, React.createElement(powercord.api.settings.tabs['better-status-indicators'].render)));
+        if (bsiSettingsPage) {
+          bsiSettingsPage.element = () => React.createElement(ErrorBoundary, {}, React.createElement(FormSection, {
+            title: 'Better Status Indicators',
+            tag: 'h1'
+          }, React.createElement(powercord.api.settings.tabs['better-status-indicators'].render)));
+        }
       }
 
       return sections;
