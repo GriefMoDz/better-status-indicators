@@ -28,9 +28,8 @@
 
 /* eslint-disable object-property-newline */
 const { React, getModule, getModuleByDisplayName, i18n: { Messages } } = require('powercord/webpack');
-const { Button, Divider, Flex, FormTitle, Icons: { FontAwesome }, Text, modal: { Confirm } } = require('powercord/components');
+const { Button, Divider, Flex, FormTitle, Text } = require('powercord/components');
 const { ColorPickerInput, SwitchItem, RadioGroup } = require('powercord/components/settings');
-const { open: openModal } = require('powercord/modal');
 
 const Icons = require('./Icons');
 const ModuleCard = require('./ModuleCard');
@@ -38,520 +37,328 @@ const SettingsCard = require('./SettingsCard');
 const StatusPickerPreview = require('./StatusPickerPreview');
 const TextInputWithButton = require('./TextInputWithButton');
 
-const colorUtils = getModule([ 'isValidHex' ], false);
-const statusStore = getModule([ 'isMobileOnline' ], false);
-const breadcrumbClasses = getModule([ 'breadcrumbInactive', 'breadcrumbActive' ], false);
-
-const { availableModules } = require('../modules');
+const Lodash = window._;
+const ColorUtils = getModule([ 'isValidHex' ], false);
 
 function formatClientTranslation (translation, args) {
   const key = translation === 'DISPLAY_TITLE' ? 'CLIENT_DISPLAY_TITLE' : `CLIENT_SWITCH_${translation}`;
   return Messages[`BSI_${key}`].format(args);
 }
 
-function handleSettingChangeAndReload (headerText, setting) {
-  return openModal(() => React.createElement(Confirm, {
-    header: headerText,
-    confirmText: Messages.OKAY,
-    cancelText: Messages.CANCEL,
-    onConfirm: () => {
-      this.props.toggleSetting(setting, true);
-      setTimeout(() => location.reload(), 1e3);
-    }
-  }, React.createElement(Text, {}, Messages.BSI_CHANGE_SETTING_MODAL_BODY)));
-}
+const { availableModules } = require('../modules');
 
 const TabBar = getModuleByDisplayName('TabBar', false);
 const Breadcrumbs = getModuleByDisplayName('Breadcrumbs', false);
 
-// @todo: Make settings dynamic to improve readability and performance
-module.exports = class Settings extends React.PureComponent {
-  constructor (props) {
-    super(props);
+const SettingsSections = {
+  SETTINGS: 0,
+  DESKTOP: 1,
+  MOBILE: 2,
+  WEB: 3,
+  STREAMING: 4
+};
 
-    this.defaultStatusColors = props.main.defaultStatusColors;
-    this.state = {
-      section: 0,
-      selectedItem: 'SETTINGS',
-      activeColorPicker: ''
-    };
-
-    this.settingsSections = {
-      SETTINGS: [ 0, 'Settings' ],
-      DESKTOP: [ 1, 'Desktop' ],
-      MOBILE: [ 2, 'Mobile' ],
-      WEB: [ 3, 'Web' ],
-      STREAMING: [ 4, 'Streaming' ]
-    };
+function getSectionLabel (section) {
+  switch (section) {
+    case SettingsSections.SETTINGS:
+      return Messages.SETTINGS;
+    case SettingsSections.DESKTOP:
+      return Messages.FORM_LABEL_DESKTOP_ONLY;
+    case SettingsSections.MOBILE:
+      return Messages.BSI_MOBILE;
+    case SettingsSections.WEB:
+      return Messages.BSI_WEB;
+    case SettingsSections.STREAMING:
+      return Messages.STATUS_STREAMING;
   }
+}
 
-  render () {
-    const { section, selectedItem } = this.state;
+function renderTabBar ({ selectedItem, setSelectedItem, setSection }) {
+  const { tabBar, tabBarItem } = getModule([ 'tabBar', 'tabBarItem' ], false);
+  const handleOnItemSelect = (selectedItem) => {
+    setSelectedItem(selectedItem);
+    setSection(null);
+  };
 
-    return <>
-      {this.renderTabBar()}
+  return (
+    <TabBar
+      className={[ 'bsi-settings-tab-bar', tabBar ].filter(Boolean).join(' ')}
+      selectedItem={selectedItem}
+      onItemSelect={handleOnItemSelect}
+      look={TabBar.Looks.BRAND}
+      type={TabBar.Types.TOP}
+    >
+      <TabBar.Item className={tabBarItem} id='SETTINGS'>
+        {Messages.SETTINGS}
+      </TabBar.Item>
+      <TabBar.Item className={tabBarItem} id='CUSTOMIZE'>
+        {Messages.BSI_CUSTOMIZE}
+      </TabBar.Item>
+      <TabBar.Item className={tabBarItem} id='MODULES'>
+        {Messages.BSI_MODULES} ({Object.keys(availableModules).filter(modId => !availableModules[modId]?.hidden).length})
+      </TabBar.Item>
+    </TabBar>
+  );
+}
 
-      <React.Fragment>
-        <Flex align={Flex.Align.CENTER} className={breadcrumbClasses.breadcrumbs}>
-          {section === 0 && <FormTitle tag='h2' className='bsi-settings-title'>
-            {Messages[`${selectedItem !== 'SETTINGS' ? 'BSI_' : ''}${selectedItem}`]}
-          </FormTitle>}
+function renderBreadcrumb ({ selectedItem, section, setSection }) {
+  const breadcrumbClasses = getModule([ 'breadcrumbInactive', 'breadcrumbActive' ], false);
 
-          {section !== 0 && <Breadcrumbs
-            activeId={section.toString()}
-            breadcrumbs={[ this.settingsSections.SETTINGS, Object.values(this.settingsSections).find(section => section[0] === this.state.section) ].map(e => ({
-              id: e[0].toString(),
-              label: e[1]
-            }))}
-            onBreadcrumbClick={(section) => this.setState({ section: parseInt(section.id) })}
-            renderCustomBreadcrumb={(section, active) => React.createElement(FormTitle, {
-              tag: 'h2',
-              className: [
-                'bsi-settings-title',
-                breadcrumbClasses.breadcrumb,
-                active ? breadcrumbClasses.breadcrumbActive : breadcrumbClasses.breadcrumbInactive
-              ].join(' ')
-            }, section.label)}
-          ></Breadcrumbs>}
-        </Flex>
+  return <Flex align={Flex.Align.CENTER} className={breadcrumbClasses.breadcrumbs}>
+    {(!section || section === SettingsSections.SETTINGS)
+      ? <FormTitle tag='h1' className='bsi-settings-title'>
+        {Messages[`${selectedItem !== 'SETTINGS' ? 'BSI_' : ''}${selectedItem}`]}
+      </FormTitle>
+      : <Breadcrumbs
+        activeId={section.toString()}
+        breadcrumbs={[ SettingsSections.SETTINGS, section ].map(e => ({
+          id: e.toString(),
+          label: getSectionLabel(e)
+        }))}
+        onBreadcrumbClick={section => setSection(parseInt(section.id))}
+        renderCustomBreadcrumb={(section, active) => React.createElement(FormTitle, {
+          tag: 'h1',
+          className: [
+            'bsi-settings-title',
+            breadcrumbClasses.breadcrumb,
+            active ? breadcrumbClasses.breadcrumbActive : breadcrumbClasses.breadcrumbInactive
+          ].join(' ')
+        }, section.label)}
+      ></Breadcrumbs>}
+  </Flex>;
+}
 
-        {section === 0 && selectedItem === 'SETTINGS' && this.renderSettings()}
-        {section === 0 && selectedItem === 'CUSTOMIZE' && this.renderCustomize()}
-        {section === 0 && selectedItem === 'MODULES' && this.renderModules()}
+function renderSectionSettings (section, { getSetting, toggleSetting, updateSetting }) {
+  const sections = require('../stores/settingsSections');
 
-        {section === 1 && this.renderDesktopSettings()}
-        {section === 2 && this.renderMobileSettings()}
-        {section === 3 && this.renderWebSettings()}
-        {section === 4 && this.renderStreamSettings()}
-      </React.Fragment>
-    </>;
-  }
+  const elements = [];
+  const { settings } = sections[section];
 
-  renderTabBar () {
-    const { tabBar, tabBarItem } = getModule([ 'tabBar', 'tabBarItem' ], false);
+  const client = section === 'stream' ? 'streaming' : section;
 
-    return (
-      <TabBar
-        className={[ 'bsi-settings-tab-bar', tabBar ].join(' ')}
-        selectedItem={this.state.selectedItem}
-        onItemSelect={selectedItem => this.setState({ section: 0, selectedItem })}
-        look={TabBar.Looks.BRAND}
-        type={TabBar.Types.TOP}
-      >
-        <TabBar.Item className={tabBarItem} id='SETTINGS'>
-          {Messages.SETTINGS}
-        </TabBar.Item>
-        <TabBar.Item className={tabBarItem} id='CUSTOMIZE'>
-          {Messages.BSI_CUSTOMIZE}
-        </TabBar.Item>
-        <TabBar.Item className={tabBarItem} id='MODULES'>
-          {Messages.BSI_MODULES} ({Object.keys(availableModules).filter(modId => !availableModules[modId]?.hidden).length})
-        </TabBar.Item>
-      </TabBar>
-    );
-  }
+  Object.keys(settings).forEach(key => {
+    const setting = settings[key];
+    const description = setting.description !== void 0
+      ? (typeof setting.description === 'string' && (/%.+%/).test(setting.description)
+        ? formatClientTranslation(setting.description.replace(/%(.+)%/, '$1'), { client })
+        : setting.description)
+      : '';
 
-  renderCustomize () {
-    const { activeColorPicker } = this.state;
-    const { getSetting, updateSetting, toggleSetting } = this.props;
+    const settingsKey = Lodash.camelCase(`${section}-${key}`);
 
-    const statuses = [ 'online', 'idle', 'dnd', 'offline', 'invisible', 'streaming' ];
-    const hasModifiedColor = statuses.some(status => {
-      const defaultColor = this.defaultStatusColors[status.toUpperCase()];
-      return getSetting(`${status}StatusColor`, defaultColor) !== defaultColor;
-    });
+    switch (setting.type) {
+      case 'radio':
+        return elements.push(React.createElement(RadioGroup, {
+          options: setting.options,
+          note: description,
+          value: getSetting(settingsKey, setting.defaultValue),
+          onChange: (e) => updateSetting(settingsKey, e.value)
+        }, setting.name));
+      case 'switch':
+        elements.push(React.createElement(SwitchItem, {
+          note: description,
+          value: getSetting(settingsKey, setting.defaultValue),
+          onChange: typeof setting.onChange === 'function' ? setting.onChange : () => toggleSetting(settingsKey, setting.defaultValue),
+          disabled: setting.disabled !== void 0
+            ? (typeof setting.disabled === 'function' ? setting.disabled() : setting.disabled)
+            : false
+        }, setting.name));
+    }
+  });
 
-    return <>
-      <Flex direction={Flex.Direction.VERTICAL}>
-        <FormTitle>{Messages.BSI_STATUS_COLOR_PICKER} & {Messages.FORM_LABEL_VIDEO_PREVIEW}</FormTitle>
-        <Flex>
-          <Flex.Child basis='70%'>
-            <></> {/* Workaround for constructing a flex child */}
-            {statuses.map(status => {
-              const defaultColor = this.defaultStatusColors[status.toUpperCase()];
-              const settingsKey = `${status}StatusColor`;
+  return <React.Fragment>
+    <FormTitle className='bsi-settings-status-display-title'>{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: Lodash.upperFirst(client) })}</FormTitle>
+    {elements}
+  </React.Fragment>;
+}
 
-              return <TextInputWithButton
-                placeholder={`${status.charAt(0).toUpperCase()}${status.slice(1)} - ${defaultColor}`}
-                buttonText={activeColorPicker === status ? Messages.BSI_CLOSE_COLOR_PICKER : Messages.BSI_OPEN_COLOR_PICKER}
-                buttonColor={getSetting(settingsKey, defaultColor)}
-                buttonIcon='fas fa-palette'
-                onButtonClick={() => this.setState({ activeColorPicker: activeColorPicker === status ? '' : status })}
-                onChange={(value) => ((updateSetting(settingsKey, value === '' ? defaultColor : value), this.props.main._refreshStatusVariables()))}
-                defaultValue={getSetting(settingsKey, defaultColor)}
-              />;
+function renderSettings ({ setSection }, { getSetting, toggleSetting }) {
+  const sections = require('../stores/settingsSections');
+
+  return <React.Fragment>
+    <FormTitle className='bsi-settings-status-display-title'>{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'Client' })}</FormTitle>
+
+    {[ 'desktop', 'mobile', 'web', 'stream' ].map((key, index) => {
+      const section = sections[key];
+      let customFormTitle = null;
+
+      if (key === 'stream') {
+        customFormTitle = <FormTitle className='bsi-settings-status-display-title'>{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'Activity' })}</FormTitle>;
+      }
+
+      return [ customFormTitle, <SettingsCard
+        buttonText={Messages.BSI_VIEW_SETTINGS}
+        hasNextSection={true}
+        name={section.name}
+        onButtonClick={() => setSection(index + 1)}
+        details={[ { text: `${Object.keys(section.settings).length} ${Messages.SETTINGS}` } ]}
+        icon={(props) => React.createElement(Icons[section.icon], { ...props })}
+      /> ].filter(Boolean);
+    })}
+
+    <Divider />
+
+    <FormTitle className='bsi-settings-status-display-title'>{Messages.BSI_STATUS_DISPLAY}</FormTitle>
+    <SwitchItem
+      note={Messages.BSI_TRUE_STATUS_DESC}
+      value={getSetting('trueStatusColor', false)}
+      onChange={() => toggleSetting('trueStatusColor', false)}
+    >
+      {Messages.BSI_TRUE_STATUS}
+    </SwitchItem>
+  </React.Fragment>;
+}
+
+
+function renderCustomize ({ activeColorPicker, setActiveColorPicker }, props) {
+  const { getSetting, updateSetting, toggleSetting, main } = props;
+
+  const statuses = [ 'online', 'idle', 'dnd', 'offline', 'invisible', 'streaming' ];
+  const hasModifiedDefaults = statuses.some(status => {
+    const defaultColor = main.defaultStatusColors[status.toUpperCase()];
+    return getSetting(`${status}StatusColor`, defaultColor) !== defaultColor;
+  });
+
+  return <React.Fragment>
+    <Flex direction={Flex.Direction.VERTICAL}>
+      <FormTitle>{Messages.BSI_STATUS_COLOR_PICKER} & {Messages.FORM_LABEL_VIDEO_PREVIEW}</FormTitle>
+      <Flex>
+        <Flex.Child basis='70%'>
+          <></>
+          {statuses.map(status => {
+            const defaultColor = main.defaultStatusColors[status.toUpperCase()];
+            const settingsKey = `${status}StatusColor`;
+
+            return <TextInputWithButton
+              placeholder={`${status.charAt(0).toUpperCase()}${status.slice(1)} - ${defaultColor}`}
+              buttonText={activeColorPicker === status ? Messages.BSI_CLOSE_COLOR_PICKER : Messages.BSI_OPEN_COLOR_PICKER}
+              buttonColor={getSetting(settingsKey, defaultColor)}
+              buttonIcon='fas fa-palette'
+              onButtonClick={() => setActiveColorPicker(activeColorPicker === status ? '' : status)}
+              onChange={(value) => ((updateSetting(settingsKey, value === '' ? defaultColor : value), main._refreshStatusVariables()))}
+              defaultValue={getSetting(settingsKey, defaultColor)}
+            />;
+          })}
+
+          {hasModifiedDefaults && <Button
+            size={Button.Sizes.MIN}
+            color={Button.Colors.BRAND}
+            className='bsi-reset-colors-button'
+            onClick={() => statuses.forEach(status => {
+              updateSetting(`${status}StatusColor`, main.defaultStatusColors[status.toUpperCase()]);
+              main._refreshStatusVariables();
             })}
+          >
+            {Messages.BSI_RESTORE_DEFAULT_COLORS}
+          </Button>}
+        </Flex.Child>
 
-            {hasModifiedColor && <Button
-              size={Button.Sizes.MIN}
-              color={Button.Colors.BRAND}
-              className='bsi-reset-colors-button'
-              onClick={() => statuses.forEach(status => {
-                updateSetting(`${status}StatusColor`, this.defaultStatusColors[status.toUpperCase()]);
-                this.props.main._refreshStatusVariables();
-              })}
-            >
-              {Messages.BSI_RESTORE_DEFAULT_COLORS}
-            </Button>}
-          </Flex.Child>
-
-          <Flex.Child basis='auto'>
-            <></> {/* Workaround for constructing a flex child */}
-            <StatusPickerPreview className={activeColorPicker ? 'animate' : ''} active={activeColorPicker} />
-          </Flex.Child>
-        </Flex>
-
-        <Text size={Text.Sizes.SIZE_12} style={{ marginTop: 10 }}>{Messages.BSI_STATUS_COLOR_CHANGE_NOTE.format({})}</Text>
+        <Flex.Child basis='auto'>
+          <></>
+          <StatusPickerPreview className={activeColorPicker ? 'animate' : ''} selectedStatus={activeColorPicker} />
+        </Flex.Child>
       </Flex>
 
-      {activeColorPicker && <ColorPickerInput
-        default={colorUtils.hex2int(this.defaultStatusColors[activeColorPicker.toUpperCase()])}
-        value={colorUtils.hex2int(getSetting(`${activeColorPicker}StatusColor`, '000000'))}
-        onChange={(value) => ((updateSetting(`${activeColorPicker}StatusColor`, colorUtils.int2hex(value)), this.props.main._refreshStatusVariables()))}
-      />}
+      <Text size={Text.Sizes.SIZE_12} style={{ marginTop: 10 }}>{Messages.BSI_STATUS_COLOR_CHANGE_NOTE.format({})}</Text>
+    </Flex>
 
-      {!activeColorPicker && <Divider/>}
+    {activeColorPicker && <ColorPickerInput
+      default={ColorUtils.hex2int(main.defaultStatusColors[activeColorPicker.toUpperCase()])}
+      value={ColorUtils.hex2int(getSetting(`${activeColorPicker}StatusColor`, '000000'))}
+      onChange={(value) => ((updateSetting(`${activeColorPicker}StatusColor`, ColorUtils.int2hex(value)), main._refreshStatusVariables()))}
+    />}
 
-      <RadioGroup
-        options={[
-          { name: Messages.BSI_STATUS_DISPLAY_SOLID_OPT, value: 'solid' },
-          { name: Messages.BSI_STATUS_DISPLAY_DEFAULT_OPT, value: 'default' },
-          { name: Messages.BSI_STATUS_DISPLAY_CLASSIC_OPT, value: 'classic' }
-        ]}
-        value={this.props.getSetting('statusDisplay', 'default')}
-        onChange={e => {
-          this.props.updateSetting('statusDisplay', e.value);
-          this.props.main._refreshMaskLibrary();
-        }}
-      >
-        {Messages.BSI_STATUS_DISPLAY}
-      </RadioGroup>
+    {!activeColorPicker && <Divider/>}
 
-      <SwitchItem
-        note={Messages.BSI_THEME_VARIABLES_DESC}
-        value={getSetting('themeVariables', false)}
-        onChange={(state) => {
-          toggleSetting('themeVariables', false);
-          this.props.main._refreshStatusVariables(!state);
-        }}
-      >
-        {Messages.BSI_THEME_VARIABLES}
-      </SwitchItem>
-    </>;
+    <RadioGroup
+      options={[
+        { name: Messages.BSI_STATUS_DISPLAY_SOLID_OPT, value: 'solid' },
+        { name: Messages.BSI_STATUS_DISPLAY_DEFAULT_OPT, value: 'default' },
+        { name: Messages.BSI_STATUS_DISPLAY_CLASSIC_OPT, value: 'classic' }
+      ]}
+      value={props.getSetting('statusDisplay', 'default')}
+      onChange={e => {
+        props.updateSetting('statusDisplay', e.value);
+        main._refreshMaskLibrary();
+      }}
+    >
+      {Messages.BSI_STATUS_DISPLAY}
+    </RadioGroup>
+
+    <SwitchItem
+      note={Messages.BSI_THEME_VARIABLES_DESC}
+      value={getSetting('themeVariables', false)}
+      onChange={(state) => {
+        toggleSetting('themeVariables', false);
+        main._refreshStatusVariables(!state);
+      }}
+    >
+      {Messages.BSI_THEME_VARIABLES}
+    </SwitchItem>
+  </React.Fragment>;
+}
+
+function renderModules ({ getSetting, toggleSetting, updateSetting, main }) {
+  const modules = Object.keys(availableModules).filter(modId => !availableModules[modId]?.hidden);
+
+  return <React.Fragment>
+    <FormTitle className='bsi-settings-status-display-title'>{Messages.BSI_AVAILABLE_MODULES.format({ count: modules.length })}</FormTitle>
+    <Text size={Text.Sizes.SIZE_12} style={{ marginBottom: 10 }}>{Messages.BSI_MODULES_CHANGE_NOTE.format({})}</Text>
+
+    {modules.map(modId => {
+      const mod = availableModules[modId];
+
+      return <ModuleCard
+        id={modId}
+        name={mod.name}
+        description={mod.description || 'No description given.'}
+        icon={mod.icon ? (props) => React.createElement(Icons[mod.icon], { ...props }) : null}
+        settings={mod.settings || []}
+        main={main}
+        {...{ getSetting, toggleSetting, updateSetting }}
+      />;
+    })}
+  </React.Fragment>;
+}
+
+function renderContent (states, props) {
+  switch (states.section) {
+    case SettingsSections.DESKTOP:
+      return renderSectionSettings('desktop', props);
+    case SettingsSections.MOBILE:
+      return renderSectionSettings('mobile', props);
+    case SettingsSections.WEB:
+      return renderSectionSettings('web', props);
+    case SettingsSections.STREAMING:
+      return renderSectionSettings('stream', props);
+    default:
+      if (states.selectedItem === 'SETTINGS') {
+        return renderSettings(states, props);
+      } else if (states.selectedItem === 'CUSTOMIZE') {
+        return renderCustomize(states, props);
+      } else if (states.selectedItem === 'MODULES') {
+        return renderModules(props);
+      }
   }
+}
 
-  renderSettings () {
-    const { getSetting, toggleSetting } = this.props;
+module.exports = React.memo(props => {
+  const [ activeColorPicker, setActiveColorPicker ] = React.useState(null);
+  const [ selectedItem, setSelectedItem ] = React.useState('SETTINGS');
+  const [ section, setSection ] = React.useState(null);
 
-    return <>
-      <FormTitle className="bsi-settings-status-display-title">{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'Client' })}</FormTitle>
+  const states = {
+    activeColorPicker,
+    setActiveColorPicker,
+    selectedItem,
+    setSelectedItem,
+    section,
+    setSection
+  };
 
-      <SettingsCard
-        buttonText={Messages.BSI_VIEW_SETTINGS}
-        hasNextSection={true}
-        name={Messages.FORM_LABEL_DESKTOP_ONLY}
-        onButtonClick={() => this.setState({ section: 1 })}
-        details={[ { text: `8 ${Messages.SETTINGS}` } ]}
-        icon={(props) => React.createElement(Icons.Monitor, { ...props })}
-      />
-
-      <SettingsCard
-        buttonText={Messages.BSI_VIEW_SETTINGS}
-        hasNextSection={true}
-        name={Messages.BSI_MOBILE}
-        onButtonClick={() => this.setState({ section: 2 })}
-        details={[ { text: `5 ${Messages.SETTINGS}` } ]}
-        icon={(props) => React.createElement(Icons.MobileDevice, { ...props })}
-      />
-
-      <SettingsCard
-        buttonText={Messages.BSI_VIEW_SETTINGS}
-        hasNextSection={true}
-        name={Messages.BSI_WEB}
-        onButtonClick={() => this.setState({ section: 3 })}
-        details={[ { text: `8 ${Messages.SETTINGS}` } ]}
-        icon={(props) => React.createElement(Icons.Public, { ...props })}
-      />
-
-      <FormTitle className="bsi-settings-status-display-title">{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'Activity' })}</FormTitle>
-
-      <SettingsCard
-        buttonText={Messages.BSI_VIEW_SETTINGS}
-        hasNextSection={true}
-        name={Messages.STATUS_STREAMING}
-        onButtonClick={() => this.setState({ section: 4 })}
-        details={[ { text: `7 ${Messages.SETTINGS}` } ]}
-        icon={(props) => React.createElement(Icons.Activity, { ...props })}
-      />
-
-      <Divider />
-
-      <FormTitle className="bsi-settings-status-display-title">{Messages.BSI_STATUS_DISPLAY}</FormTitle>
-      <SwitchItem
-        note={Messages.BSI_TRUE_STATUS_DESC}
-        value={getSetting('trueStatusColor', false)}
-        onChange={() => toggleSetting('trueStatusColor', false)}
-      >
-        {Messages.BSI_TRUE_STATUS}
-      </SwitchItem>
-    </>;
-  }
-
-  renderModules () {
-    const modules = Object.keys(availableModules).filter(modId => !availableModules[modId]?.hidden);
-    const settingsProps = (({ getSetting, toggleSetting, updateSetting }) => ({ getSetting, toggleSetting, updateSetting }))(this.props);
-
-    return <>
-      <FormTitle className="bsi-settings-status-display-title">{Messages.BSI_AVAILABLE_MODULES.format({ count: modules.length })}</FormTitle>
-      <Text size={Text.Sizes.SIZE_12} style={{ marginBottom: 10 }}>{Messages.BSI_MODULES_CHANGE_NOTE.format({})}</Text>
-
-      {modules.map(modId => {
-        const mod = availableModules[modId];
-        return <ModuleCard
-          id={modId}
-          name={mod.name}
-          description={mod.description || 'No description given.'}
-          icon={mod.icon ? (props) => React.createElement(Icons[mod.icon], { ...props }) : null}
-          settings={mod.settings || []}
-          main={this.props.main}
-          {...settingsProps}
-        />;
-      })}
-    </>;
-  }
-
-  renderDesktopSettings () {
-    const { getSetting, toggleSetting } = this.props;
-
-    return <>
-      <FormTitle className="bsi-settings-status-display-title">{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'Desktop' })}</FormTitle>
-      <SwitchItem
-        note={formatClientTranslation('MESSAGE_HEADERS_DESC', { client: 'desktop' })}
-        value={getSetting('desktopMessageHeaders', false)}
-        onChange={() => toggleSetting('desktopMessageHeaders', false)}
-      >
-        {Messages.BSI_CLIENT_SWITCH_MESSAGE_HEADERS}
-      </SwitchItem>
-      <SwitchItem
-        note={formatClientTranslation('MEMBERS_LIST_DESC', { client: 'desktop' })}
-        value={getSetting('desktopMembersList', false)}
-        onChange={() => toggleSetting('desktopMembersList', false)}
-      >
-        {Messages.BSI_CLIENT_SWITCH_MEMBERS_LIST}
-      </SwitchItem>
-      <SwitchItem
-        note={formatClientTranslation('USER_POPOUT_MODAL_DESC', { client: 'desktop' })}
-        value={getSetting('desktopUserPopoutModal', false)}
-        onChange={() => toggleSetting('desktopUserPopoutModal', false)}
-      >
-        {Messages.BSI_CLIENT_SWITCH_USER_POPOUT_MODAL}
-      </SwitchItem>
-      <SwitchItem
-        note={formatClientTranslation('DM_DESC', { client: 'desktop' })}
-        value={getSetting('desktopDirectMessages', false)}
-        onChange={() => toggleSetting('desktopDirectMessages', false)}
-      >
-        {Messages.BSI_CLIENT_SWITCH_DM}
-      </SwitchItem>
-      <SwitchItem
-        note={formatClientTranslation('MATCH_COLOR_DESC', { client: 'desktop' })}
-        value={getSetting('desktopMatchStatus', false)}
-        onChange={() => toggleSetting('desktopMatchStatus', false)}
-      >
-        {Messages.BSI_CLIENT_SWITCH_MATCH_COLOR}
-      </SwitchItem>
-      <SwitchItem
-        note={Messages.BSI_DESKTOP_SWITCH_PRESERVE_STATUS_DESC}
-        value={getSetting('desktopPreserveStatus', false)}
-        onChange={() => toggleSetting('desktopPreserveStatus', false)}
-      >
-        {Messages.BSI_CLIENT_SWITCH_PRESERVE_STATUS}
-      </SwitchItem>
-      <SwitchItem
-        note={Messages.BSI_DESKTOP_SWITCH_UNIVERSAL_STATUS_DESC}
-        value={getSetting('desktopUniversalStatus', false)}
-        onChange={() => toggleSetting('desktopUniversalStatus', false)}
-        disabled={getSetting('desktopPreserveStatus', false) === false}
-      >
-        {Messages.BSI_DESKTOP_SWITCH_UNIVERSAL_STATUS} <FontAwesome icon='universal-access-regular' />
-      </SwitchItem>
-      <SwitchItem
-        note={formatClientTranslation('SHOW_ON_SELF_DESC', { client: 'desktop' })}
-        value={getSetting('desktopShowOnSelf', false)}
-        onChange={() => toggleSetting('desktopShowOnSelf', false)}
-        disabled={getSetting('desktopPreserveStatus', false) === false}
-      >
-        {Messages.BSI_CLIENT_SWITCH_SHOW_ON_SELF}
-      </SwitchItem>
-    </>;
-  }
-
-  renderMobileSettings () {
-    const { getSetting, toggleSetting } = this.props;
-
-    return <>
-      <FormTitle className="bsi-settings-status-display-title">{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'Mobile' })}</FormTitle>
-      <SwitchItem
-        note={Messages.BSI_MOBILE_SWITCH_DISABLE_STATUS_DESC}
-        value={getSetting('mobileDisabled', false)}
-        onChange={handleSettingChangeAndReload.bind(this, Messages.BSI_MOBILE_DISABLE_STATUS_MODAL_HEADER, 'mobileDisabled')}
-      >
-        {Messages.BSI_MOBILE_SWITCH_DISABLE_STATUS}
-      </SwitchItem>
-      <SwitchItem
-        note={Messages.BSI_MOBILE_SWITCH_PRESERVE_STATUS_DESC}
-        value={getSetting('mobilePreserveStatus', false)}
-        onChange={() => ((toggleSetting('mobilePreserveStatus', false), statusStore.emitChange()))}
-        disabled={getSetting('mobileDisabled', false)}
-      >
-        {Messages.BSI_CLIENT_SWITCH_PRESERVE_STATUS}
-      </SwitchItem>
-      <SwitchItem
-        note={formatClientTranslation('SHOW_ON_SELF_DESC', { client: 'mobile' })}
-        value={getSetting('mobileShowOnSelf', false)}
-        onChange={() => toggleSetting('mobileShowOnSelf', false)}
-        disabled={getSetting('mobileDisabled', false) || getSetting('mobilePreserveStatus', false) === false}
-      >
-        {Messages.BSI_CLIENT_SWITCH_SHOW_ON_SELF}
-      </SwitchItem>
-      <SwitchItem
-        note={formatClientTranslation('AVATAR_STATUS_DESC', { client: 'mobile' })}
-        value={getSetting('mobileAvatarStatus', true)}
-        onChange={handleSettingChangeAndReload.bind(this, Messages.BSI_MOBILE_AVATAR_STATUS_MODAL_HEADER, 'mobileAvatarStatus')}
-        disabled={getSetting('mobileDisabled', false)}
-      >
-        {Messages.BSI_CLIENT_SWITCH_AVATAR_STATUS}
-      </SwitchItem>
-      <SwitchItem
-        note={Messages.BSI_MOBILE_SWITCH_MATCH_COLOR_DESC}
-        value={getSetting('mobileMatchStatus', false)}
-        onChange={() => toggleSetting('mobileMatchStatus', false)}
-        disabled={getSetting('mobileDisabled', false) || getSetting('mobileAvatarStatus', true)}
-      >
-        {Messages.BSI_CLIENT_SWITCH_MATCH_COLOR}
-      </SwitchItem>
-    </>;
-  }
-
-  renderWebSettings () {
-    const { getSetting, toggleSetting } = this.props;
-
-    return <>
-      <FormTitle className="bsi-settings-status-display-title">{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'Web' })}</FormTitle>
-      <SwitchItem
-        note={formatClientTranslation('MESSAGE_HEADERS_DESC', { client: 'web' })}
-        value={getSetting('webMessageHeaders', false)}
-        onChange={() => toggleSetting('webMessageHeaders', false)}
-      >
-        {Messages.BSI_CLIENT_SWITCH_MESSAGE_HEADERS}
-      </SwitchItem>
-      <SwitchItem
-        note={formatClientTranslation('MEMBERS_LIST_DESC', { client: 'web' })}
-        value={getSetting('webMembersList', true)}
-        onChange={() => toggleSetting('webMembersList', true)}
-      >
-        {Messages.BSI_CLIENT_SWITCH_MEMBERS_LIST}
-      </SwitchItem>
-      <SwitchItem
-        note={formatClientTranslation('USER_POPOUT_MODAL_DESC', { client: 'web' })}
-        value={getSetting('webUserPopoutModal', true)}
-        onChange={() => toggleSetting('webUserPopoutModal', true)}
-      >
-        {Messages.BSI_CLIENT_SWITCH_USER_POPOUT_MODAL}
-      </SwitchItem>
-      <SwitchItem
-        note={formatClientTranslation('DM_DESC', { client: 'web' })}
-        value={getSetting('webDirectMessages', true)}
-        onChange={() => toggleSetting('webDirectMessages', true)}
-      >
-        {Messages.BSI_CLIENT_SWITCH_DM}
-      </SwitchItem>
-      <SwitchItem
-        note={formatClientTranslation('MATCH_COLOR_DESC', { client: 'web' })}
-        value={getSetting('webMatchStatus', false)}
-        onChange={() => toggleSetting('webMatchStatus', false)}
-      >
-        {Messages.BSI_CLIENT_SWITCH_MATCH_COLOR}
-      </SwitchItem>
-      <SwitchItem
-        note={Messages.BSI_WEB_SWITCH_PRESERVE_STATUS_DESC}
-        value={getSetting('webPreserveStatus', false)}
-        onChange={() => toggleSetting('webPreserveStatus', false)}
-      >
-        {Messages.BSI_CLIENT_SWITCH_PRESERVE_STATUS}
-      </SwitchItem>
-      <SwitchItem
-        note={formatClientTranslation('SHOW_ON_SELF_DESC', { client: 'web' })}
-        value={getSetting('webShowOnSelf', false)}
-        onChange={() => toggleSetting('webShowOnSelf', false)}
-        disabled={getSetting('webPreserveStatus', false) === false}
-      >
-        {Messages.BSI_CLIENT_SWITCH_SHOW_ON_SELF}
-      </SwitchItem>
-      <SwitchItem
-        note={formatClientTranslation('SHOW_ON_BOTS_DESC', { client: 'web' })}
-        value={getSetting('webShowOnBots', true)}
-        onChange={() => toggleSetting('webShowOnBots', true)}
-      >
-        {Messages.BSI_CLIENT_SWITCH_SHOW_ON_BOTS}
-      </SwitchItem>
-    </>;
-  }
-
-  renderStreamSettings () {
-    const { getSetting, toggleSetting } = this.props;
-
-    return <>
-      <FormTitle className="bsi-settings-status-display-title">{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'Streaming' })}</FormTitle>
-      <SwitchItem
-        note={formatClientTranslation('MESSAGE_HEADERS_DESC', { client: 'streaming' })}
-        value={getSetting('streamMessageHeaders', true)}
-        onChange={() => toggleSetting('streamMessageHeaders', true)}
-      >
-        {Messages.BSI_CLIENT_SWITCH_MESSAGE_HEADERS}
-      </SwitchItem>
-      <SwitchItem
-        note={formatClientTranslation('MEMBERS_LIST_DESC', { client: 'streaming' })}
-        value={getSetting('streamMembersList', true)}
-        onChange={() => toggleSetting('streamMembersList', true)}
-      >
-        {Messages.BSI_CLIENT_SWITCH_MEMBERS_LIST}
-      </SwitchItem>
-      <SwitchItem
-        note={formatClientTranslation('USER_POPOUT_MODAL_DESC', { client: 'streaming' })}
-        value={getSetting('streamUserPopoutModal', true)}
-        onChange={() => toggleSetting('streamUserPopoutModal', true)}
-      >
-        {Messages.BSI_CLIENT_SWITCH_USER_POPOUT_MODAL}
-      </SwitchItem>
-      <SwitchItem
-        note={formatClientTranslation('DM_DESC', { client: 'streaming' })}
-        value={getSetting('streamDirectMessages', true)}
-        onChange={() => toggleSetting('streamDirectMessages', true)}
-      >
-        {Messages.BSI_CLIENT_SWITCH_DM}
-      </SwitchItem>
-      <SwitchItem
-        note={formatClientTranslation('MATCH_COLOR_DESC', { client: 'streaming' })}
-        value={getSetting('streamMatchStatus', true)}
-        onChange={() => toggleSetting('streamMatchStatus', true)}
-      >
-        {Messages.BSI_CLIENT_SWITCH_MATCH_COLOR}
-      </SwitchItem>
-      <SwitchItem
-        note={Messages.BSI_STREAMING_SWITCH_SHOW_ON_SELF_DESC}
-        value={getSetting('streamShowOnSelf', false)}
-        onChange={() => toggleSetting('streamShowOnSelf', false)}
-      >
-        {Messages.BSI_CLIENT_SWITCH_SHOW_ON_SELF}
-      </SwitchItem>
-      <SwitchItem
-        note={formatClientTranslation('SHOW_ON_BOTS_DESC', { client: 'streaming' })}
-        value={getSetting('streamShowOnBots', true)}
-        onChange={() => toggleSetting('streamShowOnBots', true)}
-      >
-        {Messages.BSI_CLIENT_SWITCH_SHOW_ON_BOTS}
-      </SwitchItem>
-    </>;
-  }
-};
+  return <React.Fragment>
+    {renderTabBar(states, props)}
+    {renderBreadcrumb(states, props)}
+    {renderContent(states, props)}
+  </React.Fragment>;
+});

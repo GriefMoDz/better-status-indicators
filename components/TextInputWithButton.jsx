@@ -38,6 +38,7 @@ module.exports = class TextInputWithButton extends React.PureComponent {
   constructor (props) {
     super(props);
 
+    this.handleOnChange = (e) => typeof props.onChange === 'function' && props.onChange(e.currentTarget.value);
     this.iconStyles = {
       color: 'var(--text-normal)',
       lineHeight: 0,
@@ -46,36 +47,41 @@ module.exports = class TextInputWithButton extends React.PureComponent {
     };
   }
 
-  handleChange (e) {
-    if (typeof this.props.onChange === 'function') {
-      this.props.onChange(e.currentTarget.value);
-    }
+  renderInput (props) {
+    return <Flex.Child className={classes.input.split(' ').splice(1).join(' ')} style={{ cursor: 'auto' }}>
+      <input
+        type='text'
+        value={props.defaultValue}
+        placeholder={props.placeholder}
+        disabled={props.disabled}
+        onChange={this.handleOnChange.bind(this)}
+      />
+    </Flex.Child>
+  }
+
+  renderButton (props) {
+    return <Flex shrink={1} grow={0} style={{ margin: 0 }}>
+      <Button
+        className={classes.button}
+        disabled={props.disabled}
+        size={Button.Sizes.MIN}
+        color={Button.Colors.GREY}
+        look={Button.Looks.GHOST}
+        onClick={props.onButtonClick}
+        style={{ backgroundColor: props.buttonColor ? colorUtils.hex2rgb(props.buttonColor, 0.25) : null }}
+      >
+        <span className={classes.text}>{props.buttonText}</span>
+        <span className={`${props.buttonIcon} ${classes.editIcon}`} style={this.iconStyles}></span>
+      </Button>
+    </Flex>
   }
 
   render () {
-    const { disabled, defaultValue, placeholder, buttonText, buttonColor, buttonIcon, onButtonClick } = this.props;
-
     return (
-      <div className={[ 'bsi-button-text-input', classes.container, classes.hasValue, disabled && classes.disabled ].filter(Boolean).join(' ')}>
+      <div className={[ 'bsi-button-text-input', classes.container, classes.hasValue, this.props.disabled && classes.disabled ].filter(Boolean).join(' ')}>
         <Flex className={classes.layout}>
-          <Flex.Child className={classes.input.split(' ').splice(1).join(' ')} style={{ cursor: 'auto' }}>
-            <input type='text' value={defaultValue} placeholder={placeholder} disabled={disabled} onChange={this.handleChange.bind(this)}></input>
-          </Flex.Child>
-
-          <Flex shrink={1} grow={0} style={{ margin: 0 }}>
-            <Button
-              className={classes.button}
-              disabled={disabled}
-              size={Button.Sizes.MIN}
-              color={Button.Colors.GREY}
-              look={Button.Looks.GHOST}
-              onClick={onButtonClick}
-              style={{ backgroundColor: buttonColor ? colorUtils.hex2rgb(buttonColor, 0.25) : null }}
-            >
-              <span className={classes.text}>{buttonText}</span>
-              <span className={`${buttonIcon} ${classes.editIcon}`} style={this.iconStyles}></span>
-            </Button>
-          </Flex>
+          {this.renderInput(this.props)}
+          {this.renderButton(this.props)}
         </Flex>
       </div>
     );

@@ -45,7 +45,7 @@
   "BSI_STREAMING_SWITCH_SHOW_ON_SELF_DESC": "Displays the streaming status indicator for yourself.",
   "BSI_DESKTOP_SWITCH_PRESERVE_STATUS_DESC": "Displays the desktop status indicator even if the user is active on web or mobile.",
   "BSI_DESKTOP_SWITCH_UNIVERSAL_STATUS_DESC": "Displays the desktop status indicator whenever it's available; requires the desktop \"Preserve Status\" setting to be enabled.",
-  "BSI_DESKTOP_SWITCH_UNIVERSAL_STATUS": "Universal Status",
+  "BSI_DESKTOP_SWITCH_UNIVERSAL_STATUS": "Universal Status $[](iconHook)",
   "BSI_MOBILE_SWITCH_MATCH_COLOR_DESC": "Fills the mobile status indicator with the corresponding color of the users' status; requires the mobile \"Avatar Status\" setting to be disabled.",
   "BSI_MOBILE_SWITCH_PRESERVE_STATUS_DESC": "Displays the mobile status indicator even if the user is active on desktop.",
   "BSI_MOBILE_SWITCH_DISABLE_STATUS": "Disable Status",

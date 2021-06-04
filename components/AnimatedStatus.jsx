@@ -28,10 +28,11 @@
 
 /* eslint-disable object-property-newline */
 const { React, Flux, getModule } = require('powercord/webpack');
-const ReactHooks = {};
 
-ReactHooks.Spring = getModule([ 'useSpring' ], false);
-ReactHooks.Basic = getModule([ 'useLazyValue' ], false);
+const ReactHooks = {
+  Spring: getModule([ 'useSpring' ], false),
+  Basic: getModule([ 'useLazyValue' ], false)
+};
 
 const uuid = getModule([ 'v4', 'parse' ], false);
 const classes = getModule([ 'wrapper', 'avatar' ], false);

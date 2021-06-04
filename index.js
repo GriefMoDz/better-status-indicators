@@ -494,6 +494,23 @@ module.exports = class BetterStatusIndicators extends Plugin {
       return res;
     });
 
+    const ErrorBoundary = require('../pc-settings/components/ErrorBoundary');
+
+    const FormSection = await getModuleByDisplayName('FormSection');
+    const SettingsView = await getModuleByDisplayName('SettingsView');
+    this.inject('bsi-settings-page', SettingsView.prototype, 'getPredicateSections', (_, sections) => {
+      const changelog = sections.find(category => category.section === 'changelog');
+      if (changelog) {
+        const bsiSettingsPage = sections.find(category => category.section === 'better-status-indicators');
+        bsiSettingsPage.element = () => React.createElement(ErrorBoundary, {}, React.createElement(FormSection, {
+          title: 'Better Status Indicators',
+          tag: 'h1'
+        }, React.createElement(powercord.api.settings.tabs['better-status-indicators'].render)));
+      }
+
+      return sections;
+    });
+
     if (getSetting('statusDisplay', 'default') !== 'default') {
       const { container } = await getModule([ 'container', 'base' ]);
       await waitFor(`.${container}`).then(this._refreshMaskLibrary);
