@@ -330,14 +330,17 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     /* Avatar Status Indicator - Hardware Acceleration Disabled: Fixes */
     if (!this.hardwareAccelerationIsEnabled) {
-      const UserProfileBody = await this._getUserProfileBody();
-      this.inject('bsi-user-profile-avatar-status', UserProfileBody.prototype, 'renderHeader', (_, res) => {
+      const UserProfileModalHeader = await getModule(m => m.default?.displayName === 'UserProfileModalHeader');
+      this.inject('bsi-user-profile-avatar-status', UserProfileModalHeader, 'default', (_, res) => {
         if (Array.isArray(res.props?.children) && res.props.children[0]) {
+          this.log(res.props.children[0]);
           res.props.children[0].type = Avatar;
         }
 
         return res;
       });
+
+      UserProfileModalHeader.default.displayName = 'UserProfileModalHeader';
 
       const UserPopoutHeader = await getModule(m => m.default?.displayName === 'UserPopoutHeader');
       this.inject('bsi-user-popout-avatar-status', UserPopoutHeader, 'default', (_, res) => {
@@ -348,6 +351,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
         return res;
       });
+
+      UserPopoutHeader.default.displayName = 'UserPopoutHeader';
 
       const PrivateChannel = await getModuleByDisplayName('PrivateChannel');
       this.inject('bsi-user-dm-avatar-status', PrivateChannel.prototype, 'renderAvatar', (_, res) => {
@@ -517,14 +522,6 @@ module.exports = class BetterStatusIndicators extends Plugin {
       const { container } = await getModule([ 'container', 'base' ]);
       await waitFor(`.${container}`).then(this._refreshMaskLibrary);
     }
-  }
-
-  async _getUserProfileBody () {
-    const UserProfile = (await getModuleByDisplayName('UserProfile')).prototype.render().type
-      .prototype.render.call({ memoizedGetStateFromStores: () => null }).type.render().type
-      .prototype.render.call({ props: { forwardedRef: null } }).type;
-
-    return UserProfile;
   }
 
   _refreshStatusVariables (unmount = false) {
