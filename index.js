@@ -333,7 +333,6 @@ module.exports = class BetterStatusIndicators extends Plugin {
       const UserProfileModalHeader = await getModule(m => m.default?.displayName === 'UserProfileModalHeader');
       this.inject('bsi-user-profile-avatar-status', UserProfileModalHeader, 'default', (_, res) => {
         if (Array.isArray(res.props?.children) && res.props.children[0]) {
-          this.log(res.props.children[0]);
           res.props.children[0].type = Avatar;
         }
 
