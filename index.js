@@ -330,8 +330,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     /* Avatar Status Indicator - Hardware Acceleration Disabled: Fixes */
     if (!this.hardwareAccelerationIsEnabled) {
-      const UserPopoutHeader = await getModule(m => m.default?.displayName === 'UserPopoutHeader');
-      this.inject('bsi-user-popout-avatar-status', UserPopoutHeader, 'default', (_, res) => {
+      const UserPopoutComponents = await getModule([ 'UserPopoutAvatar' ]);
+      this.inject('bsi-user-popout-avatar-status', UserPopoutComponents, 'UserPopoutAvatar', (_, res) => {
         const avatarComponent = findInReactTree(res, n => n.props?.hasOwnProperty('isMobile'));
         if (avatarComponent) {
           avatarComponent.type = Avatar;
@@ -339,8 +339,6 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
         return res;
       });
-
-      UserPopoutHeader.default.displayName = 'UserPopoutHeader';
 
       const PrivateChannel = await getModuleByDisplayName('PrivateChannel');
       this.inject('bsi-user-dm-avatar-status', PrivateChannel.prototype, 'renderAvatar', (_, res) => {
