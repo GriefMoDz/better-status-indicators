@@ -166,7 +166,7 @@ module.exports = {
       showOnBots: {
         name: Messages.BSI_CLIENT_SWITCH_SHOW_ON_BOTS,
         description: '%SHOW_ON_BOTS_DESC%',
-        defaultValue: true,
+        defaultValue: false,
         type: 'switch'
       }
     }
