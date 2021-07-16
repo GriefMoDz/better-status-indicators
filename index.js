@@ -170,17 +170,17 @@ module.exports = class BetterStatusIndicators extends Plugin {
     this.inject('bsi-status-colors', statusModule, 'getStatusColor', ([ status ], color) => {
       switch (status) {
         case 'online':
-          return getSetting('onlineStatusColor', this.defaultStatusColors.ONLINE);
+          return this.hex2hsl(getSetting('onlineStatusColor', this.defaultStatusColors.ONLINE));
         case 'idle':
-          return getSetting('idleStatusColor', this.defaultStatusColors.IDLE);
+          return this.hex2hsl(getSetting('idleStatusColor', this.defaultStatusColors.IDLE));
         case 'dnd':
-          return getSetting('dndStatusColor', this.defaultStatusColors.DND);
+          return this.hex2hsl(getSetting('dndStatusColor', this.defaultStatusColors.DND));
         case 'streaming':
-          return getSetting('streamingStatusColor', this.defaultStatusColors.STREAMING);
+          return this.hex2hsl(getSetting('streamingStatusColor', this.defaultStatusColors.STREAMING));
         case 'offline':
-          return getSetting('offlineStatusColor', this.defaultStatusColors.OFFLINE);
+          return this.hex2hsl(getSetting('offlineStatusColor', this.defaultStatusColors.OFFLINE));
         case 'invisible':
-          return getSetting('invisibleStatusColor', this.defaultStatusColors.INVISIBLE);
+          return this.hex2hsl(getSetting('invisibleStatusColor', this.defaultStatusColors.INVISIBLE));
       }
 
       return color;
@@ -510,6 +510,17 @@ module.exports = class BetterStatusIndicators extends Plugin {
     }
   }
 
+  hex2hsl (value) {
+    const ColorUtils = getModule([ 'isValidHex' ], false);
+    if (ColorUtils.isValidHex(value)) {
+      const colorInt = ColorUtils.hex2int(value);
+
+      return ColorUtils.int2hsl(colorInt, true);
+    }
+
+    return value;
+  }
+
   _refreshStatusVariables (unmount = false) {
     const currentStatusVariables = document.querySelector(`#${this.entityID}-status-variables`);
 
@@ -519,7 +530,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       const statusVariables = document.createElement('style');
       statusVariables.setAttribute('id', `${this.entityID}-status-variables`);
       statusVariables.textContent = `:root {\n\t${statuses.map(status => (
-        `--bsi-${status}-color: ${this.settings.get(`${status}StatusColor`, this.defaultStatusColors[status.toUpperCase()])};`
+        `--bsi-${status}-color: ${this.hex2hsl(this.settings.get(`${status}StatusColor`, this.defaultStatusColors[status.toUpperCase()]))};`
       )).join('\n\t')}\n}\n`;
 
       document.body.classList.add('bsi-theme-variables');

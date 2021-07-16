@@ -58,6 +58,19 @@ const SettingsSections = {
   STREAMING: 4
 };
 
+function getDefaultStatusColors () {
+  const Colors = getModule([ 'STATUS_GREEN' ], false);
+
+  return {
+    ONLINE: Colors.STATUS_GREEN_600,
+    IDLE: Colors.STATUS_YELLOW,
+    DND: Colors.STATUS_RED,
+    INVISIBLE: Colors.STATUS_OFFLINE,
+    OFFLINE: Colors.STATUS_GREY,
+    STREAMING: Colors.TWITCH
+  }
+}
+
 function getSectionLabel (section) {
   switch (section) {
     case SettingsSections.SETTINGS:
@@ -209,13 +222,13 @@ function renderSettings ({ setSection }, { getSetting, toggleSetting }) {
   </React.Fragment>;
 }
 
-
 function renderCustomize ({ activeColorPicker, setActiveColorPicker }, props) {
   const { getSetting, updateSetting, toggleSetting, main } = props;
 
   const statuses = [ 'online', 'idle', 'dnd', 'offline', 'invisible', 'streaming' ];
+  const defaultStatusColors = getDefaultStatusColors();
   const hasModifiedDefaults = statuses.some(status => {
-    const defaultColor = main.defaultStatusColors[status.toUpperCase()];
+    const defaultColor = defaultStatusColors[status.toUpperCase()];
     return getSetting(`${status}StatusColor`, defaultColor) !== defaultColor;
   });
 
@@ -226,7 +239,7 @@ function renderCustomize ({ activeColorPicker, setActiveColorPicker }, props) {
         <Flex.Child basis='70%'>
           <></>
           {statuses.map(status => {
-            const defaultColor = main.defaultStatusColors[status.toUpperCase()];
+            const defaultColor = defaultStatusColors[status.toUpperCase()];
             const settingsKey = `${status}StatusColor`;
 
             return <TextInputWithButton
@@ -234,7 +247,7 @@ function renderCustomize ({ activeColorPicker, setActiveColorPicker }, props) {
               buttonText={activeColorPicker === status ? Messages.BSI_CLOSE_COLOR_PICKER : Messages.BSI_OPEN_COLOR_PICKER}
               buttonColor={getSetting(settingsKey, defaultColor)}
               buttonIcon='fas fa-palette'
-              onButtonClick={() => setActiveColorPicker(activeColorPicker === status ? '' : status)}
+              onButtonClick={() => setActiveColorPicker(activeColorPicker === status ? null : status)}
               onChange={(value) => ((updateSetting(settingsKey, value === '' ? defaultColor : value), main._refreshStatusVariables()))}
               defaultValue={getSetting(settingsKey, defaultColor)}
             />;
@@ -245,7 +258,7 @@ function renderCustomize ({ activeColorPicker, setActiveColorPicker }, props) {
             color={Button.Colors.BRAND}
             className='bsi-reset-colors-button'
             onClick={() => statuses.forEach(status => {
-              updateSetting(`${status}StatusColor`, main.defaultStatusColors[status.toUpperCase()]);
+              updateSetting(`${status}StatusColor`, defaultStatusColors[status.toUpperCase()]);
               main._refreshStatusVariables();
             })}
           >
@@ -263,7 +276,7 @@ function renderCustomize ({ activeColorPicker, setActiveColorPicker }, props) {
     </Flex>
 
     {activeColorPicker && <ColorPickerInput
-      default={ColorUtils.hex2int(main.defaultStatusColors[activeColorPicker.toUpperCase()])}
+      default={ColorUtils.hex2int(defaultStatusColors[activeColorPicker.toUpperCase()])}
       value={ColorUtils.hex2int(getSetting(`${activeColorPicker}StatusColor`, '000000'))}
       onChange={(value) => ((updateSetting(`${activeColorPicker}StatusColor`, ColorUtils.int2hex(value)), main._refreshStatusVariables()))}
     />}
