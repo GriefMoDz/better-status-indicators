@@ -101,6 +101,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
       })
     });
 
+    this.ColorUtils = getModule([ 'isValidHex' ], false);
+
     const { getSetting, toggleSetting, updateSetting } = powercord.api.settings._fluxProps(this.entityID);
 
     /* Theme Status Variables */
@@ -511,11 +513,10 @@ module.exports = class BetterStatusIndicators extends Plugin {
   }
 
   hex2hsl (value) {
-    const ColorUtils = getModule([ 'isValidHex' ], false);
-    if (ColorUtils.isValidHex(value)) {
-      const colorInt = ColorUtils.hex2int(value);
+    if (this.ColorUtils.isValidHex(value)) {
+      const colorInt = this.ColorUtils.hex2int(value);
 
-      return ColorUtils.int2hsl(colorInt, true);
+      return this.ColorUtils.int2hsl(colorInt, true);
     }
 
     return value;
