@@ -85,7 +85,7 @@ module.exports = {
     const guildStore = await getModule([ 'getLastSelectedGuildId' ]);
     const activityStore = await getModule([ 'isGameActivity' ]);
 
-    const { useSubscribeGuildMembers } = (await getModule([ 'useSubscribeGuildMembers' ]));
+    const useSubscribeGuildMembers = (await getModule([ 'useSubscribeGuildMembers' ])).default;
 
     const Avatar = main.hardwareAccelerationIsEnabled ? avatarModule.AnimatedAvatar : avatarModule.default;
     const proposedAvatarModule = main.hardwareAccelerationIsEnabled ? avatarModule.AnimatedAvatar : avatarModule;
@@ -111,21 +111,17 @@ module.exports = {
         return mobileStatus === 'self+others' ? true : mobileStatus === 'others' ? userId !== main.currentUserId : false;
       };
 
-      const guildMembers = React.useMemo(() => {
-        const members = {};
-        const guildId = guildStore.getGuildId();
-
-        return guildId ? (members[guildId] = [ userId ], members) : {};
-      });
-
-      useSubscribeGuildMembers(guildMembers);
-
       const ConnectedAvatar = Flux.connectStores([ statusStore, powercord.api.settings.store ], () => ({
         status: activityStore.isStreaming(props.activities || statusStore.getActivities(userId))
           ? 'streaming'
           : statusStore.getStatus(userId),
         isMobile: getMobileStatusState() && statusStore.isMobileOnline(userId)
-      }))(Avatar);
+      }))(useSubscribeGuildMembers(() => {
+        const members = {};
+        const guildId = guildStore.getGuildId();
+
+        return guildId ? (members[guildId] = [ userId ], members) : {};
+      })(Avatar));
 
       return React.createElement(ConnectedAvatar, {
         ...props,
