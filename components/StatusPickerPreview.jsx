@@ -45,6 +45,7 @@ const StatusMenuItem = React.memo(props => {
     onMouseOver={() => setFocused(true)}
     onMouseOut={() => setFocused(false)}
     className={[ 'status-menu-item', classes.colorDefault, focused && classes.focused, selectedStatus === status && 'status-active' ].filter(Boolean).join(' ')}
+    data-status={status}
     role='menuitem'
   >
     <div className='status-item'>

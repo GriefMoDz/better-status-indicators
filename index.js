@@ -261,8 +261,11 @@ module.exports = class BetterStatusIndicators extends Plugin {
       const { size, status, isMobile, isTyping } = props;
       const foreignObject = findInReactTree(res, n => n?.type === 'foreignObject');
 
-      if (status && isMobile && !isTyping) {
+      if (status) {
         res.props['data-bsi-status'] = status;
+      }
+
+      if (status && isMobile && !isTyping) {
         res.props['data-bsi-mobile-avatar-status'] = getSetting('mobileAvatarStatus', true);
       }
 
@@ -341,6 +344,18 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
         return res;
       });
+
+      const UserProfileModalHeader = await getModule(m => m.default?.displayName === 'UserProfileModalHeader');
+      this.inject('bsi-user-profile-avatar-status', UserProfileModalHeader, 'default', (_, res) => {
+        const avatarComponent = findInReactTree(res, n => n.props?.hasOwnProperty('isMobile'));
+        if (avatarComponent) {
+          avatarComponent.type = Avatar;
+        }
+
+        return res;
+      });
+
+      UserProfileModalHeader.default.displayName = 'UserProfileModalHeader';
 
       const PrivateChannel = await getModuleByDisplayName('PrivateChannel');
       this.inject('bsi-user-dm-avatar-status', PrivateChannel.prototype, 'renderAvatar', (_, res) => {

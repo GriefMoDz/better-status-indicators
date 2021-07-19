@@ -166,7 +166,7 @@ $statuses: (
 );
 
 .bsi-theme-variables {
-  #bsi-status-preview .item-1tOPte:not(.focused-3afm-j):nth-last-of-type(4) .status-1AY8sU,
+  #bsi-status-preview .status-menu-item[data-status='invisible']:not(.focused-3afm-j) .status-1AY8sU,
   #status-picker-invisible .status-1AY8sU {
     background-color: var(--bsi-invisible-color) !important;
   }
@@ -180,7 +180,7 @@ $statuses: (
   .bsi-theme-variables {
     .wrapper-3t9DeA {
       &[data-bsi-status=#{$status}] rect[mask='url(#svg-mask-status-online-mobile)'],
-      rect[mask='url(#svg-mask-status-#{$status})']:not([fill='#ffffff']) {
+      &[data-bsi-status=#{$status}] rect[mask='url(#svg-mask-status-#{$status})']:not([fill='#ffffff']) {
         fill: var(--bsi-#{$status}-color);
       }
     }

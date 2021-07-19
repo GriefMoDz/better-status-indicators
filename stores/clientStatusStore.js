@@ -31,6 +31,12 @@ let currentClientStatus = {};
 
 const authStore = getModule([ 'initialize', 'getFingerprint' ], false);
 
+function handleInitialClientStatus (sessions) {
+  if (Object.keys(currentClientStatus) === 0) {
+    currentClientStatus = Object.assign({}, ...sessions.map(session => ({ [session.clientInfo.client]: session.status })));
+  }
+}
+
 function handleCurrentClientStatus (userId, clientStatus) {
   if (userId === authStore.getId() && clientStatus !== null) {
     currentClientStatus = clientStatus;
@@ -44,5 +50,6 @@ class ClientStatusStore extends Flux.Store {
 }
 
 module.exports = new ClientStatusStore(FluxDispatcher, {
+  SESSIONS_REPLACE: ({ sessions }) => handleInitialClientStatus(sessions),
   PRESENCE_UPDATE: ({ user, clientStatus }) => handleCurrentClientStatus(user.id, clientStatus)
 });
