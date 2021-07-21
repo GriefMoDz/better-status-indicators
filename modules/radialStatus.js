@@ -26,44 +26,56 @@
  * SOFTWARE.
  */
 
-const { React, getModule, getModuleByDisplayName } = require('powercord/webpack');
+const { React, getModule } = require('powercord/webpack');
 const { findInReactTree } = require('powercord/util');
 const { inject, uninject } = require('powercord/injector');
 
 module.exports = {
   name: '[WIP] Radial Avatar Status',
-  description: null,
+  description: 'Replaces the traditional status indicator with a border outline around the users\' avatar.',
   icon: 'Radial',
   settings: {},
-  hidden: !0,
 
   async startModule (main) {
-    const Tooltip = await getModuleByDisplayName('Tooltip');
-
     /* Avatar Radial Status */
-    const { humanizeStatus } = await getModule([ 'humanizeStatus' ]);
-
     const statusStore = await getModule([ 'isMobileOnline' ]);
+    const statusModule = await getModule([ 'getStatusMask' ]);
     const Avatar = await getModule([ 'AnimatedAvatar' ]);
     inject('bsi-module-radial-avatar-status', Avatar, 'default', ([ props ], res) => {
-      const userId = props.userId || props.src.split('/')[4];
-      const clientStatuses = userId === main.currentUserId ? main.clientStatusStore.getCurrentClientStatus() : statusStore.getState().clientStatuses[userId];
-      if (!clientStatuses || !props.status || props.isTyping || props.isMobile || clientStatuses.isDesktop || clientStatuses.isWeb) {
-        return res;
+      if (props.status) {
+        res.props['data-bsi-radial-status'] = true;
       }
 
       const foreignObject = findInReactTree(res, n => n?.type === 'foreignObject');
+      const { type: AvatarImg } = foreignObject.props.children;
+
+      foreignObject.props.children.type = (_props) => {
+        const res = AvatarImg(_props);
+
+        if (!_props.isSpeaking) {
+          res.props.children.push(React.createElement('div', {
+            className: 'bsi-avatarRadial',
+            style: { '--status-color': statusModule.getStatusColor(props.status) }
+          }));
+        }
+
+        return res;
+      };
+
+      if (props.isTyping || props.isMobile) {
+        return res;
+      }
+
+      if (main.settings.get('enabledModules').includes('avatarStatuses')) {
+        const userId = props.userId || props.src?.includes('/avatars') && props.src.match(/\/(?:avatars|users)\/(\d+)/)[1];
+        const clientStatuses = userId === main.currentUserId ? main.clientStatusStore.getCurrentClientStatus() : statusStore.getState().clientStatuses[userId];
+
+        if (clientStatuses?.desktop || clientStatuses?.web) {
+          return res;
+        }
+      }
+
       foreignObject.props.mask = 'url(#svg-mask-avatar-default)';
-      foreignObject.props.children.props.isSpeaking = true;
-
-      res.props.children.props.children[0] = React.createElement(Tooltip, {
-        text: props.statusTooltip ? humanizeStatus(props.status) : null,
-        position: 'top'
-      }, (props) => {
-        Object.assign(foreignObject.props, props);
-
-        return foreignObject;
-      });
 
       delete res.props.children.props.children[1];
 

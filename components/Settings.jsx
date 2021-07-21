@@ -27,7 +27,7 @@
  */
 
 /* eslint-disable object-property-newline */
-const { React, getModule, getModuleByDisplayName, i18n: { Messages } } = require('powercord/webpack');
+const { React, getModule, getModuleByDisplayName, i18n: { Messages }, constants: { HEXColors } } = require('powercord/webpack');
 const { Button, Divider, Flex, FormTitle, Text } = require('powercord/components');
 const { ColorPickerInput, SwitchItem, RadioGroup } = require('powercord/components/settings');
 
@@ -59,15 +59,13 @@ const SettingsSections = {
 };
 
 function getDefaultStatusColors () {
-  const Colors = getModule([ 'STATUS_GREEN' ], false);
-
   return {
-    ONLINE: Colors.STATUS_GREEN_600,
-    IDLE: Colors.STATUS_YELLOW,
-    DND: Colors.STATUS_RED,
-    INVISIBLE: Colors.STATUS_OFFLINE,
-    OFFLINE: Colors.STATUS_GREY,
-    STREAMING: Colors.TWITCH
+    ONLINE: HEXColors.STATUS_GREEN_600,
+    IDLE: HEXColors.STATUS_YELLOW,
+    DND: HEXColors.STATUS_RED,
+    INVISIBLE: HEXColors.STATUS_GREY,
+    OFFLINE: HEXColors.STATUS_GREY,
+    STREAMING: HEXColors.TWITCH
   }
 }
 

@@ -227,6 +227,22 @@ $status-colors: (
   width: 40px;
 }
 
+.wrapper-3t9DeA[data-bsi-radial-status='true'] {
+  .bsi-avatarRadial {
+    box-shadow: inset 0 0 0 2px var(--status-color),
+      inset 0 0 0 3px var(--background-secondary);
+    border-radius: 50%;
+
+    width: 100%;
+    height: 100%;
+    grid-area: 1 / 1;
+  }
+
+  &:not([data-bsi-client-avatar-status]) + svg > foreignObject[mask='url(#svg-mask-avatar-status-round-80)'] {
+    mask: url(#svg-mask-avatar-default);
+  }
+}
+
 @each $status, $color in $status-colors {
   $status-color: var(--rs-#{$status}-color, $color) !important;
 

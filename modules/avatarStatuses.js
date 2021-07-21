@@ -53,7 +53,7 @@ module.exports = {
     const statusStore = await getModule([ 'isMobileOnline' ]);
     const Avatar = await getModule([ 'AnimatedAvatar' ]);
     inject('bsi-module-enhanced-avatar-status-indicators', Avatar, 'default', ([ props ], res) => {
-      const userId = props.userId || props.src.split('/')[4];
+      const userId = props.userId || props.src?.includes('/avatars') && props.src.match(/\/(?:avatars|users)\/(\d+)/)[1];
       const clientStatuses = userId === main.currentUserId ? main.clientStatusStore.getCurrentClientStatus() : statusStore.getState().clientStatuses[userId];
       if (!clientStatuses || !props.status || props.isTyping || props.isMobile) {
         return res;
@@ -62,6 +62,9 @@ module.exports = {
       const isDesktop = clientStatuses.desktop;
       const isWeb = clientStatuses.web;
 
+      const client = isDesktop && !isWeb ? 'desktop' : 'web';
+      res.props['data-bsi-client-avatar-status'] = client;
+
       const tooltip = findInReactTree(res, n => n.type?.displayName === 'Tooltip');
       const { children } = tooltip.props;
 
@@ -69,7 +72,7 @@ module.exports = {
         const res = children(props);
 
         res.props.children[0].props = { ...res.props.children[0].props,
-          mask: `url(#svg-mask-status-online-${isDesktop && !isWeb ? 'desktop' : 'web'})`
+          mask: `url(#svg-mask-status-online-${client})`
         };
 
         return res;
