@@ -101,7 +101,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       })
     });
 
-    this.ColorUtils = getModule([ 'isValidHex' ], false);
+    this.ColorUtils = await getModule([ 'isValidHex' ]);
 
     const { getSetting, toggleSetting, updateSetting } = powercord.api.settings._fluxProps(this.entityID);
 
@@ -333,37 +333,34 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     NowPlayingHeader.default.displayName = 'NowPlayingHeader';
 
-    /* Avatar Status Indicator - Hardware Acceleration Disabled: Fixes */
-    if (!this.hardwareAccelerationIsEnabled) {
-      const UserPopoutComponents = await getModule([ 'UserPopoutAvatar' ]);
-      this.inject('bsi-user-popout-avatar-status', UserPopoutComponents, 'UserPopoutAvatar', (_, res) => {
-        const avatarComponent = findInReactTree(res, n => n.props?.hasOwnProperty('isMobile'));
-        if (avatarComponent) {
-          avatarComponent.type = Avatar;
-        }
+    const UserPopoutComponents = await getModule([ 'UserPopoutAvatar' ]);
+    this.inject('bsi-user-popout-avatar-status', UserPopoutComponents, 'UserPopoutAvatar', (_, res) => {
+      const avatarComponent = findInReactTree(res, n => n.props?.hasOwnProperty('isMobile'));
+      if (avatarComponent) {
+        avatarComponent.type = Avatar;
+      }
 
-        return res;
-      });
+      return res;
+    });
 
-      const UserProfileModalHeader = await getModule(m => m.default?.displayName === 'UserProfileModalHeader');
-      this.inject('bsi-user-profile-avatar-status', UserProfileModalHeader, 'default', (_, res) => {
-        const avatarComponent = findInReactTree(res, n => n.props?.hasOwnProperty('isMobile'));
-        if (avatarComponent) {
-          avatarComponent.type = Avatar;
-        }
+    const UserProfileModalHeader = await getModule(m => m.default?.displayName === 'UserProfileModalHeader');
+    this.inject('bsi-user-profile-avatar-status', UserProfileModalHeader, 'default', (_, res) => {
+      const avatarComponent = findInReactTree(res, n => n.props?.hasOwnProperty('isMobile'));
+      if (avatarComponent) {
+        avatarComponent.type = Avatar;
+      }
 
-        return res;
-      });
+      return res;
+    });
 
-      UserProfileModalHeader.default.displayName = 'UserProfileModalHeader';
+    UserProfileModalHeader.default.displayName = 'UserProfileModalHeader';
 
-      const PrivateChannel = await getModuleByDisplayName('PrivateChannel');
-      this.inject('bsi-user-dm-avatar-status', PrivateChannel.prototype, 'renderAvatar', (_, res) => {
-        res.type = Avatar;
+    const PrivateChannel = await getModuleByDisplayName('PrivateChannel');
+    this.inject('bsi-user-dm-avatar-status', PrivateChannel.prototype, 'renderAvatar', (_, res) => {
+      res.type = Avatar;
 
-        return res;
-      });
-    }
+      return res;
+    });
 
     /* Status Indicators */
     const ConnectedStatusIcon = this.settings.connectStore(StatusIcon);
@@ -448,7 +445,6 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     NameTag.default.displayName = 'NameTag';
 
-    const PrivateChannel = await getModuleByDisplayName('PrivateChannel');
     this.inject('bsi-dm-channel-client-status', PrivateChannel.prototype, 'render', function (_, res) {
       if (!this.props.user || res.props.decorators) {
         return res;
