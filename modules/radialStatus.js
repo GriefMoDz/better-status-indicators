@@ -36,7 +36,7 @@ module.exports = {
   icon: 'Radial',
   settings: {},
 
-  startModule (main) {
+  async startModule (main) {
     /* Avatar Radial Status */
     const statusStore = getModule([ 'isMobileOnline' ], false);
     const statusModule = getModule(['getStatusMask'], false);
