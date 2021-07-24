@@ -101,7 +101,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       })
     });
 
-    this.ColorUtils = await getModule([ 'isValidHex' ]);
+    this.ColorUtils = getModule([ 'isValidHex' ], false);
 
     const { getSetting, toggleSetting, updateSetting } = powercord.api.settings._fluxProps(this.entityID);
 
@@ -116,7 +116,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       this._hardwareAccelerationDisabled();
     }
 
-    const DiscordUtils = await getModule([ 'setEnableHardwareAcceleration' ]);
+    const DiscordUtils = getModule([ 'setEnableHardwareAcceleration' ], false);
     DiscordUtils.setEnableHardwareAcceleration = (enable) => {
       toggleSetting('seenHardwareAccelerationNotice', enable);
       setTimeout(() => window.DiscordNative.gpuSettings.setEnableHardwareAcceleration(enable), 1e3);
@@ -130,7 +130,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     }
 
     for (const modId of modules.keys()) {
-      const mod = await modules.load(modId);
+      const mod = modules.load(modId);
       const enabledModules = getSetting('enabledModules', []);
 
       if (enabledModules.includes(modId)) {
@@ -141,7 +141,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     /* Mobile Status Indicator */
     const _this = this;
 
-    const statusStore = await getModule([ 'isMobileOnline' ]);
+    const statusStore = getModule([ 'isMobileOnline' ], false);
     statusStore.emitChange();
 
     this.inject('bsi-mobile-status-online', statusStore, 'isMobileOnline', function ([ userId ], res) {
@@ -159,7 +159,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     });
 
     const getStatusMessage = (status) => Messages[`STATUS_${status.toUpperCase()}`];
-    const statusUtils = await getModule([ 'humanizeStatus' ]);
+    const statusUtils = getModule([ 'humanizeStatus' ], false);
     this.inject('bsi-mobile-status-text', statusUtils, 'humanizeStatus', ([ status, isMobile ], res) => {
       if (status !== 'online' && isMobile) {
         return Messages.STATUS_ONLINE_MOBILE.replace(getStatusMessage('online'), getStatusMessage(status));
@@ -168,7 +168,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       return res;
     });
 
-    const statusModule = await getModule([ 'getStatusMask' ]);
+    const statusModule = getModule([ 'getStatusMask' ], false);
     this.inject('bsi-status-colors', statusModule, 'getStatusColor', ([ status ], color) => {
       switch (status) {
         case 'online':
@@ -212,7 +212,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       return args;
     }, true);
 
-    const Mask = await getModule([ 'MaskLibrary' ]);
+    const Mask = getModule([ 'MaskLibrary' ], false);
     this.inject('bsi-mobile-status', statusModule, 'Status', ([ { isMobile, status, size, color } ], res) => {
       const statusStyle = res.props.children.props.style;
       if (!color) {
@@ -232,7 +232,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     statusModule.Status.displayName = 'Status';
 
-    const Status = await getModuleByDisplayName('FluxContainer(Status)');
+    const Status = getModuleByDisplayName('FluxContainer(Status)', false);
     this.inject('bsi-mobile-custom-status', Status.prototype, 'render', (_, res) => {
       const StatusComponent = this.hardwareAccelerationIsEnabled ? AnimatedStatus : statusModule.Status;
       const originalProps = res.props;
@@ -245,7 +245,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       return res;
     });
 
-    const avatarModule = await getModule([ 'AnimatedAvatar' ]);
+    const avatarModule = getModule([ 'AnimatedAvatar' ], false);
     this.inject('bsi-mobile-animated-status', avatarModule, 'determineIsAnimated', ([ isTyping, status, lastStatus, isMobile, lastIsMobile ]) => {
       if (status !== 'online' && isMobile && !isTyping) {
         status = 'online';
@@ -255,7 +255,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       return [ isTyping, status, lastStatus, isMobile, lastIsMobile ];
     }, true);
 
-    const userStore = await getModule([ 'getCurrentUser' ]);
+    const userStore = getModule([ 'getCurrentUser' ], false);
 
     this.inject('bsi-mobile-status-default-mask', avatarModule, 'default', ([ props ], res) => {
       const { size, status, isMobile, isTyping } = props;
@@ -313,7 +313,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     avatarModule.default.Sizes = avatarModule.Sizes;
 
     const Avatar = avatarModule.default;
-    const NowPlayingHeader = await getModule(m => m.default?.displayName === 'NowPlayingHeader');
+    const NowPlayingHeader = getModule(m => m.default?.displayName === 'NowPlayingHeader', false);
     this.inject('bsi-now-playing-avatar-status', NowPlayingHeader, 'default', (_, res) => {
       const originalType = res.type;
 
@@ -333,7 +333,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     NowPlayingHeader.default.displayName = 'NowPlayingHeader';
 
-    const UserPopoutComponents = await getModule([ 'UserPopoutAvatar' ]);
+    const UserPopoutComponents = getModule([ 'UserPopoutAvatar' ], false);
     this.inject('bsi-user-popout-avatar-status', UserPopoutComponents, 'UserPopoutAvatar', (_, res) => {
       const avatarComponent = findInReactTree(res, n => n.props?.hasOwnProperty('isMobile'));
       if (avatarComponent) {
@@ -343,7 +343,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       return res;
     });
 
-    const UserProfileModalHeader = await getModule(m => m.default?.displayName === 'UserProfileModalHeader');
+    const UserProfileModalHeader = getModule(m => m.default?.displayName === 'UserProfileModalHeader', false);
     this.inject('bsi-user-profile-avatar-status', UserProfileModalHeader, 'default', (_, res) => {
       const avatarComponent = findInReactTree(res, n => n.props?.hasOwnProperty('isMobile'));
       if (avatarComponent) {
@@ -355,7 +355,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     UserProfileModalHeader.default.displayName = 'UserProfileModalHeader';
 
-    const PrivateChannel = await getModuleByDisplayName('PrivateChannel');
+    const PrivateChannel = getModuleByDisplayName('PrivateChannel', false);
     this.inject('bsi-user-dm-avatar-status', PrivateChannel.prototype, 'renderAvatar', (_, res) => {
       res.type = Avatar;
 
@@ -371,7 +371,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       return typeof defaultMethod === 'function' ? defaultMethod.toString().includes(keyword) : null;
     };
 
-    const MessageHeader = await getModule(m => getDefaultMethodByKeyword(m, 'showTimestampOnHover'));
+    const MessageHeader = getModule(m => getDefaultMethodByKeyword(m, 'showTimestampOnHover'), false);
     this.inject('bsi-message-header-client-status1', MessageHeader, 'default', ([ { message: { author: user } } ], res) => {
       const defaultProps = { user, location: 'message-headers' };
       const usernameHeader = findInReactTree(res, n => Array.isArray(n?.props?.children) && n.props.children.find(c => c?.props?.message));
@@ -383,7 +383,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       return res;
     });
 
-    const UsernameHeader = await getModule(m => getDefaultMethodByKeyword(m, 'withMentionPrefix'));
+    const UsernameHeader = getModule(m => getDefaultMethodByKeyword(m, 'withMentionPrefix'), false);
     this.inject('bsi-message-header-client-status2', UsernameHeader, 'default', ([ { __bsiDefaultProps: defaultProps } ], res) => {
       res.props.children.splice(2, 0, [
         React.createElement(ConnectedStatusIcon, defaultProps),
@@ -394,7 +394,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     });
 
     [ 'ChannelMessage', 'InboxMessage' ].forEach(async component => {
-      const mdl = await getModule(m => m.type?.displayName === component);
+      const mdl = getModule(m => m.type?.displayName === component, false);
       if (mdl) {
         this.inject(`bsi-message-header-fix-${component}`, mdl, 'type', (_, res) => {
           if (res.props.childrenHeader) {
@@ -408,7 +408,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       }
     });
 
-    const MemberListItem = await getModuleByDisplayName('MemberListItem');
+    const MemberListItem = getModuleByDisplayName('MemberListItem', false);
     this.inject('bsi-member-list-client-status', MemberListItem.prototype, 'renderDecorators', function (_, res) {
       const { activities, status, user } = this.props;
       const defaultProps = { user, location: 'members-list' };
@@ -421,16 +421,16 @@ module.exports = class BetterStatusIndicators extends Plugin {
       return res;
     });
 
-    const DiscordTag = await getModule(m => m.default?.displayName === 'DiscordTag');
+    const DiscordTag = getModule(m => m.default?.displayName === 'DiscordTag', false);
     this.inject('bsi-name-tag-client-status1', DiscordTag, 'default', ([ { user } ], res) => {
       res.props.user = user;
 
       return res;
     });
-
+    
     DiscordTag.default.displayName = 'DiscordTag';
 
-    const NameTag = await getModule(m => m.default?.displayName === 'NameTag');
+    const NameTag = getModule(m => m.default?.displayName === 'NameTag', false);
     this.inject('bsi-name-tag-client-status2', NameTag, 'default', ([ props ], res) => {
       const user = props.user || userStore.findByTag(props.name, props.discriminator);
       const defaultProps = { user, location: 'user-popout-modal' };
@@ -500,8 +500,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     const ErrorBoundary = require('../pc-settings/components/ErrorBoundary');
 
-    const FormSection = await getModuleByDisplayName('FormSection');
-    const SettingsView = await getModuleByDisplayName('SettingsView');
+    const FormSection = getModuleByDisplayName('FormSection', false);
+    const SettingsView = getModuleByDisplayName('SettingsView', false);
     this.inject('bsi-settings-page', SettingsView.prototype, 'getPredicateSections', (_, sections) => {
       const changelog = sections.find(category => category.section === 'changelog');
       if (changelog) {
@@ -518,7 +518,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     });
 
     if (getSetting('statusDisplay', 'default') !== 'default') {
-      const { container } = await getModule([ 'container', 'base' ]);
+      const { container } = getModule([ 'container', 'base' ], false);
       await waitFor(`.${container}`).then(this._refreshMaskLibrary);
     }
   }

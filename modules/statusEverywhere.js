@@ -76,16 +76,16 @@ module.exports = {
     }
   },
 
-  async startModule (main) {
+  startModule (main) {
     const { getSetting } = powercord.api.settings._fluxProps(main.entityID);
 
-    const avatarModule = await getModule([ 'AnimatedAvatar' ]);
-    const statusStore = await getModule([ 'isMobileOnline' ]);
-    const userStore = await getModule([ 'getCurrentUser' ]);
-    const guildStore = await getModule([ 'getLastSelectedGuildId' ]);
-    const activityStore = await getModule([ 'isGameActivity' ]);
+    const avatarModule = getModule([ 'AnimatedAvatar' ], false);
+    const statusStore = getModule([ 'isMobileOnline' ], false);
+    const userStore = getModule([ 'getCurrentUser' ], false);
+    const guildStore = getModule([ 'getLastSelectedGuildId' ], false);
+    const activityStore = getModule([ 'isGameActivity' ], false);
 
-    const useSubscribeGuildMembers = (await getModule([ 'useSubscribeGuildMembers' ])).default;
+    const useSubscribeGuildMembers = (getModule([ 'useSubscribeGuildMembers' ], false)).default;
 
     const Avatar = main.hardwareAccelerationIsEnabled ? avatarModule.AnimatedAvatar : avatarModule.default;
     const proposedAvatarModule = main.hardwareAccelerationIsEnabled ? avatarModule.AnimatedAvatar : avatarModule;
@@ -130,10 +130,10 @@ module.exports = {
       });
     });
 
-    const { default: GuildMemberSubscriptions } = await getModule(m => m.default?.prototype?.checkForLeaks);
+    const { default: GuildMemberSubscriptions } = getModule(m => m.default?.prototype?.checkForLeaks, false);
     inject('bsi-module-status-everywhere-silence-leaks', GuildMemberSubscriptions.prototype, 'checkForLeaks', () => false, true);
 
-    const MemberListItem = await getModuleByDisplayName('MemberListItem');
+    const MemberListItem = getModuleByDisplayName('MemberListItem', false);
     inject('bsi-module-status-everywhere-members-list', MemberListItem.prototype, 'renderAvatar', function (_, res) {
       if (res) {
         res = React.createElement(Avatar, {
@@ -145,11 +145,11 @@ module.exports = {
       return res;
     });
 
-    const typingStore = await getModule([ 'isTyping' ]);
-    const MessageHeader = await getModule(m => {
+    const typingStore = getModule([ 'isTyping' ], false);
+    const MessageHeader = getModule(m => {
       const defaultMethod = m.__powercordOriginal_default ?? m.default;
       return (typeof defaultMethod === 'function' ? defaultMethod : null)?.toString().includes('showTimestampOnHover');
-    });
+    }, false);
 
     inject('bsi-module-status-everywhere-chat-avatar', MessageHeader, 'default', ([ props ], res) => {
       const { message } = props;
