@@ -38,7 +38,7 @@ module.exports = {
   icon: 'Globe',
   settings: {},
 
-  startModule (main) {
+  async startModule (main) {
     /* Avatar Status Masks */
     const Mask = getModule([ 'MaskLibrary' ], false);
     inject('bsi-module-enhanced-avatar-status-masks', Mask.MaskLibrary, 'type', (_, res) => {

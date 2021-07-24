@@ -76,7 +76,7 @@ module.exports = {
     }
   },
 
-  startModule (main) {
+  async startModule (main) {
     const { getSetting } = powercord.api.settings._fluxProps(main.entityID);
 
     const avatarModule = getModule([ 'AnimatedAvatar' ], false);

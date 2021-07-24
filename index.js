@@ -134,7 +134,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       const enabledModules = getSetting('enabledModules', []);
 
       if (enabledModules.includes(modId)) {
-        mod.startModule(this);
+        await mod.startModule(this);
       }
     }
 
