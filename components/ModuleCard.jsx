@@ -32,7 +32,6 @@ const { Card, Clickable, Flex, Text } = require('powercord/components');
 const { default: Button } = getModule([ 'ButtonLink' ], false);
 
 const Components = require('powercord/components/settings');
-const modules = require('../modules');
 const Icons = require('./Icons');
 
 const Caret = getModuleByDisplayName('Caret', false);
@@ -53,20 +52,9 @@ class ModuleCard extends React.PureComponent {
   }
 
   handleModuleState (state) {
-    const { getSetting, updateSetting } = this.props;
+    const { ModuleManager } = this.main;
 
-    const moduleId = this.props.id;
-    const enabledModules = getSetting('enabledModules', []);
-
-    (state ? modules.availableModules[moduleId].startModule(this.main) : modules.unload(moduleId)).then(() => {
-      if (state) {
-        enabledModules.push(moduleId);
-      } else {
-        enabledModules.splice(enabledModules.indexOf(moduleId), 1);
-      }
-
-      updateSetting('enabledModules', enabledModules);
-    });
+    ModuleManager[state ? 'enable' : 'disable'](this.props.id);
   }
 
   handleExpand () {

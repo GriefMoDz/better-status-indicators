@@ -28,20 +28,24 @@
 
 const { React, getModule } = require('powercord/webpack');
 const { findInReactTree } = require('powercord/util');
-const { inject, uninject } = require('powercord/injector');
+const { Module } = require('../../entities');
 
-module.exports = {
-  name: '[WIP] Radial Avatar Status',
-  description: 'Replaces the traditional status indicator with a border outline around the users\' avatar.',
-  icon: 'Radial',
-  settings: {},
+module.exports = class RadialStatus extends Module {
+  get manifest () {
+    return {
+      name: '[WIP] Radial Avatar Status',
+      description: 'Replaces the traditional status indicator with a border outline around the users\' avatar.',
+      icon: 'Radial',
+      settings: {}
+    };
+  }
 
-  async startModule (main) {
+  async startModule () {
     /* Avatar Radial Status */
     const statusStore = await getModule([ 'isMobileOnline' ]);
     const statusModule = await getModule([ 'getStatusMask' ]);
     const Avatar = await getModule([ 'AnimatedAvatar' ]);
-    inject('bsi-module-radial-avatar-status', Avatar, 'default', ([ props ], res) => {
+    this.inject('bsi-module-radial-avatar-status', Avatar, 'default', ([ props ], res) => {
       if (props.status) {
         res.props['data-bsi-radial-status'] = true;
       }
@@ -66,11 +70,11 @@ module.exports = {
         return res;
       }
 
-      if (main.settings.get('enabledModules').includes('avatarStatuses')) {
+      if (this.plugin.settings.get('enabledModules').includes('avatarStatuses')) {
         const userId = props.userId || props.src?.includes('/avatars') && props.src.match(/\/(?:avatars|users)\/(\d+)/)[1];
-        const clientStatuses = userId === main.currentUserId ? main.clientStatusStore.getCurrentClientStatus() : statusStore.getState().clientStatuses[userId];
+        const clientStatuses = userId === this.plugin.currentUserId ? this.plugin.clientStatusStore.getCurrentClientStatus() : statusStore.getState().clientStatuses[userId];
 
-        if (clientStatuses?.desktop || clientStatuses?.web) {
+        if (!clientStatuses || clientStatuses.desktop || clientStatuses.web) {
           return res;
         }
       }
@@ -81,9 +85,5 @@ module.exports = {
 
       return res;
     });
-  },
-
-  moduleWillUnload () {
-    uninject('bsi-module-radial-avatar-status');
   }
 };

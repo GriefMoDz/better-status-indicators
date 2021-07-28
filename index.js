@@ -41,7 +41,7 @@ const StatusIcon = require('./components/StatusIcon');
 const Settings = require('./components/Settings');
 const i18n = require('./i18n');
 
-const modules = require('./modules');
+const ModuleManager = require('./managers/modules');
 const clientStatusStore = require('./stores/clientStatusStore');
 
 const cache = {};
@@ -51,6 +51,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     super();
 
     this.AnimatedAvatarStatus = null;
+    this.ModuleManager = new ModuleManager(this);
     this.classes = {
       ...getModule([ 'wrapper', 'avatar' ], false),
       avatarWrapper: getModule([ 'avatarHint', 'avatarWrapper' ], false).avatarWrapper
@@ -129,14 +130,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       updateSetting('enabledModules', [ 'statusEverywhere' ]);
     }
 
-    for (const modId of modules.keys()) {
-      const mod = await modules.load(modId);
-      const enabledModules = getSetting('enabledModules', []);
-
-      if (enabledModules.includes(modId)) {
-        mod.startModule(this);
-      }
-    }
+    this.ModuleManager.startModules();
 
     /* Mobile Status Indicator */
     const _this = this;
@@ -598,8 +592,6 @@ module.exports = class BetterStatusIndicators extends Plugin {
     cache.injectionIds.forEach(id => uninject(id));
     this._refreshMaskLibrary();
 
-    for (const modId of modules.keys()) {
-      modules.unload(modId);
-    }
+    this.ModuleManager.shutdownModules();
   }
 };

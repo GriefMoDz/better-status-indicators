@@ -28,56 +28,60 @@
 
 /* eslint-disable object-property-newline */
 const { React, Flux, getModule, getModuleByDisplayName, i18n: { Messages } } = require('powercord/webpack');
-const { inject, uninject } = require('powercord/injector');
 const { findInReactTree } = require('powercord/util');
+const { Module } = require('../../entities');
 
-module.exports = {
-  name: 'Status Everywhere',
-  description: 'Displays user statuses in places where Discord usually doesn\'t even bother to.',
-  icon: 'Status',
-  settings: {
-    'se-typingStatus': {
-      type: 'radio',
-      name: 'Typing Status Display',
-      description: Messages.BSI_STATUS_EVERYWHERE_TYPING_STATUS_DESC.format({}),
-      defaultValue: 'hidden',
-      options: [ {
-        name: 'Show for self and others',
-        value: 'self+others'
-      }, {
-        name: 'Show for others',
-        value: 'others'
-      }, {
-        name: 'Hidden',
-        value: 'hidden'
-      } ]
-    },
-    'se-mobileStatus': {
-      type: 'radio',
-      name: 'Mobile Status Display',
-      description: 'Set whether or not the mobile status indicator should be displayed, and for who.',
-      defaultValue: 'others',
-      options: [ {
-        name: 'Show for self and others',
-        value: 'self+others'
-      }, {
-        name: 'Show for others',
-        value: 'others'
-      }, {
-        name: 'Hidden',
-        value: 'hidden'
-      } ]
-    },
-    'se-reducedStatuses': {
-      type: 'switch',
-      name: 'Reduced Statuses',
-      description: 'Scales down status indicators in chat for those that find them too obtrusive.',
-      defaultValue: false
-    }
-  },
+module.exports = class StatusEverywhere extends Module {
+  get manifest () {
+    return {
+      name: 'Status Everywhere',
+      description: 'Displays user statuses in places where Discord usually doesn\'t even bother to.',
+      icon: 'Status',
+      settings: {
+        'se-typingStatus': {
+          type: 'radio',
+          name: 'Typing Status Display',
+          description: Messages.BSI_STATUS_EVERYWHERE_TYPING_STATUS_DESC.format({}),
+          defaultValue: 'hidden',
+          options: [ {
+            name: 'Show for self and others',
+            value: 'self+others'
+          }, {
+            name: 'Show for others',
+            value: 'others'
+          }, {
+            name: 'Hidden',
+            value: 'hidden'
+          } ]
+        },
+        'se-mobileStatus': {
+          type: 'radio',
+          name: 'Mobile Status Display',
+          description: 'Set whether or not the mobile status indicator should be displayed, and for who.',
+          defaultValue: 'others',
+          options: [ {
+            name: 'Show for self and others',
+            value: 'self+others'
+          }, {
+            name: 'Show for others',
+            value: 'others'
+          }, {
+            name: 'Hidden',
+            value: 'hidden'
+          } ]
+        },
+        'se-reducedStatuses': {
+          type: 'switch',
+          name: 'Reduced Statuses',
+          description: 'Scales down status indicators in chat for those that find them too obtrusive.',
+          defaultValue: false
+        }
+      }
+    };
+  }
 
-  async startModule (main) {
-    const { getSetting } = powercord.api.settings._fluxProps(main.entityID);
+  async startModule () {
+    const { getSetting } = powercord.api.settings._fluxProps(this.plugin.entityID);
 
     const avatarModule = await getModule([ 'AnimatedAvatar' ]);
     const statusStore = await getModule([ 'isMobileOnline' ]);
@@ -87,11 +91,11 @@ module.exports = {
 
     const useSubscribeGuildMembers = (await getModule([ 'useSubscribeGuildMembers' ])).default;
 
-    const Avatar = main.hardwareAccelerationIsEnabled ? avatarModule.AnimatedAvatar : avatarModule.default;
-    const proposedAvatarModule = main.hardwareAccelerationIsEnabled ? avatarModule.AnimatedAvatar : avatarModule;
-    const proposedAvatarMethod = main.hardwareAccelerationIsEnabled ? 'type' : 'default';
+    const Avatar = this.plugin.hardwareAccelerationIsEnabled ? avatarModule.AnimatedAvatar : avatarModule.default;
+    const proposedAvatarModule = this.plugin.hardwareAccelerationIsEnabled ? avatarModule.AnimatedAvatar : avatarModule;
+    const proposedAvatarMethod = this.plugin.hardwareAccelerationIsEnabled ? 'type' : 'default';
 
-    inject('bsi-module-status-everywhere-avatar', proposedAvatarModule, proposedAvatarMethod, ([ props ], res) => {
+    this.inject('bsi-module-status-everywhere-avatar', proposedAvatarModule, proposedAvatarMethod, ([ props ], res) => {
       const userId = props.userId || props.src?.includes('/avatars') && props.src.match(/\/(?:avatars|users)\/(\d+)/)[1];
 
       if (props.status || props.size === 'SIZE_16' || props.size === 'SIZE_100') {
@@ -108,7 +112,7 @@ module.exports = {
       const getMobileStatusState = () => {
         const mobileStatus = getSetting('se-mobileStatus', 'others');
 
-        return mobileStatus === 'self+others' ? true : mobileStatus === 'others' ? userId !== main.currentUserId : false;
+        return mobileStatus === 'self+others' ? true : mobileStatus === 'others' ? userId !== this.plugin.currentUserId : false;
       };
 
       const ConnectedAvatar = Flux.connectStores([ statusStore, powercord.api.settings.store ], () => ({
@@ -131,10 +135,10 @@ module.exports = {
     });
 
     const { default: GuildMemberSubscriptions } = await getModule(m => m.default?.prototype?.checkForLeaks);
-    inject('bsi-module-status-everywhere-silence-leaks', GuildMemberSubscriptions.prototype, 'checkForLeaks', () => false, true);
+    this.inject('bsi-module-status-everywhere-silence-leaks', GuildMemberSubscriptions.prototype, 'checkForLeaks', () => false, true);
 
     const MemberListItem = await getModuleByDisplayName('MemberListItem');
-    inject('bsi-module-status-everywhere-members-list', MemberListItem.prototype, 'renderAvatar', function (_, res) {
+    this.inject('bsi-module-status-everywhere-members-list', MemberListItem.prototype, 'renderAvatar', function (_, res) {
       if (res) {
         res = React.createElement(Avatar, {
           ...res.props,
@@ -151,7 +155,7 @@ module.exports = {
       return (typeof defaultMethod === 'function' ? defaultMethod : null)?.toString().includes('showTimestampOnHover');
     });
 
-    inject('bsi-module-status-everywhere-chat-avatar', MessageHeader, 'default', ([ props ], res) => {
+    this.inject('bsi-module-status-everywhere-chat-avatar', MessageHeader, 'default', ([ props ], res) => {
       const { message } = props;
       const defaultProps = {
         userId: message.author.id,
@@ -161,7 +165,7 @@ module.exports = {
       const getTypingStatusState = () => {
         const typingStatus = getSetting('se-typingStatus', 'hidden');
 
-        return typingStatus === 'self+others' ? true : typingStatus === 'others' ? defaultProps.userId !== main.currentUserId : false;
+        return typingStatus === 'self+others' ? true : typingStatus === 'others' ? defaultProps.userId !== this.plugin.currentUserId : false;
       };
 
       const ConnectedAvatar = Flux.connectStores([ typingStore, powercord.api.settings.store ], () => ({
@@ -189,12 +193,5 @@ module.exports = {
 
       return res;
     });
-  },
-
-  moduleWillUnload () {
-    uninject('bsi-module-status-everywhere-avatar');
-    uninject('bsi-module-status-everywhere-silence-leaks');
-    uninject('bsi-module-status-everywhere-members-list');
-    uninject('bsi-module-status-everywhere-chat-avatar');
   }
 };

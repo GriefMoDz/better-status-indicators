@@ -28,33 +28,37 @@
 
 const { React, getModule } = require('powercord/webpack');
 const { findInReactTree } = require('powercord/util');
-const { inject, uninject } = require('powercord/injector');
+const { Module } = require('../../entities');
 
-const Masks = require('../components/Masks');
+const Masks = require('../../components/Masks');
 
-module.exports = {
-  name: '[WIP] Enhanced Avatar Status',
-  description: 'Displays the user\'s first appeared platform in replacement of the traditional status indicator.',
-  icon: 'Globe',
-  settings: {},
+module.exports = class AvatarStatuses extends Module {
+  get manifest () {
+    return {
+      name: '[WIP] Enhanced Avatar Status',
+      description: 'Displays the user\'s first appeared platform in replacement of the traditional status indicator.',
+      icon: 'Globe',
+      settings: {}
+    }
+  }
 
-  async startModule (main) {
+  async startModule () {
     /* Avatar Status Masks */
     const Mask = await getModule([ 'MaskLibrary' ]);
-    inject('bsi-module-enhanced-avatar-status-masks', Mask.MaskLibrary, 'type', (_, res) => {
+    this.inject('bsi-module-enhanced-avatar-status-masks', Mask.MaskLibrary, 'type', (_, res) => {
       res.props.children.push(...[ React.createElement(Masks.Web), React.createElement(Masks.Desktop) ]);
 
       return res;
     });
 
-    main._refreshMaskLibrary();
+    this.plugin._refreshMaskLibrary();
 
     /* Avatar Status Indicators */
     const statusStore = await getModule([ 'isMobileOnline' ]);
     const Avatar = await getModule([ 'AnimatedAvatar' ]);
-    inject('bsi-module-enhanced-avatar-status-indicators', Avatar, 'default', ([ props ], res) => {
+    this.inject('bsi-module-enhanced-avatar-status-indicators', Avatar, 'default', ([ props ], res) => {
       const userId = props.userId || props.src?.includes('/avatars') && props.src.match(/\/(?:avatars|users)\/(\d+)/)[1];
-      const clientStatuses = userId === main.currentUserId ? main.clientStatusStore.getCurrentClientStatus() : statusStore.getState().clientStatuses[userId];
+      const clientStatuses = userId === this.plugin.currentUserId ? this.plugin.clientStatusStore.getCurrentClientStatus() : statusStore.getState().clientStatuses[userId];
       if (!clientStatuses || !props.status || props.isTyping || props.isMobile) {
         return res;
       }
@@ -80,10 +84,5 @@ module.exports = {
 
       return res;
     });
-  },
-
-  moduleWillUnload () {
-    uninject('bsi-module-enhanced-avatar-status-masks');
-    uninject('bsi-module-enhanced-avatar-status-indicators');
   }
 };

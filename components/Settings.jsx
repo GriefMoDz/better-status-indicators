@@ -45,7 +45,7 @@ function formatClientTranslation (translation, args) {
   return Messages[`BSI_${key}`].format(args);
 }
 
-const { availableModules } = require('../modules');
+let ModuleManager;
 
 const TabBar = getModuleByDisplayName('TabBar', false);
 const Breadcrumbs = getModuleByDisplayName('Breadcrumbs', false);
@@ -106,7 +106,7 @@ function renderTabBar ({ selectedItem, setSelectedItem, setSection }) {
         {Messages.BSI_CUSTOMIZE}
       </TabBar.Item>
       <TabBar.Item className={tabBarItem} id='MODULES'>
-        {Messages.BSI_MODULES} ({Object.keys(availableModules).filter(modId => !availableModules[modId]?.hidden).length})
+        {Messages.BSI_MODULES} ({ModuleManager.getModules().length})
       </TabBar.Item>
     </TabBar>
   );
@@ -310,21 +310,21 @@ function renderCustomize ({ activeColorPicker, setActiveColorPicker }, props) {
 }
 
 function renderModules ({ getSetting, toggleSetting, updateSetting, main }) {
-  const modules = Object.keys(availableModules).filter(modId => !availableModules[modId]?.hidden);
+  const modules = ModuleManager.getModules();
 
   return <React.Fragment>
     <FormTitle className='bsi-settings-status-display-title'>{Messages.BSI_AVAILABLE_MODULES.format({ count: modules.length })}</FormTitle>
     <Text size={Text.Sizes.SIZE_12} style={{ marginBottom: 10 }}>{Messages.BSI_MODULES_CHANGE_NOTE.format({})}</Text>
 
     {modules.map(modId => {
-      const mod = availableModules[modId];
+      const { manifest } = ModuleManager.get(modId);
 
       return <ModuleCard
         id={modId}
-        name={mod.name}
-        description={mod.description || 'No description given.'}
-        icon={mod.icon ? (props) => React.createElement(Icons[mod.icon], { ...props }) : null}
-        settings={mod.settings || []}
+        name={manifest.name}
+        description={manifest.description || 'No description given.'}
+        icon={manifest.icon ? (props) => React.createElement(Icons[manifest.icon], { ...props }) : null}
+        settings={manifest.settings || []}
         main={main}
         {...{ getSetting, toggleSetting, updateSetting }}
       />;
@@ -366,6 +366,8 @@ module.exports = React.memo(props => {
     section,
     setSection
   };
+
+  ModuleManager = props.main.ModuleManager;
 
   return <React.Fragment>
     {renderTabBar(states, props)}
