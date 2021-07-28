@@ -36,8 +36,8 @@ module.exports = {
     return new Set(modules);
   },
 
-  async load (modId) {
-    const mod = await require(`./${modId}`);
+  load (modId) {
+    const mod = require(`./${modId}`);
     if (mod) {
       this.availableModules[modId] = mod;
 
