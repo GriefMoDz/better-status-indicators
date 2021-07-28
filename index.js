@@ -118,9 +118,16 @@ module.exports = class BetterStatusIndicators extends Plugin {
     }
 
     const DiscordUtils = await getModule([ 'setEnableHardwareAcceleration' ]);
+    const { setEnableHardwareAcceleration } = window.DiscordNative.gpuSettings;
+
     DiscordUtils.setEnableHardwareAcceleration = (enable) => {
       toggleSetting('seenHardwareAccelerationNotice', enable);
-      setTimeout(() => window.DiscordNative.gpuSettings.setEnableHardwareAcceleration(enable), 1e3);
+      return new Promise((resolve) =>
+        setTimeout(() => {
+          setEnableHardwareAcceleration(enable);
+          resolve();
+        }, 1e3)
+      );
     };
 
     /* Module Loader */
@@ -163,7 +170,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     });
 
     const statusModule = await getModule([ 'getStatusMask' ]);
-    this.inject('bsi-status-colors', statusModule, 'getStatusColor', ([ status ], color) => {
+    this.inject('bsi-status-colors', statusModule, 'getStatusColor', ([ status ]) => {
       switch (status) {
         case 'online':
           return this.hex2hsl(getSetting('onlineStatusColor', this.defaultStatusColors.ONLINE));
@@ -179,7 +186,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
           return this.hex2hsl(getSetting('invisibleStatusColor', this.defaultStatusColors.INVISIBLE));
       }
 
-      return color;
+      return this.hex2hsl(getSetting('offlineStatusColor', this.defaultStatusColors.OFFLINE));
     });
 
     this.inject('bsi-mobile-status-mask', statusModule, 'getStatusMask', ([ status, isMobile, isTyping ]) => {
@@ -559,7 +566,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     const tempMaskLibrary = document.createElement('div');
     ReactDOM.render(React.createElement(Mask.MaskLibrary), tempMaskLibrary);
 
-    document.querySelector('#app-mount > svg').replaceWith(tempMaskLibrary.firstChild);
+    document.querySelector('#app-mount > svg').innerHTML = tempMaskLibrary.firstElementChild.innerHTML;
   }
 
   _hardwareAccelerationDisabled () {

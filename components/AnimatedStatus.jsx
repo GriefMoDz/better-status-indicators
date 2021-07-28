@@ -67,6 +67,7 @@ const AnimatedStatus = React.memo(props => {
     height: statusHeight,
     viewBox: `0 0 ${size} ${statusHeight}`,
     className: [ classes.mask, className ].filter(Boolean).join(' '),
+    'data-bsi-status': status,
     style
   }, statusMask, React.createElement(Spring.animated.rect, {
     x: 0,

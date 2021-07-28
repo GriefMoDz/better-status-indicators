@@ -26,21 +26,11 @@
  * SOFTWARE.
  */
 
-const { Flux, FluxDispatcher, getModule } = require('powercord/webpack');
+const { Flux, FluxDispatcher } = require('powercord/webpack');
 let currentClientStatus = {};
 
-const authStore = getModule([ 'initialize', 'getFingerprint' ], false);
-
-function handleInitialClientStatus (sessions) {
-  if (Object.keys(currentClientStatus) === 0) {
-    currentClientStatus = Object.assign({}, ...sessions.map(session => ({ [session.clientInfo.client]: session.status })));
-  }
-}
-
-function handleCurrentClientStatus (userId, clientStatus) {
-  if (userId === authStore.getId() && clientStatus !== null) {
-    currentClientStatus = clientStatus;
-  }
+function handleCurrentClientStatus (sessions) {
+  currentClientStatus = Object.assign({}, ...sessions.map(session => ({ [session.clientInfo.client]: session.status })));
 }
 
 class ClientStatusStore extends Flux.Store {
@@ -50,6 +40,5 @@ class ClientStatusStore extends Flux.Store {
 }
 
 module.exports = new ClientStatusStore(FluxDispatcher, {
-  SESSIONS_REPLACE: ({ sessions }) => handleInitialClientStatus(sessions),
-  PRESENCE_UPDATE: ({ user, clientStatus }) => handleCurrentClientStatus(user.id, clientStatus)
+  SESSIONS_REPLACE: ({ sessions }) => handleCurrentClientStatus(sessions)
 });
