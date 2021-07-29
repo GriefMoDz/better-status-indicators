@@ -171,6 +171,18 @@ $statuses: (
     background-color: var(--bsi-invisible-color) !important;
   }
 
+  .wrapper-3t9DeA {
+    &[data-bsi-status='unknown'] {
+      rect[mask='url(#svg-mask-status-offline)']:not([fill='#ffffff']) {
+        fill: var(--bsi-offline-color);
+      }
+
+      .bsi-avatarRadial {
+        --status-color: var(--bsi-offline-color) !important;
+      }
+    }
+  }
+
   .avatarWrapper-2yR4wp .wrapper-3t9DeA rect[mask='url(#svg-mask-status-offline)'] {
     fill: var(--bsi-invisible-color) !important;
   }

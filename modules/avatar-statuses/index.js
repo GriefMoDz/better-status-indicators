@@ -42,9 +42,9 @@ module.exports = class AvatarStatuses extends Module {
     }
   }
 
-  async startModule () {
+  startModule () {
     /* Avatar Status Masks */
-    const Mask = await getModule([ 'MaskLibrary' ]);
+    const Mask = getModule([ 'MaskLibrary' ], false);
     this.inject('bsi-module-enhanced-avatar-status-masks', Mask.MaskLibrary, 'type', (_, res) => {
       res.props.children.push(...[ React.createElement(Masks.Web), React.createElement(Masks.Desktop) ]);
 
@@ -54,8 +54,8 @@ module.exports = class AvatarStatuses extends Module {
     this.plugin._refreshMaskLibrary();
 
     /* Avatar Status Indicators */
-    const statusStore = await getModule([ 'isMobileOnline' ]);
-    const Avatar = await getModule([ 'AnimatedAvatar' ]);
+    const statusStore = getModule([ 'isMobileOnline' ], false);
+    const Avatar = getModule([ 'AnimatedAvatar' ], false);
     this.inject('bsi-module-enhanced-avatar-status-indicators', Avatar, 'default', ([ props ], res) => {
       const userId = props.userId || props.src?.includes('/avatars') && props.src.match(/\/(?:avatars|users)\/(\d+)/)[1];
       const clientStatuses = userId === this.plugin.currentUserId ? this.plugin.clientStatusStore.getCurrentClientStatus() : statusStore.getState().clientStatuses[userId];

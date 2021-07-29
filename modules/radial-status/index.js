@@ -40,11 +40,11 @@ module.exports = class RadialStatus extends Module {
     };
   }
 
-  async startModule () {
+  startModule () {
     /* Avatar Radial Status */
-    const statusStore = await getModule([ 'isMobileOnline' ]);
-    const statusModule = await getModule([ 'getStatusMask' ]);
-    const Avatar = await getModule([ 'AnimatedAvatar' ]);
+    const statusStore = getModule([ 'isMobileOnline' ], false);
+    const statusModule = getModule([ 'getStatusMask' ], false);
+    const Avatar = getModule([ 'AnimatedAvatar' ], false);
     this.inject('bsi-module-radial-avatar-status', Avatar, 'default', ([ props ], res) => {
       if (props.status) {
         res.props['data-bsi-radial-status'] = true;
