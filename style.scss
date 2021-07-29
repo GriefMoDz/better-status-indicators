@@ -162,25 +162,14 @@ $statuses: (
   "dnd",
   "offline",
   "invisible",
-  "streaming"
+  "streaming",
+  "unknown"
 );
 
 .bsi-theme-variables {
   #bsi-status-preview .status-menu-item[data-status='invisible']:not(.focused-3afm-j) .status-1AY8sU,
   #status-picker-invisible:not(.focused-3afm-j) .status-1AY8sU {
     background-color: var(--bsi-invisible-color) !important;
-  }
-
-  .wrapper-3t9DeA {
-    &[data-bsi-status='unknown'] {
-      rect[mask='url(#svg-mask-status-offline)']:not([fill='#ffffff']) {
-        fill: var(--bsi-offline-color);
-      }
-
-      .bsi-avatarRadial {
-        --status-color: var(--bsi-offline-color) !important;
-      }
-    }
   }
 
   .avatarWrapper-2yR4wp .wrapper-3t9DeA rect[mask='url(#svg-mask-status-offline)'] {
@@ -194,11 +183,19 @@ $statuses: (
       &[data-bsi-status=#{$status}] {
         rect[mask='url(#svg-mask-status-online-mobile)'],
         rect[mask='url(#svg-mask-status-#{$status})']:not([fill='#ffffff']) {
-          fill: var(--bsi-#{$status}-color);
+          @if $status == unknown {
+            fill: var(--bsi-offline-color);
+          } @else {
+            fill: var(--bsi-#{$status}-color);
+          }
         }
 
         .bsi-avatarRadial {
-          --status-color: var(--bsi-#{$status}-color) !important;
+          @if $status == unknown {
+            --status-color: var(--bsi-offline-color) !important;
+          } @else {
+            --status-color: var(--bsi-#{$status}-color) !important;
+          }
         }
       }
     }
