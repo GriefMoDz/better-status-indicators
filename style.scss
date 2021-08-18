@@ -181,6 +181,7 @@ $statuses: (
   .bsi-theme-variables {
     .wrapper-3t9DeA {
       &[data-bsi-status=#{$status}] {
+        rect[mask='url(#svg-mask-status-typing)'],
         rect[mask='url(#svg-mask-status-online-mobile)'],
         rect[mask='url(#svg-mask-status-#{$status})']:not([fill='#ffffff']) {
           @if $status == unknown {

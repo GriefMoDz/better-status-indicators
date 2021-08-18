@@ -180,11 +180,10 @@ module.exports = class StatusEverywhere extends Module {
             return res;
           }
 
-          const originalProps = res.props;
-          res = React.createElement('span', {}, React.createElement(ConnectedAvatar, {
-            ...originalProps,
-            ...defaultProps,
-            className: [ originalProps.className, getSetting('se-reducedStatuses', false) && 'bsi-reduced-statuses' ].filter(Boolean).join(' ')
+          const newProps = Object.assign(res.props, defaultProps);
+          res = React.createElement('span', null, React.createElement(ConnectedAvatar, {
+            ...newProps,
+            className: [ newProps.className, getSetting('se-reducedStatuses', false) && 'bsi-reduced-statuses' ].filter(Boolean).join(' ')
           }));
 
           return res;

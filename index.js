@@ -28,8 +28,8 @@
 
 /* eslint-disable object-property-newline */
 const { React, ReactDOM, getModule, getModuleByDisplayName, i18n: { Messages }, constants: { StatusTypes } } = require('powercord/webpack');
+const { findInReactTree, getOwnerInstance, waitFor } = require('powercord/util');
 const { Text, modal: { Confirm } } = require('powercord/components');
-const { findInReactTree, waitFor } = require('powercord/util');
 const { inject, uninject } = require('powercord/injector');
 const { open: openModal } = require('powercord/modal');
 const { Plugin } = require('powercord/entities');
@@ -356,6 +356,26 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     UserProfileModalHeader.default.displayName = 'UserProfileModalHeader';
 
+    const { container } = getModule([ 'container', 'usernameContainer' ], false);
+    const Account = getOwnerInstance(await waitFor(`.${container}:not(#powercord-spotify-modal)`));
+    this.inject('bsi-account-avatar-status', Account.__proto__, 'render', (_, res) => {
+      const AvatarWithPopout = findInReactTree(res, n => n.type?.displayName === 'Popout');
+      if (AvatarWithPopout) {
+        AvatarWithPopout.props.children = (oldMethod => (args) => {
+          let res = oldMethod(args);
+          if (res?.props?.children) {
+            res.props.children.type = Avatar;
+          }
+
+          return res;
+        })(AvatarWithPopout.props.children);
+      }
+
+      return res;
+    });
+
+    Account.forceUpdate();
+
     const PrivateChannel = getModuleByDisplayName('PrivateChannel', false);
     this.inject('bsi-user-dm-avatar-status', PrivateChannel.prototype, 'renderAvatar', (_, res) => {
       res.type = Avatar;
@@ -501,8 +521,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     const ErrorBoundary = require('../pc-settings/components/ErrorBoundary');
 
-    const FormSection = getModuleByDisplayName('FormSection', false);
-    const SettingsView = getModuleByDisplayName('SettingsView', false);
+    const FormSection = await getModuleByDisplayName('FormSection');
+    const SettingsView = await getModuleByDisplayName('SettingsView');
     this.inject('bsi-settings-page', SettingsView.prototype, 'getPredicateSections', (_, sections) => {
       const changelog = sections.find(category => category.section === 'changelog');
       if (changelog) {
