@@ -183,7 +183,7 @@ function renderSectionSettings (section, { getSetting, toggleSetting, updateSett
   </React.Fragment>;
 }
 
-function renderSettings ({ setSection }, { getSetting, toggleSetting }) {
+function renderSettings ({ setSection }) {
   const sections = require('../stores/settingsSections');
 
   return <React.Fragment>
@@ -206,17 +206,6 @@ function renderSettings ({ setSection }, { getSetting, toggleSetting }) {
         icon={(props) => React.createElement(Icons[section.icon], { ...props })}
       /> ].filter(Boolean);
     })}
-
-    <Divider />
-
-    <FormTitle className='bsi-settings-status-display-title'>{Messages.BSI_STATUS_DISPLAY}</FormTitle>
-    <SwitchItem
-      note={Messages.BSI_TRUE_STATUS_DESC}
-      value={getSetting('trueStatusColor', false)}
-      onChange={() => toggleSetting('trueStatusColor', false)}
-    >
-      {Messages.BSI_TRUE_STATUS}
-    </SwitchItem>
   </React.Fragment>;
 }
 

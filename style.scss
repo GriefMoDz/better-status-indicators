@@ -167,9 +167,12 @@ $statuses: (
 );
 
 .bsi-theme-variables {
-  #bsi-status-preview .status-menu-item[data-status='invisible']:not(.focused-3afm-j) .status-1AY8sU,
-  #status-picker-invisible:not(.focused-3afm-j) .status-1AY8sU {
-    background-color: var(--bsi-invisible-color) !important;
+  #bsi-status-preview .status-menu-item[data-status='invisible']:not(.focused-3afm-j),
+  #status-picker-invisible:not(.focused-3afm-j),
+  .popout-VcNcHB [data-list-item-id$='invisible'] {
+    .status-1AY8sU {
+      background-color: var(--bsi-invisible-color) !important;
+    }
   }
 
   .avatarWrapper-2yR4wp .wrapper-3t9DeA rect[mask='url(#svg-mask-status-offline)'] {

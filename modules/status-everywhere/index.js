@@ -109,17 +109,24 @@ module.exports = class StatusEverywhere extends Module {
 
       const { size } = props;
 
-      const getMobileStatusState = () => {
+      const getStatusStates = () => {
         const mobileStatus = getSetting('se-mobileStatus', 'others');
+        const typingStatus = getSetting('se-typingStatus', 'hidden');
 
-        return mobileStatus === 'self+others' ? true : mobileStatus === 'others' ? userId !== this.plugin.currentUserId : false;
+        return {
+          mobileStatus: Boolean(mobileStatus === 'self+others' ? true : mobileStatus === 'others' ? userId !== this.plugin.currentUserId : false)
+            && statusStore.isMobileOnline(userId),
+          typingStatus: Boolean(typingStatus === 'self+others' ? true : typingStatus === 'others' ? userId !== this.plugin.currentUserId : false)
+            && typingStore.isTyping(props.message?.channel_id, userId)
+        }
       };
 
-      const ConnectedAvatar = Flux.connectStores([ statusStore, powercord.api.settings.store ], () => ({
+      const ConnectedAvatar = Flux.connectStores([ statusStore, typingStore, powercord.api.settings.store ], () => ({
         status: activityStore.isStreaming(props.activities || statusStore.getActivities(userId))
           ? 'streaming'
           : statusStore.getStatus(userId),
-        isMobile: getMobileStatusState() && statusStore.isMobileOnline(userId)
+        isMobile: getStatusStates().mobileStatus,
+        isTyping: getStatusStates().typingStatus
       }))(useSubscribeGuildMembers(() => {
         const members = {};
         const guildId = guildStore.getGuildId();
@@ -162,15 +169,9 @@ module.exports = class StatusEverywhere extends Module {
         size: avatarModule.Sizes.SIZE_40
       };
 
-      const getTypingStatusState = () => {
-        const typingStatus = getSetting('se-typingStatus', 'hidden');
-
-        return typingStatus === 'self+others' ? true : typingStatus === 'others' ? defaultProps.userId !== this.plugin.currentUserId : false;
-      };
-
-      const ConnectedAvatar = Flux.connectStores([ typingStore, powercord.api.settings.store ], () => ({
-        isTyping: getTypingStatusState() && typingStore.isTyping(message.channel_id, defaultProps.userId)
-      }))(Avatar);
+      if (!message.author || (message.author && message.author.isNonUserBot())) {
+        return res;
+      }
 
       const AvatarWithPopout = findInReactTree(res, n => n.type?.displayName === 'Popout');
       if (AvatarWithPopout) {
@@ -181,10 +182,11 @@ module.exports = class StatusEverywhere extends Module {
           }
 
           const newProps = Object.assign(res.props, defaultProps);
-          res = React.createElement('span', null, React.createElement(ConnectedAvatar, {
+          res = React.createElement(Avatar, {
             ...newProps,
+            message: props.message,
             className: [ newProps.className, getSetting('se-reducedStatuses', false) && 'bsi-reduced-statuses' ].filter(Boolean).join(' ')
-          }));
+          });
 
           return res;
         })(AvatarWithPopout.props.children);

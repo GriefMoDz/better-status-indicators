@@ -303,14 +303,6 @@ module.exports = class BetterStatusIndicators extends Plugin {
       return res;
     });
 
-    this.inject('bsi-true-status-color', avatarModule, 'default', (args) => {
-      if (getSetting('trueStatusColor', false) && args[0].status && args[0].statusColor && args[0].statusColor === '#ffffff') {
-        args[0].statusColor = statusModule.getStatusColor(args[0].status);
-      }
-
-      return args;
-    }, true);
-
     avatarModule.default.Sizes = avatarModule.Sizes;
 
     const Avatar = avatarModule.default;
