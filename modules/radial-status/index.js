@@ -26,7 +26,7 @@
  * SOFTWARE.
  */
 
-const { React, getModule } = require('powercord/webpack');
+const { React, getModule, i18n: { Messages } } = require('powercord/webpack');
 const { findInReactTree } = require('powercord/util');
 const { Module } = require('../../entities');
 
@@ -36,11 +36,24 @@ module.exports = class RadialStatus extends Module {
       name: '[WIP] Radial Avatar Status',
       description: 'Replaces the traditional status indicator with a border outline around the users\' avatar.',
       icon: 'Radial',
-      settings: {}
+      settings: {
+        'rs-avatar-inset': {
+          type: 'slider',
+          name: 'Avatar Inset',
+          description: Messages.BSI_RADIAL_STATUS_INSET_DESC,
+          defaultValue: 3,
+          onMarkerRender: (val) => `${val}px`,
+          minValue: 3,
+          stickToMarkers: true,
+          markers: [3, 4, 5, 6, 7, 8, 9, 10]
+        }
+      }
     };
   }
 
   startModule () {
+    const { getSetting } = powercord.api.settings._fluxProps(this.plugin.entityID);
+
     /* Avatar Radial Status */
     const statusStore = getModule([ 'isMobileOnline' ], false);
     const statusModule = getModule([ 'getStatusMask' ], false);
@@ -59,7 +72,10 @@ module.exports = class RadialStatus extends Module {
         if (!_props.isSpeaking) {
           res.props.children.push(React.createElement('div', {
             className: 'bsi-avatarRadial',
-            style: { '--status-color': statusModule.getStatusColor(props.status) }
+            style: { 
+              '--status-color': statusModule.getStatusColor(props.status),
+              '--avatar-inset': `${getSetting('rs-avatar-inset', 3)}px`
+            }
           }));
         }
 
