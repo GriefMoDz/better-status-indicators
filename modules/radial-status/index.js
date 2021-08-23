@@ -48,11 +48,11 @@ module.exports = class RadialStatus extends Module {
           markers: [3, 4, 5, 6, 7, 8, 9, 10]
         },
         'rs-hide-speaking-ring': {
-           type: 'switch',
-           name: 'Hide speaking ring',
-           description: "Hides the green ring around your avatar in the account container and always renders the status regardless if you're speaking or not.",
-           defaultValue: false
-         }
+          type: 'switch',
+          name: 'Hide speaking ring',
+          description: "Hides the green ring around your avatar in the account container and always renders the status regardless if you're speaking or not.",
+          defaultValue: false
+        }
       }
     };
   }
