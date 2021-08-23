@@ -46,7 +46,13 @@ module.exports = class RadialStatus extends Module {
           minValue: 3,
           stickToMarkers: true,
           markers: [3, 4, 5, 6, 7, 8, 9, 10]
-        }
+        },
+        'rs-hide-speaking-ring': {
+           type: 'switch',
+           name: 'Hide speaking ring',
+           description: "Hides the green ring around your avatar in the account container and always renders the status regardless if you're speaking or not.",
+           defaultValue: false
+         }
       }
     };
   }
@@ -69,6 +75,7 @@ module.exports = class RadialStatus extends Module {
       foreignObject.props.children.type = (_props) => {
         const res = AvatarImg(_props);
 
+        if (getSetting('rs-hide-speaking-ring', false)) _props.isSpeaking = false;
         if (!_props.isSpeaking) {
           res.props.children.push(React.createElement('div', {
             className: 'bsi-avatarRadial',
