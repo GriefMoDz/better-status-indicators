@@ -83,7 +83,7 @@ module.exports = class RadialStatus extends Module {
             className: 'bsi-avatarRadial',
             style: { 
               '--status-color': statusModule.getStatusColor(props.status),
-              '--avatar-inset': `${props.size == 'SIZE_120' ? inset * 2.5 : props.size == 'SIZE_80' ? inset * 1.75 : inset}px`,
+              '--avatar-inset': `${props.size == 'SIZE_120' ? inset * 2.25 : props.size == 'SIZE_80' ? inset * 1.75 : inset}px`,
               '--outline-size': `${props.size == 'SIZE_120' ? 4 : props.size == 'SIZE_80' ? 3 : 2}px`
             }
           }));
