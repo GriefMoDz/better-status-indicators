@@ -77,11 +77,14 @@ module.exports = class RadialStatus extends Module {
 
         if (getSetting('rs-hide-speaking-ring', false)) _props.isSpeaking = false;
         if (!_props.isSpeaking) {
+          const inset = getSetting('rs-avatar-inset', 3);
+          
           res.props.children.push(React.createElement('div', {
             className: 'bsi-avatarRadial',
             style: { 
               '--status-color': statusModule.getStatusColor(props.status),
-              '--avatar-inset': `${getSetting('rs-avatar-inset', 3)}px`
+              '--avatar-inset': `${props.size == 'SIZE_120' ? inset + 4 : props.size == 'SIZE_80' ? inset + 2 : inset}px`,
+              '--outline-size': `${props.size == 'SIZE_120' ? 4 : props.size == 'SIZE_80' ? 3 : 2}px`
             }
           }));
         }
