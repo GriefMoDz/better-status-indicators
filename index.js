@@ -27,12 +27,13 @@
  */
 
 /* eslint-disable object-property-newline */
-const { React, ReactDOM, getModule, getModuleByDisplayName, i18n: { Messages }, constants: { StatusTypes } } = require('powercord/webpack');
+const { React, ReactDOM, FluxDispatcher, getModule, getModuleByDisplayName, i18n: { Messages }, constants: { StatusTypes } } = require('powercord/webpack');
 const { findInReactTree, getOwnerInstance, waitFor } = require('powercord/util');
 const { Text, modal: { Confirm } } = require('powercord/components');
 const { inject, uninject } = require('powercord/injector');
 const { open: openModal } = require('powercord/modal');
 const { Plugin } = require('powercord/entities');
+const Lodash = window._;
 
 const AnimatedAvatarStatus = require('./components/AnimatedAvatarStatus');
 const AnimatedStatus = require('./components/AnimatedStatus');
@@ -91,6 +92,15 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
   async startPlugin () {
     this.loadStylesheet('./style.scss');
+    this.reload = Lodash.debounce(() => {
+      FluxDispatcher.dispatch({ type: 'BSI_RELOAD_AVATARS' })
+    }, 500);
+
+    const setSetting = this.settings.set; 
+    this.settings.set = (...args) => {
+      setSetting(...args);
+      this.reload();
+    }
 
     powercord.api.i18n.loadAllStrings(i18n);
     powercord.api.settings.registerSettings('better-status-indicators', {
@@ -261,6 +271,18 @@ module.exports = class BetterStatusIndicators extends Plugin {
     this.inject('bsi-mobile-status-default-mask', avatarModule, 'default', ([ props ], res) => {
       const { size, status, isMobile, isTyping } = props;
       const foreignObject = findInReactTree(res, n => n?.type === 'foreignObject');
+      const forceUpdate = React.useState(0)[1];
+
+      React.useEffect(() => {
+         function callback() {
+            forceUpdate({});
+         };
+
+         FluxDispatcher.subscribe('BSI_RELOAD_AVATARS', callback);
+         return () => {
+            FluxDispatcher.unsubscribe('BSI_RELOAD_AVATARS', callback);
+         };
+      }, []);
 
       if (status) {
         res.props['data-bsi-status'] = status;
@@ -534,6 +556,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
       const { container } = getModule([ 'container', 'base' ], false);
       await waitFor(`.${container}`).then(this._refreshMaskLibrary);
     }
+
+    this.reload();
   }
 
   hex2hsl (value) {

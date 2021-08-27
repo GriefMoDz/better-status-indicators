@@ -258,8 +258,6 @@ function renderCustomize ({ activeColorPicker, setActiveColorPicker }, props) {
           <StatusPickerPreview className={activeColorPicker ? 'animate' : ''} selectedStatus={activeColorPicker} />
         </Flex.Child>
       </Flex>
-
-      <Text size={Text.Sizes.SIZE_12} style={{ marginTop: 10 }}>{Messages.BSI_STATUS_COLOR_CHANGE_NOTE.format({})}</Text>
     </Flex>
 
     {activeColorPicker && <ColorPickerInput
@@ -303,7 +301,6 @@ function renderModules ({ getSetting, toggleSetting, updateSetting, main }) {
 
   return <React.Fragment>
     <FormTitle className='bsi-settings-status-display-title'>{Messages.BSI_AVAILABLE_MODULES.format({ count: modules.length })}</FormTitle>
-    <Text size={Text.Sizes.SIZE_12} style={{ marginBottom: 10 }}>{Messages.BSI_MODULES_CHANGE_NOTE.format({})}</Text>
 
     {modules.map(modId => {
       const { manifest } = ModuleManager.get(modId);
