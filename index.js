@@ -93,7 +93,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
   async startPlugin () {
     this.loadStylesheet('./style.scss');
     this.reload = Lodash.debounce(() => {
-      FluxDispatcher.dispatch({ type: 'BSI_RELOAD_AVATARS' })
+      FluxDispatcher.dispatch({ type: 'BSI_RELOAD_AVATARS' });
     }, 500);
 
     const setSetting = this.settings.set; 
