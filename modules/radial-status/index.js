@@ -58,8 +58,6 @@ module.exports = class RadialStatus extends Module {
   }
 
   startModule () {
-    const { getSetting } = powercord.api.settings._fluxProps(this.plugin.entityID);
-
     /* Avatar Radial Status */
     const statusStore = getModule([ 'isMobileOnline' ], false);
     const statusModule = getModule([ 'getStatusMask' ], false);
@@ -75,9 +73,9 @@ module.exports = class RadialStatus extends Module {
       foreignObject.props.children.type = (_props) => {
         const res = AvatarImg(_props);
 
-        if (getSetting('rs-hide-speaking-ring', false)) _props.isSpeaking = false;
+        if (this.plugin.settings.get('rs-hide-speaking-ring', false)) _props.isSpeaking = false;
         if (!_props.isSpeaking) {
-          const inset = getSetting('rs-avatar-inset', 3);
+          const inset = this.plugin.settings.get('rs-avatar-inset', 3);
           
           res.props.children.push(React.createElement('div', {
             className: 'bsi-avatarRadial',
