@@ -108,7 +108,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
       label: 'Better Status Indicators',
       render: (props) => React.createElement(Settings, {
         ...props,
-        main: this
+        main: this,
+        updateSetting: this.settings.set
       })
     });
 
