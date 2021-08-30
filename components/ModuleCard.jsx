@@ -107,19 +107,28 @@ class ModuleCard extends React.PureComponent {
             onChange: (e) => updateSetting(key, e.value)
           }, setting.name));
         case 'switch':
-          elements.push(React.createElement(Components.SwitchItem, {
+          return elements.push(React.createElement(Components.SwitchItem, {
             note: setting.description || '',
             value: getSetting(key, setting.defaultValue),
             onChange: () => toggleSetting(key, setting.defaultValue)
+          }, setting.name));
+        case 'slider':
+          return elements.push(React.createElement(Components.SliderInput, {
+            note: setting.description || '',
+            minValue: setting.minValue || 1,
+            stickToMarkers: setting.stickToMarkers || false,
+            markers: Array.isArray(setting.markers) ? setting.markers : [],
+            defaultValue: setting.defaultValue || null,
+            initialValue: getSetting(key, setting.defaultValue),
+            onValueChange: (val) => updateSetting(key, Math.floor(parseInt(val))),
+            onMarkerRender: setting.onMarkerRender || null
           }, setting.name));
       }
     });
 
     return <div className={classes.body}>
       <FormDivider className={classes.topDivider} />
-      {elements.length > 0 && <Flex>
-        <Flex.Child>{elements}</Flex.Child>
-      </Flex>}
+      {elements.length > 0 && elements.map(e => <Flex.Child>{e}</Flex.Child>)}
       <Flex direction={Flex.Direction.VERTICAL}>
         <Flex>
           <Button style={{ marginLeft: elements.length > 0 ? 'auto' : '' }} size={Button.Sizes.SMALL} color={Button.Colors.RED} look={Button.Looks.OUTLINED} onClick={() => this.handleModuleState(false)}>{Messages.BSI_MODULE_DISABLE}</Button>
