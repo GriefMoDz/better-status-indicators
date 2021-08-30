@@ -54,6 +54,7 @@
   "BSI_MODULE_SETTINGS_HIDDEN": "Settings have been hidden as the module is __**disabled**__. Click here to enable it back:",
   "BSI_MODULE_SETTINGS_MISSING": "Settings aren't available for this module. :smiling_face_with_tear:",
   "BSI_STATUS_EVERYWHERE_TYPING_STATUS_DESC": "Set whether or not the typing status indicator should be displayed in chat avatars, and for who. **Disclaimer**: Enabling this may impact performance on slower hardware. Please proceed with caution.",
+  "BSI_RADIAL_STATUS_INSET_DESC" : "Change the inset of the avatar picture; a lower inset will make the avatar smaller, resulting in a bigger gap between the status indicator and the avatar.",
   "BSI_MODULE_ENABLE": "Enable Module",
   "BSI_MODULE_DISABLE": "Disable Module"
 }
