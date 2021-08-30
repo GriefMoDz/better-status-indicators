@@ -45,12 +45,12 @@ module.exports = class RadialStatus extends Module {
           onMarkerRender: (val) => `${val}px`,
           minValue: 3,
           stickToMarkers: true,
-          markers: [3, 4, 5, 6, 7, 8, 9, 10]
+          markers: [ 3, 4, 5, 6, 7, 8, 9, 10 ]
         },
         'rs-hide-speaking-ring': {
           type: 'switch',
-          name: 'Hide speaking ring',
-          description: "Hides the green ring around your avatar in the account container and always renders the status regardless if you're speaking or not.",
+          name: 'Hide Speaking Ring',
+          description: 'Hides the green ring around your avatar in the account container and always renders the status regardless if you\'re speaking or not.',
           defaultValue: false
         }
       }
@@ -58,6 +58,8 @@ module.exports = class RadialStatus extends Module {
   }
 
   startModule () {
+    const { settings: { get: getSetting } } = this.plugin;
+
     /* Avatar Radial Status */
     const statusStore = getModule([ 'isMobileOnline' ], false);
     const statusModule = getModule([ 'getStatusMask' ], false);
@@ -73,10 +75,13 @@ module.exports = class RadialStatus extends Module {
       foreignObject.props.children.type = (_props) => {
         const res = AvatarImg(_props);
 
-        if (this.plugin.settings.get('rs-hide-speaking-ring', false)) _props.isSpeaking = false;
+        if (getSetting('rs-hide-speaking-ring', false)) {
+          _props.isSpeaking = false;
+        }
+
         if (!_props.isSpeaking) {
-          const inset = this.plugin.settings.get('rs-avatar-inset', 3);
-          
+          const inset = getSetting('rs-avatar-inset', 3);
+
           res.props.children.push(React.createElement('div', {
             className: 'bsi-avatarRadial',
             style: { 
@@ -94,7 +99,7 @@ module.exports = class RadialStatus extends Module {
         return res;
       }
 
-      if (this.plugin.settings.get('enabledModules').includes('avatarStatuses')) {
+      if (getSetting('enabledModules').includes('avatarStatuses')) {
         const userId = props.userId || props.src?.includes('/avatars') && props.src.match(/\/(?:avatars|users)\/(\d+)/)[1];
         const clientStatuses = userId === this.plugin.currentUserId ? this.plugin.clientStatusStore.getCurrentClientStatus() : statusStore.getState().clientStatuses[userId];
 
