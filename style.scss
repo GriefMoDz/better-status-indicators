@@ -260,6 +260,10 @@ $status-colors: (
     height: 100%;
     grid-area: 1 / 1;
   }
+  
+  img {
+    border-radius: 50%;
+  }
 
   &:not([data-bsi-client-avatar-status]) + svg > foreignObject[mask='url(#svg-mask-avatar-status-round-80)'] {
     mask: url(#svg-mask-avatar-default);
