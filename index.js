@@ -27,7 +27,7 @@
  */
 
 /* eslint-disable object-property-newline */
-const { React, ReactDOM, getModule, getModuleByDisplayName, i18n: { Messages }, constants: { StatusTypes } } = require('powercord/webpack');
+const { React, ReactDOM, FluxDispatcher, getModule, getModuleByDisplayName, i18n: { Messages }, constants: { StatusTypes } } = require('powercord/webpack');
 const { findInReactTree, getOwnerInstance, waitFor } = require('powercord/util');
 const { Text, modal: { Confirm } } = require('powercord/components');
 const { inject, uninject } = require('powercord/injector');
@@ -45,6 +45,7 @@ const ModuleManager = require('./managers/modules');
 const clientStatusStore = require('./stores/clientStatusStore');
 
 const cache = {};
+const Lodash = window._;
 
 module.exports = class BetterStatusIndicators extends Plugin {
   constructor () {
@@ -91,6 +92,16 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
   async startPlugin () {
     this.loadStylesheet('./style.scss');
+    this._refreshAvatars = Lodash.debounce(() => FluxDispatcher.dispatch({ type: 'BSI_REFRESH_AVATARS' }), 500);
+
+    const wrapInAvatarRefresh = (method, ...args) => {
+      method(...args);
+      this._refreshAvatars();
+    };
+
+    this.settings.set = wrapInAvatarRefresh.bind(this, this.settings.set);
+
+    const { getSetting, toggleSetting, updateSetting } = powercord.api.settings._fluxProps(this.entityID);
 
     powercord.api.i18n.loadAllStrings(i18n);
     powercord.api.settings.registerSettings('better-status-indicators', {
@@ -98,13 +109,13 @@ module.exports = class BetterStatusIndicators extends Plugin {
       label: 'Better Status Indicators',
       render: (props) => React.createElement(Settings, {
         ...props,
-        main: this
+        main: this,
+        toggleSetting: wrapInAvatarRefresh.bind(this, toggleSetting),
+        updateSetting: wrapInAvatarRefresh.bind(this, updateSetting)
       })
     });
 
     this.ColorUtils = getModule([ 'isValidHex' ], false);
-
-    const { getSetting, toggleSetting, updateSetting } = powercord.api.settings._fluxProps(this.entityID);
 
     /* Theme Status Variables */
     if (getSetting('themeVariables', false)) {
@@ -261,6 +272,15 @@ module.exports = class BetterStatusIndicators extends Plugin {
     this.inject('bsi-mobile-status-default-mask', avatarModule, 'default', ([ props ], res) => {
       const { size, status, isMobile, isTyping } = props;
       const foreignObject = findInReactTree(res, n => n?.type === 'foreignObject');
+      const forceUpdate = React.useState({})[1];
+
+      React.useEffect(() => {
+        const callback = () => forceUpdate({});
+
+        FluxDispatcher.subscribe('BSI_REFRESH_AVATARS', callback);
+
+        return () => FluxDispatcher.unsubscribe('BSI_REFRESH_AVATARS', callback);
+      }, []);
 
       if (status) {
         res.props['data-bsi-status'] = status;
@@ -534,6 +554,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
       const { container } = getModule([ 'container', 'base' ], false);
       await waitFor(`.${container}`).then(this._refreshMaskLibrary);
     }
+
+    this._refreshAvatars();
   }
 
   hex2hsl (value) {
@@ -612,5 +634,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     this._refreshMaskLibrary();
 
     this.ModuleManager.shutdownModules();
+
+    this._refreshAvatars();
   }
 };
