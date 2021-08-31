@@ -637,5 +637,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     this._refreshMaskLibrary();
 
     this.ModuleManager.shutdownModules();
+    
+    this.reload();
   }
 };
