@@ -33,7 +33,6 @@ const { Text, modal: { Confirm } } = require('powercord/components');
 const { inject, uninject } = require('powercord/injector');
 const { open: openModal } = require('powercord/modal');
 const { Plugin } = require('powercord/entities');
-const Lodash = window._;
 
 const AnimatedAvatarStatus = require('./components/AnimatedAvatarStatus');
 const AnimatedStatus = require('./components/AnimatedStatus');
@@ -46,6 +45,7 @@ const ModuleManager = require('./managers/modules');
 const clientStatusStore = require('./stores/clientStatusStore');
 
 const cache = {};
+const Lodash = window._;
 
 module.exports = class BetterStatusIndicators extends Plugin {
   constructor () {
@@ -92,15 +92,16 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
   async startPlugin () {
     this.loadStylesheet('./style.scss');
-    this.reload = Lodash.debounce(() => {
-      FluxDispatcher.dispatch({ type: 'BSI_RELOAD_AVATARS' });
-    }, 500);
+    this._refreshAvatars = Lodash.debounce(() => FluxDispatcher.dispatch({ type: 'BSI_REFRESH_AVATARS' }), 500);
 
-    const setSetting = this.settings.set; 
-    this.settings.set = (...args) => {
-      setSetting(...args);
-      this.reload();
-    }
+    const wrapInAvatarRefresh = (method, ...args) => {
+      method(...args);
+      this._refreshAvatars();
+    };
+
+    this.settings.set = wrapInAvatarRefresh.bind(this, this.settings.set);
+
+    const { getSetting, toggleSetting, updateSetting } = powercord.api.settings._fluxProps(this.entityID);
 
     powercord.api.i18n.loadAllStrings(i18n);
     powercord.api.settings.registerSettings('better-status-indicators', {
@@ -109,13 +110,12 @@ module.exports = class BetterStatusIndicators extends Plugin {
       render: (props) => React.createElement(Settings, {
         ...props,
         main: this,
-        updateSetting: this.settings.set
+        toggleSetting: wrapInAvatarRefresh.bind(this, toggleSetting),
+        updateSetting: wrapInAvatarRefresh.bind(this, updateSetting)
       })
     });
 
     this.ColorUtils = getModule([ 'isValidHex' ], false);
-
-    const { getSetting, toggleSetting, updateSetting } = powercord.api.settings._fluxProps(this.entityID);
 
     /* Theme Status Variables */
     if (getSetting('themeVariables', false)) {
@@ -272,17 +272,14 @@ module.exports = class BetterStatusIndicators extends Plugin {
     this.inject('bsi-mobile-status-default-mask', avatarModule, 'default', ([ props ], res) => {
       const { size, status, isMobile, isTyping } = props;
       const foreignObject = findInReactTree(res, n => n?.type === 'foreignObject');
-      const forceUpdate = React.useState(0)[1];
+      const forceUpdate = React.useState({})[1];
 
       React.useEffect(() => {
-         function callback() {
-            forceUpdate({});
-         };
+        const callback = () => forceUpdate({});
 
-         FluxDispatcher.subscribe('BSI_RELOAD_AVATARS', callback);
-         return () => {
-            FluxDispatcher.unsubscribe('BSI_RELOAD_AVATARS', callback);
-         };
+        FluxDispatcher.subscribe('BSI_REFRESH_AVATARS', callback);
+
+        return () => FluxDispatcher.unsubscribe('BSI_REFRESH_AVATARS', callback);
       }, []);
 
       if (status) {
@@ -558,7 +555,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       await waitFor(`.${container}`).then(this._refreshMaskLibrary);
     }
 
-    this.reload();
+    this._refreshAvatars();
   }
 
   hex2hsl (value) {
@@ -637,7 +634,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     this._refreshMaskLibrary();
 
     this.ModuleManager.shutdownModules();
-    
-    this.reload();
+
+    this._refreshAvatars();
   }
 };
