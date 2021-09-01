@@ -359,6 +359,15 @@ $status-colors: (
   margin-bottom: 20px;
 }
 
+.bsi-settings-slider {
+  margin: 10px 5px 0;
+  width: calc(100% - 15px);
+}
+
+.bsi-settings-slider [class|='markValue'] {
+  white-space: nowrap;
+}
+
 html.reduce-motion {
   .bsi-settings-tab-bar ~ div > [data-list-id='color-picker'] {
     animation: fade-in .5s;

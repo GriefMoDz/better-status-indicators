@@ -121,7 +121,8 @@ class ModuleCard extends React.PureComponent {
             defaultValue: setting.defaultValue || null,
             initialValue: getSetting(key, setting.defaultValue),
             onValueChange: (val) => updateSetting(key, Math.floor(parseInt(val))),
-            onMarkerRender: setting.onMarkerRender || null
+            onMarkerRender: setting.onMarkerRender || null,
+            className: 'bsi-settings-slider'
           }, setting.name));
       }
     });
