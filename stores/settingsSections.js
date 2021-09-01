@@ -109,8 +109,36 @@ module.exports = {
       },
       matchStatus: {
         name: Messages.BSI_CLIENT_SWITCH_MATCH_COLOR,
-        description: Messages.BSI_MOBILE_SWITCH_MATCH_COLOR_DESC,
+        description: '%MATCH_COLOR_DESC%',
         disabled: () => getSetting('mobileDisabled', false) || getSetting('mobileAvatarStatus', true),
+        defaultValue: false,
+        type: 'switch'
+      },
+      messageHeaders: {
+        name: Messages.BSI_CLIENT_SWITCH_MESSAGE_HEADERS,
+        disabled: () => getSetting('mobileDisabled', false) || getSetting('mobileAvatarStatus', true),
+        description: '%MESSAGE_HEADERS_DESC%',
+        defaultValue: false,
+        type: 'switch'
+      },
+      membersList: {
+        name: Messages.BSI_CLIENT_SWITCH_MEMBERS_LIST,
+        disabled: () => getSetting('mobileDisabled', false) || getSetting('mobileAvatarStatus', true),
+        description: '%MEMBERS_LIST_DESC%',
+        defaultValue: false,
+        type: 'switch'
+      },
+      userPopoutModal: {
+        name: Messages.BSI_CLIENT_SWITCH_USER_POPOUT_MODAL,
+        disabled: () => getSetting('mobileDisabled', false) || getSetting('mobileAvatarStatus', true),
+        description: '%USER_POPOUT_MODAL_DESC%',
+        defaultValue: false,
+        type: 'switch'
+      },
+      directMessages: {
+        name: Messages.BSI_CLIENT_SWITCH_DM,
+        disabled: () => getSetting('mobileDisabled', false) || getSetting('mobileAvatarStatus', true),
+        description: '%DM_DESC%',
         defaultValue: false,
         type: 'switch'
       }

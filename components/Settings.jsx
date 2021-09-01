@@ -41,8 +41,12 @@ const Lodash = window._;
 const ColorUtils = getModule([ 'isValidHex' ], false);
 
 function formatClientTranslation (translation, args) {
-  const key = translation === 'DISPLAY_TITLE' ? 'CLIENT_DISPLAY_TITLE' : `CLIENT_SWITCH_${translation}`;
-  return Messages[`BSI_${key}`].format(args);
+  const key = translation === 'DISPLAY_TITLE' ? 
+    'CLIENT_DISPLAY_TITLE' :
+    `${args.client == 'mobile' ? 'MOBILE' : 'CLIENT'}_SWITCH_${translation}`;
+
+  const res = Messages[`BSI_${key}`];
+  return res.format ? res.format(args) : res;
 }
 
 let ModuleManager;
