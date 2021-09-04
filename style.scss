@@ -182,6 +182,18 @@ $statuses: (
 
 @each $status in $statuses {
   .bsi-theme-variables {
+    .bsi-clientStatuses {
+      svg[data-bsi-status=#{$status}] {
+        path {
+          @if $status == unknown {
+            fill: var(--bsi-offline-color) !important;
+          } @else {
+            fill: var(--bsi-#{$status}-color) !important;
+          }
+        }
+      }
+    }
+    
     .wrapper-3t9DeA {
       &[data-bsi-status=#{$status}] {
         rect[mask='url(#svg-mask-status-typing)'],

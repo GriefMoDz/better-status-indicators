@@ -62,6 +62,7 @@ function renderClientStatus (client, props, states) {
   }, (props) => React.createElement(clientIcons[client], {
     color: iconColor,
     className: `bsi-${client}Icon ${classes.icon}`,
+    'data-bsi-status': clientStatus,
     ...props
   }));
 }
