@@ -109,7 +109,7 @@ module.exports = {
       },
       matchStatus: {
         name: Messages.BSI_CLIENT_SWITCH_MATCH_COLOR,
-        description: '%MATCH_COLOR_DESC%',
+        description: Messages.BSI_MOBILE_SWITCH_MATCH_COLOR_DESC,
         disabled: () => getSetting('mobileDisabled', false) || getSetting('mobileAvatarStatus', true),
         defaultValue: false,
         type: 'switch'
