@@ -95,7 +95,7 @@ module.exports = class RadialStatus extends Module {
         return res;
       };
 
-      if (props.isTyping || props.isMobile) {
+      if (props.isTyping || (props.isMobile && getSetting('mobileAvatarStatus', true))) {
         return res;
       }
 

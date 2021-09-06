@@ -113,6 +113,34 @@ module.exports = {
         disabled: () => getSetting('mobileDisabled', false) || getSetting('mobileAvatarStatus', true),
         defaultValue: false,
         type: 'switch'
+      },
+      messageHeaders: {
+        name: Messages.BSI_CLIENT_SWITCH_MESSAGE_HEADERS,
+        description: Messages.BSI_MOBILE_SWITCH_MESSAGE_HEADERS_DESC,
+        disabled: () => getSetting('mobileDisabled', false) || getSetting('mobileAvatarStatus', true),
+        defaultValue: true,
+        type: 'switch'
+      },
+      membersList: {
+        name: Messages.BSI_CLIENT_SWITCH_MEMBERS_LIST,
+        description: Messages.BSI_MOBILE_SWITCH_MEMBERS_LIST_DESC,
+        disabled: () => getSetting('mobileDisabled', false) || getSetting('mobileAvatarStatus', true),
+        defaultValue: true,
+        type: 'switch'
+      },
+      userPopoutModal: {
+        name: Messages.BSI_CLIENT_SWITCH_USER_POPOUT_MODAL,
+        description: Messages.BSI_MOBILE_SWITCH_USER_POPOUT_MODAL_DESC,
+        disabled: () => getSetting('mobileDisabled', false) || getSetting('mobileAvatarStatus', true),
+        defaultValue: true,
+        type: 'switch'
+      },
+      directMessages: {
+        name: Messages.BSI_CLIENT_SWITCH_DM,
+        description: Messages.BSI_MOBILE_SWITCH_DM_DESC,
+        disabled: () => getSetting('mobileDisabled', false) || getSetting('mobileAvatarStatus', true),
+        defaultValue: true,
+        type: 'switch'
       }
     }
   },
