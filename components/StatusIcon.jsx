@@ -56,7 +56,7 @@ function renderStatusIcon ({ props, settings }, states) {
     ...props
   }, React.createElement(Activity, {
     color: settings.matchStatus ? states.statusColor : 'currentColor',
-    className: `${classes.icon}`,
+    className: classes.icon,
     ...props
   }))) : null;
 }
