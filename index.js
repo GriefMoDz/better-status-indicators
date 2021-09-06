@@ -286,7 +286,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
         res.props['data-bsi-status'] = status;
       }
 
-      const useMobileAvatarStatus = getSetting('mobileAvatarStatus', true);
+      const useEnhancedAvatarStatus = this.ModuleManager.isEnabled('avatar-statuses');
+      const useMobileAvatarStatus = getSetting('mobileAvatarStatus', true) || useEnhancedAvatarStatus;
 
       if (status && isMobile && !isTyping) {
         res.props['data-bsi-mobile-avatar-status'] = useMobileAvatarStatus;
