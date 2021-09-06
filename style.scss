@@ -126,6 +126,14 @@ $avatar-statuses: (
 @mixin avatarStatusCutout ($width: 32, $height: 10px, $x: 22, $y: 22, $avatar-status: false, $mask: avatar-default) {
   @each $status in $avatar-statuses {
     .wrapper-3t9DeA[data-bsi-mobile-avatar-status='#{$avatar-status}'][data-bsi-status='#{$status}'] {
+      &[data-bsi-radial-status='true'] {
+        + svg > foreignObject[width='#{$width}'] {
+          &:not([mask*='#{$mask}']) {
+            mask: url(#svg-mask-avatar-default);
+          }
+        }
+      }
+
       foreignObject[width='#{$width}'] {
         &:not([mask*='#{$mask}']) {
           mask: url(#svg-mask-avatar-status-round-#{$width});
