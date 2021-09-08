@@ -102,7 +102,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     const { getSetting, toggleSetting, updateSetting } = powercord.api.settings._fluxProps('better-status-indicators');
 
     powercord.api.i18n.loadAllStrings(i18n);
-    powercord.api.settings.registerSettings('better-status-indicators', {
+    powercord.api.settings.registerSettings(this.entityID, {
       category: 'better-status-indicators',
       label: 'Better Status Indicators',
       render: (props) => React.createElement(Settings, {
@@ -630,7 +630,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
   }
 
   pluginWillUnload () {
-    powercord.api.settings.unregisterSettings('better-status-indicators');
+    powercord.api.settings.unregisterSettings(this.entityID);
 
     cache.injectionIds.forEach(id => uninject(id));
     this._refreshMaskLibrary();
