@@ -58,7 +58,7 @@ module.exports = class RadialStatus extends Module {
   }
 
   startModule () {
-    const { settings: { get: getSetting } } = this.plugin;
+    const { getSetting } = powercord.api.settings._fluxProps('better-status-indicators');
 
     /* Avatar Radial Status */
     const statusStore = getModule([ 'isMobileOnline' ], false);

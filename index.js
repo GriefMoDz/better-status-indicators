@@ -99,9 +99,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       this._refreshAvatars();
     };
 
-    this.settings.set = wrapInAvatarRefresh.bind(this, this.settings.set);
-
-    const { getSetting, toggleSetting, updateSetting } = powercord.api.settings._fluxProps(this.entityID);
+    const { getSetting, toggleSetting, updateSetting } = powercord.api.settings._fluxProps('better-status-indicators');
 
     powercord.api.i18n.loadAllStrings(i18n);
     powercord.api.settings.registerSettings('better-status-indicators', {
@@ -144,7 +142,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     /* Module Loader */
     const disabledModules = getSetting('disabledModules');
     if (disabledModules && disabledModules.length === 0) {
-      this.settings.delete('disabledModules');
+      updateSetting('disabledModules');
       updateSetting('enabledModules', [ 'statusEverywhere' ]);
     }
 
@@ -399,8 +397,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
     });
 
     /* Status Indicators */
-    const ConnectedStatusIcon = this.settings.connectStore(StatusIcon);
-    const ConnectedClientStatuses = this.settings.connectStore(ClientStatuses);
+    const ConnectedStatusIcon = powercord.api.settings.connectStores('better-status-indicators')(StatusIcon);
+    const ConnectedClientStatuses = powercord.api.settings.connectStores('better-status-indicators')(ClientStatuses);
 
     const getDefaultMethodByKeyword = (mdl, keyword) => {
       const defaultMethod = mdl.__powercordOriginal_default ?? mdl.default;
@@ -573,6 +571,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
   _refreshStatusVariables (unmount = false) {
     const currentStatusVariables = document.querySelector(`#${this.entityID}-status-variables`);
+    const { getSetting } = powercord.api.settings._fluxProps('better-status-indicators');
 
     if (!unmount) {
       const statuses = Object.values(StatusTypes).filter(status => status !== 'unknown');
@@ -580,7 +579,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       const statusVariables = document.createElement('style');
       statusVariables.setAttribute('id', `${this.entityID}-status-variables`);
       statusVariables.textContent = `:root {\n\t${statuses.map(status => (
-        `--bsi-${status}-color: ${this.hex2hsl(this.settings.get(`${status}StatusColor`, this.defaultStatusColors[status.toUpperCase()]))};`
+        `--bsi-${status}-color: ${this.hex2hsl(getSetting(`${status}StatusColor`, this.defaultStatusColors[status.toUpperCase()]))};`
       )).join('\n\t')}\n}\n`;
 
       document.body.classList.add('bsi-theme-variables');

@@ -81,7 +81,7 @@ module.exports = class StatusEverywhere extends Module {
   }
 
   startModule () {
-    const { getSetting } = powercord.api.settings._fluxProps(this.plugin.entityID);
+    const { getSetting } = powercord.api.settings._fluxProps('better-status-indicators');
 
     const avatarModule = getModule([ 'AnimatedAvatar' ], false);
     const statusStore = getModule([ 'isMobileOnline' ], false);
