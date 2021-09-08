@@ -51,11 +51,14 @@ function renderStatusIcon ({ props, settings }, states) {
   return props.getSetting(`stream${locationKey}`, true) ? React.createElement(Tooltip, {
     text: Messages.BSI_STREAMING_AS_STATUS.format({ status: humanizeStatus(states.status) }),
     hideOnClick: false
-  }, (props) => React.createElement(Activity, {
-    color: settings.matchStatus ? states.statusColor : 'currentColor',
-    className: `bsi-statusIcon ${classes.icon}`,
+  }, (props) => React.createElement('div', {
+    className: 'bsi-statusIcon',
     ...props
-  })) : null;
+  }, React.createElement(Activity, {
+    color: settings.matchStatus ? states.statusColor : 'currentColor',
+    className: classes.icon,
+    ...props
+  }))) : null;
 }
 
 module.exports = React.memo(props => {
