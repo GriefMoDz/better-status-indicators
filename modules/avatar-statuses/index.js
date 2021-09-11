@@ -70,17 +70,19 @@ module.exports = class AvatarStatuses extends Module {
       res.props['data-bsi-client-avatar-status'] = client;
 
       const tooltip = findInReactTree(res, n => n.type?.displayName === 'Tooltip');
-      const { children } = tooltip.props;
+      if (tooltip) {
+        const { children } = tooltip.props;
 
-      tooltip.props.children = (props) => {
-        const res = children(props);
+        tooltip.props.children = (props) => {
+          const res = children(props);
 
-        res.props.children[0].props = { ...res.props.children[0].props,
-          mask: `url(#svg-mask-status-online-${client})`
+          res.props.children[0].props = { ...res.props.children[0].props,
+            mask: `url(#svg-mask-status-online-${client})`
+          };
+
+          return res;
         };
-
-        return res;
-      };
+      }
 
       return res;
     });

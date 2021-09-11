@@ -201,7 +201,7 @@ $statuses: (
         }
       }
     }
-    
+
     .wrapper-3t9DeA {
       &[data-bsi-status=#{$status}] {
         rect[mask='url(#svg-mask-status-typing)'],
@@ -280,7 +280,7 @@ $status-colors: (
     height: 100%;
     grid-area: 1 / 1;
   }
-  
+
   img {
     border-radius: 50%;
   }
@@ -406,14 +406,12 @@ html.reduce-motion {
 /* Status Preview */
 #bsi-status-preview {
   width: 190px;
+  display: block;
+  padding: 3px 8px;
   transition: width .45s ease-in-out;
 
   &.animate {
     width: 170px;
-  }
-
-  > .scroller {
-    padding: 3px 8px;
   }
 
   .separator {
@@ -436,8 +434,6 @@ html.reduce-motion {
   }
 
   .status-menu-item {
-    box-sizing: border-box;
-    position: relative;
     margin: 5px 0;
     border-radius: 2px;
     font-size: 14px;
@@ -447,7 +443,6 @@ html.reduce-motion {
   }
 
   .status-item {
-    box-sizing: border-box;
     display: grid;
     grid-template-areas:
       "icon status"
@@ -463,6 +458,11 @@ html.reduce-motion {
 
 .bsi-button-text-input {
   margin-bottom: 5px;
+
+  [type=button]:not([class*='disabled']) div {
+    text-overflow: unset;
+    overflow: visible;
+  }
 
   &:focus-within, &:hover {
     [type=button]:not([class*='disabled']) {

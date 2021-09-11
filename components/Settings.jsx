@@ -28,7 +28,7 @@
 
 /* eslint-disable object-property-newline */
 const { React, getModule, getModuleByDisplayName, i18n: { Messages }, constants: { HEXColors } } = require('powercord/webpack');
-const { Button, Divider, Flex, FormTitle, Text } = require('powercord/components');
+const { Button, Divider, Flex, FormTitle } = require('powercord/components');
 const { ColorPickerInput, SwitchItem, RadioGroup } = require('powercord/components/settings');
 
 const Icons = require('./Icons');
@@ -255,7 +255,10 @@ function renderCustomize ({ activeColorPicker, setActiveColorPicker }, props) {
 
         <Flex.Child basis='auto'>
           <></>
-          <StatusPickerPreview className={activeColorPicker ? 'animate' : ''} selectedStatus={activeColorPicker} />
+          <StatusPickerPreview
+            className={activeColorPicker ? 'animate' : ''}
+            selectedStatus={activeColorPicker}
+          />
         </Flex.Child>
       </Flex>
     </Flex>

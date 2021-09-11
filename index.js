@@ -145,7 +145,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     const disabledModules = getSetting('disabledModules');
     if (disabledModules && disabledModules.length === 0) {
       this.settings.delete('disabledModules');
-      updateSetting('enabledModules', [ 'statusEverywhere' ]);
+      updateSetting('enabledModules', [ 'status-everywhere' ]);
     }
 
     this.ModuleManager.startModules();
@@ -601,9 +601,13 @@ module.exports = class BetterStatusIndicators extends Plugin {
     const Mask = getModule([ 'MaskLibrary' ], false);
 
     const tempMaskLibrary = document.createElement('div');
+    tempMaskLibrary.style.display = 'none';
+    document.body.appendChild(tempMaskLibrary);
+
     ReactDOM.render(React.createElement(Mask.MaskLibrary), tempMaskLibrary);
 
     document.querySelector('#app-mount > svg').innerHTML = tempMaskLibrary.firstElementChild.innerHTML;
+    tempMaskLibrary.remove();
   }
 
   _hardwareAccelerationDisabled () {

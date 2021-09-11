@@ -70,6 +70,10 @@ module.exports = class RadialStatus extends Module {
       }
 
       const foreignObject = findInReactTree(res, n => n?.type === 'foreignObject');
+      if (!foreignObject) {
+        return res;
+      }
+
       const { type: AvatarImg } = foreignObject.props.children;
 
       foreignObject.props.children.type = (_props) => {
@@ -99,7 +103,7 @@ module.exports = class RadialStatus extends Module {
         return res;
       }
 
-      if (getSetting('enabledModules').includes('avatarStatuses')) {
+      if (this.plugin.ModuleManager.isEnabled('avatar-statuses') && !props.isMobile && props.status !== 'offline') {
         const userId = props.userId || props.src?.includes('/avatars') && props.src.match(/\/(?:avatars|users)\/(\d+)/)[1];
         const clientStatuses = userId === this.plugin.currentUserId ? this.plugin.clientStatusStore.getCurrentClientStatus() : statusStore.getState().clientStatuses[userId];
 
