@@ -35,7 +35,7 @@ class ModuleManager {
     this.modules = new Map();
     this.plugin = plugin;
 
-    this.settings = powercord.api.settings._fluxProps('better-status-indicators');
+    this.settings = plugin.$settings;
   }
 
   get (moduleId) {

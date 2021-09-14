@@ -27,7 +27,7 @@
  */
 
 /* eslint-disable object-property-newline */
-const { React, ReactDOM, FluxDispatcher, getModule, getModuleByDisplayName, i18n: { Messages }, constants: { StatusTypes } } = require('powercord/webpack');
+const { React, ReactDOM, Flux, FluxDispatcher, getModule, getModuleByDisplayName, i18n: { Messages }, constants: { StatusTypes } } = require('powercord/webpack');
 const { findInReactTree, getOwnerInstance, waitFor } = require('powercord/util');
 const { Text, modal: { Confirm } } = require('powercord/components');
 const { inject, uninject } = require('powercord/injector');
@@ -90,14 +90,34 @@ module.exports = class BetterStatusIndicators extends Plugin {
     return cache.defaultStatusColors;
   }
 
-  async startPlugin () {
-    this.loadStylesheet('./style.scss');
-    this._refreshAvatars = Lodash.debounce(() => FluxDispatcher.dirtyDispatch({ type: 'BSI_REFRESH_AVATARS' }), 500);
+  get $settings () {
+    if (cache.settings) {
+      return cache.settings;
+    }
 
+    const { settings, getSetting, toggleSetting, updateSetting } = powercord.api.settings._fluxProps('better-status-indicators');
     const wrapInAvatarRefresh = (method, ...args) => {
       method(...args);
       this._refreshAvatars();
     };
+
+    const newFluxProps = {
+      settings,
+      getSetting,
+      toggleSetting: wrapInAvatarRefresh.bind(this, toggleSetting),
+      updateSetting: wrapInAvatarRefresh.bind(this, updateSetting)
+    };
+
+    const connectStores = Flux.connectStores([ powercord.api.settings.store ], () => ({ ...newFluxProps }));
+
+    cache.settings = { connectStores, ...newFluxProps };
+
+    return cache.settings;
+  }
+
+  async startPlugin () {
+    this.loadStylesheet('./style.scss');
+    this._refreshAvatars = Lodash.debounce(() => FluxDispatcher.dirtyDispatch({ type: 'BSI_REFRESH_AVATARS' }), 500);
 
     const { getSetting, toggleSetting, updateSetting } = powercord.api.settings._fluxProps('better-status-indicators');
 
@@ -108,8 +128,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
       render: (props) => React.createElement(Settings, {
         ...props,
         main: this,
-        toggleSetting: wrapInAvatarRefresh.bind(this, toggleSetting),
-        updateSetting: wrapInAvatarRefresh.bind(this, updateSetting)
+        toggleSetting: this.$settings.toggleSetting,
+        updateSetting: this.$settings.updateSetting
       })
     });
 
@@ -633,13 +653,13 @@ module.exports = class BetterStatusIndicators extends Plugin {
     return (inject(...args), cache.injectionIds.push(args[0]));
   }
 
-  pluginWillUnload () {
+  async pluginWillUnload () {
     powercord.api.settings.unregisterSettings(this.entityID);
 
     cache.injectionIds.forEach(id => uninject(id));
     this._refreshMaskLibrary();
 
-    this.ModuleManager.shutdownModules();
+    await this.ModuleManager.shutdownModules();
 
     this._refreshAvatars();
   }

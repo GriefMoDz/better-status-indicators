@@ -98,6 +98,10 @@ class ModuleCard extends React.PureComponent {
     settings.forEach(key => {
       const setting = this.props.settings[key];
 
+      if (typeof setting === 'function') {
+        return elements.push(React.createElement(setting));
+      }
+
       switch (setting.type) {
         case 'radio':
           return elements.push(React.createElement(Components.RadioGroup, {

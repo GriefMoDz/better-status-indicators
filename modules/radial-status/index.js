@@ -28,7 +28,28 @@
 
 const { React, getModule, i18n: { Messages } } = require('powercord/webpack');
 const { findInReactTree } = require('powercord/util');
+const { Card } = require('powercord/components');
 const { Module } = require('../../entities');
+
+class AvatarPreview extends React.PureComponent {
+  constructor () {
+    super();
+
+    this.avatarModule = getModule([ 'AnimatedAvatar' ], false);
+    this.currentUser = getModule([ 'getCurrentUser' ], false).getCurrentUser()
+  }
+
+  render () {
+    return React.createElement(Card, {
+      className: 'bsi-settings-avatar-preview'
+    }, React.createElement(this.avatarModule.AnimatedAvatar, {
+      'aria-label': 'avatar',
+      src: this.currentUser.getAvatarURL(),
+      size: this.avatarModule.default.Sizes.SIZE_80,
+      status: 'online'
+    }));
+  }
+}
 
 module.exports = class RadialStatus extends Module {
   get manifest () {
@@ -37,6 +58,7 @@ module.exports = class RadialStatus extends Module {
       description: 'Replaces the traditional status indicator with a border outline around the users\' avatar.',
       icon: 'Radial',
       settings: {
+        AvatarPreview,
         'rs-avatar-inset': {
           type: 'slider',
           name: 'Avatar Inset',

@@ -388,6 +388,12 @@ $status-colors: (
   white-space: nowrap;
 }
 
+.bsi-settings-avatar-preview {
+  width: calc(80px + 32px);
+  margin-bottom: 15px;
+  padding: 16px;
+}
+
 html.reduce-motion {
   .bsi-settings-tab-bar ~ div > [data-list-id='color-picker'] {
     animation: fade-in .5s;
