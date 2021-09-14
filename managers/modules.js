@@ -34,6 +34,8 @@ class ModuleManager {
     this.moduleDir = resolve(__dirname, '..', 'modules');
     this.modules = new Map();
     this.plugin = plugin;
+
+    this.settings = powercord.api.settings._fluxProps('better-status-indicators');
   }
 
   get (moduleId) {
@@ -49,7 +51,7 @@ class ModuleManager {
   }
 
   isEnabled (moduleId) {
-    return this.plugin.settings.get('enabledModules', []).includes(moduleId);
+    return this.settings.getSetting('enabledModules', []).includes(moduleId);
   }
 
   isHidden (moduleId) {
@@ -99,8 +101,8 @@ class ModuleManager {
   }
 
   enable (moduleId) {
-    this.plugin.settings.set('enabledModules', [
-      ...this.plugin.settings.get('enabledModules', []),
+    this.settings.updateSetting('enabledModules', [
+      ...this.settings.getSetting('enabledModules', []),
       moduleId
     ]);
 
@@ -108,9 +110,9 @@ class ModuleManager {
   }
 
   disable (moduleId) {
-    this.plugin.settings.set(
+    this.settings.updateSetting(
       'enabledModules',
-      this.plugin.settings.get('enabledModules', []).filter(id => id !== moduleId)
+      this.settings.getSetting('enabledModules', []).filter(id => id !== moduleId)
     );
 
     this.unload(moduleId);
