@@ -27,7 +27,6 @@
  */
 
 const { React, Flux, getModule } = require('powercord/webpack');
-const { AdvancedScrollerThin } = require('powercord/components');
 
 const { Status } = getModule([ 'AnimatedStatus' ], false);
 const { humanizeStatus } = getModule([ 'humanizeStatus' ], false);
@@ -59,15 +58,13 @@ const StatusPickerPreview = React.memo(props => {
   const statuses = [ 'ONLINE', 'IDLE', 'DND', 'OFFLINE', 'INVISIBLE', 'STREAMING' ];
 
   return <div className={[ classes.menu, props.className ].filter(Boolean).join(' ')} role='menu' id='bsi-status-preview'>
-    <AdvancedScrollerThin className='scroller'>
-      {statuses.map((status, index) =>
-        <StatusMenuItem
-          status={status.toLowerCase()}
-          separate={(index + 1) !== statuses.length}
-          {...props}
-        />
-      )}
-    </AdvancedScrollerThin>
+    {statuses.map((status, index) =>
+      <StatusMenuItem
+        status={status.toLowerCase()}
+        separate={(index + 1) !== statuses.length}
+        {...props}
+      />
+    )}
   </div>;
 });
 
