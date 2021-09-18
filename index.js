@@ -500,14 +500,14 @@ module.exports = class BetterStatusIndicators extends Plugin {
     NameTag.default.displayName = 'NameTag';
 
     this.inject('bsi-dm-channel-client-status', PrivateChannel.prototype, 'render', function (_, res) {
-      if (!this.props.user || res.props.decorators) {
-        return res;
-      }
+      if (!this.props.user) return res;
 
       const { activities, status, user } = this.props;
       const defaultProps = { user, location: 'direct-messages' };
 
+      const decorators = res.props.decorators ?? [];
       res.props.decorators = [
+        ...decorators,
         React.createElement(ConnectedStatusIcon, { activities, status, ...defaultProps }),
         React.createElement(ConnectedClientStatuses, { status, ...defaultProps })
       ];
