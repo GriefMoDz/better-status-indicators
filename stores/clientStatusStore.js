@@ -26,8 +26,11 @@
  * SOFTWARE.
  */
 
-const { Flux, FluxDispatcher } = require('powercord/webpack');
-let currentClientStatus = {};
+const { Flux, FluxDispatcher, getModule } = require('powercord/webpack');
+let currentClientStatus = Object.values(getModule([ 'getSessions' ], false).getSessions()).reduce((sessions, session) => {
+  sessions[session.clientInfo.client] = session.status;
+  return sessions;
+}, {});
 
 function handleCurrentClientStatus (sessions) {
   currentClientStatus = Object.assign({}, ...sessions.map(session => ({ [session.clientInfo.client]: session.status })));

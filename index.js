@@ -389,6 +389,10 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     UserProfileModalHeader.default.displayName = 'UserProfileModalHeader';
 
+    const ConnectedMobileAvatar = Flux.connectStores([ statusStore ], () => ({
+      isMobile: statusStore.isMobileOnline(this.currentUserId)
+    }))(Avatar);
+
     const { container } = getModule([ 'container', 'usernameContainer' ], false);
     const Account = getOwnerInstance(await waitFor(`.${container}:not(#powercord-spotify-modal)`));
     this.inject('bsi-account-avatar-status', Account.__proto__, 'render', (_, res) => {
@@ -397,7 +401,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
         AvatarWithPopout.props.children = (oldMethod => (args) => {
           let res = oldMethod(args);
           if (res?.props?.children) {
-            res.props.children.type = Avatar;
+            res.props.children.type = ConnectedMobileAvatar;
           }
 
           return res;
@@ -500,7 +504,9 @@ module.exports = class BetterStatusIndicators extends Plugin {
     NameTag.default.displayName = 'NameTag';
 
     this.inject('bsi-dm-channel-client-status', PrivateChannel.prototype, 'render', function (_, res) {
-      if (!this.props.user) return res;
+      if (!this.props.user) {
+        return res;
+      }
 
       const { activities, status, user } = this.props;
       const defaultProps = { user, location: 'direct-messages' };
