@@ -53,10 +53,6 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     this.AnimatedAvatarStatus = null;
     this.ModuleManager = new ModuleManager(this);
-    this.classes = {
-      ...getModule([ 'wrapper', 'avatar' ], false),
-      avatarWrapper: getModule([ 'avatarHint', 'avatarWrapper' ], false).avatarWrapper
-    };
   }
 
   get color () {
@@ -116,6 +112,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
   }
 
   async startPlugin () {
+    this.promises = { cancelled: false }
     this.loadStylesheet('./style.scss');
     this._refreshAvatars = Lodash.debounce(() => FluxDispatcher.dirtyDispatch({ type: 'BSI_REFRESH_AVATARS' }), 500);
 
@@ -168,7 +165,22 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     this.ModuleManager.startModules();
 
-    /* Mobile Status Indicator */
+    /* Patches */
+    this.patchMasks();
+    this.patchStatus();
+    this.patchAvatars();
+    this.patchSettingsSection();
+
+    if (getSetting('statusDisplay', 'default') !== 'default') {
+      const { container } = getModule([ 'container', 'base' ], false);
+      await waitFor(`.${container}`).then(this._refreshMaskLibrary);
+    }
+
+    this._refreshAvatars();
+  }
+
+  patchStatus() {
+    const { getSetting } = powercord.api.settings._fluxProps('better-status-indicators');
     const _this = this;
 
     const statusStore = getModule([ 'isMobileOnline' ], false);
@@ -274,6 +286,11 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
       return res;
     });
+  }
+
+  async patchAvatars() {
+    const { getSetting } = powercord.api.settings._fluxProps('better-status-indicators');
+    const statusStore = getModule([ 'isMobileOnline' ], false);
 
     const avatarModule = getModule([ 'AnimatedAvatar' ], false);
     this.inject('bsi-mobile-animated-status', avatarModule, 'determineIsAnimated', ([ isTyping, status, lastStatus, isMobile, lastIsMobile ]) => {
@@ -284,8 +301,6 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
       return [ isTyping, status, lastStatus, isMobile, lastIsMobile ];
     }, true);
-
-    const userStore = getModule([ 'getCurrentUser' ], false);
 
     this.inject('bsi-mobile-status-default-mask', avatarModule, 'default', ([ props ], res) => {
       const { size, status, isMobile, isTyping } = props;
@@ -393,8 +408,17 @@ module.exports = class BetterStatusIndicators extends Plugin {
       isMobile: statusStore.isMobileOnline(this.currentUserId)
     }))(Avatar);
 
+    const PrivateChannel = getModuleByDisplayName('PrivateChannel', false);
+    this.inject('bsi-user-dm-avatar-status', PrivateChannel.prototype, 'renderAvatar', (_, res) => {
+      res.type = Avatar;
+
+      return res;
+    });
+
     const { container } = getModule([ 'container', 'usernameContainer' ], false);
     const Account = getOwnerInstance(await waitFor(`.${container}:not(#powercord-spotify-modal)`));
+
+    if (this.promises.cancelled) return;
     this.inject('bsi-account-avatar-status', Account.__proto__, 'render', (_, res) => {
       const AvatarWithPopout = findInReactTree(res, n => n.type?.displayName === 'Popout');
       if (AvatarWithPopout) {
@@ -412,15 +436,10 @@ module.exports = class BetterStatusIndicators extends Plugin {
     });
 
     Account.forceUpdate();
+  }
 
-    const PrivateChannel = getModuleByDisplayName('PrivateChannel', false);
-    this.inject('bsi-user-dm-avatar-status', PrivateChannel.prototype, 'renderAvatar', (_, res) => {
-      res.type = Avatar;
-
-      return res;
-    });
-
-    /* Status Indicators */
+  patchMasks() {
+    const { getSetting } = powercord.api.settings._fluxProps('better-status-indicators');
     const ConnectedStatusIcon = powercord.api.settings.connectStores('better-status-indicators')(StatusIcon);
     const ConnectedClientStatuses = powercord.api.settings.connectStores('better-status-indicators')(ClientStatuses);
 
@@ -488,6 +507,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     DiscordTag.default.displayName = 'DiscordTag';
 
+    const userStore = getModule([ 'getCurrentUser' ], false);
     const NameTag = getModule(m => m.default?.displayName === 'NameTag', false);
     this.inject('bsi-name-tag-client-status2', NameTag, 'default', ([ props ], res) => {
       const user = props.user || userStore.findByTag(props.name, props.discriminator);
@@ -503,6 +523,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     NameTag.default.displayName = 'NameTag';
 
+    const PrivateChannel = getModuleByDisplayName('PrivateChannel', false);
     this.inject('bsi-dm-channel-client-status', PrivateChannel.prototype, 'render', function (_, res) {
       if (!this.props.user) {
         return res;
@@ -521,6 +542,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       return res;
     });
 
+    const Mask = getModule([ 'MaskLibrary' ], false);
     this.inject('bsi-custom-status-masks', Mask.MaskLibrary, 'type', (_, res) => {
       const masks = res.props.children;
       const statusDisplay = getSetting('statusDisplay', 'default');
@@ -557,11 +579,15 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
       return res;
     });
+  }
 
+  async patchSettingsSection() {
     const ErrorBoundary = require('../pc-settings/components/ErrorBoundary');
 
     const FormSection = await getModuleByDisplayName('FormSection');
     const SettingsView = await getModuleByDisplayName('SettingsView');
+
+    if (this.promises.cancelled) return;
     this.inject('bsi-settings-page', SettingsView.prototype, 'getPredicateSections', (_, sections) => {
       const changelog = sections.find(category => category.section === 'changelog');
       if (changelog) {
@@ -576,13 +602,6 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
       return sections;
     });
-
-    if (getSetting('statusDisplay', 'default') !== 'default') {
-      const { container } = getModule([ 'container', 'base' ], false);
-      await waitFor(`.${container}`).then(this._refreshMaskLibrary);
-    }
-
-    this._refreshAvatars();
   }
 
   hex2hsl (value) {
@@ -660,6 +679,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
   }
 
   async pluginWillUnload () {
+    this.promises.cancelled = true;
     powercord.api.settings.unregisterSettings(this.entityID);
 
     cache.injectionIds.forEach(id => uninject(id));
