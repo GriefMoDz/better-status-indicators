@@ -330,15 +330,17 @@ module.exports = class BetterStatusIndicators extends Plugin {
         foreignObject.props.mask = `url(#svg-mask-avatar-status-mobile-${size.split('_')[1]})`;
 
         const tooltip = findInReactTree(res, n => n.type?.displayName === 'Tooltip');
-        const { children } = tooltip.props;
+        if (tooltip) {
+          const { children } = tooltip.props;
 
-        tooltip.props.children = (props) => {
-          const res = children(props);
+          tooltip.props.children = (props) => {
+            const res = children(props);
 
-          res.props.children[0].props = { ...res.props.children[0].props, mask: 'url(#svg-mask-status-online-mobile)' };
+            res.props.children[0].props = { ...res.props.children[0].props, mask: 'url(#svg-mask-status-online-mobile)' };
 
-          return res;
-        };
+            return res;
+          };
+        }
       }
 
       return res;
