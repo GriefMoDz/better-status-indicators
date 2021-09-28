@@ -112,7 +112,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
   }
 
   async startPlugin () {
-    this.promises = { cancelled: false }
+    this.promises = { cancelled: false };
     this.loadStylesheet('./style.scss');
     this._refreshAvatars = Lodash.debounce(() => FluxDispatcher.dirtyDispatch({ type: 'BSI_REFRESH_AVATARS' }), 500);
 
@@ -179,7 +179,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     this._refreshAvatars();
   }
 
-  patchStatus() {
+  patchStatus () {
     const { getSetting } = powercord.api.settings._fluxProps('better-status-indicators');
     const _this = this;
 
@@ -288,7 +288,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     });
   }
 
-  async patchAvatars() {
+  async patchAvatars () {
     const { getSetting } = powercord.api.settings._fluxProps('better-status-indicators');
     const statusStore = getModule([ 'isMobileOnline' ], false);
 
@@ -420,7 +420,10 @@ module.exports = class BetterStatusIndicators extends Plugin {
     const { container } = getModule([ 'container', 'usernameContainer' ], false);
     const Account = getOwnerInstance(await waitFor(`.${container}:not(#powercord-spotify-modal)`));
 
-    if (this.promises.cancelled) return;
+    if (this.promises.cancelled) {
+      return;
+    }
+
     this.inject('bsi-account-avatar-status', Account.__proto__, 'render', (_, res) => {
       const AvatarWithPopout = findInReactTree(res, n => n.type?.displayName === 'Popout');
       if (AvatarWithPopout) {
@@ -440,7 +443,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     Account.forceUpdate();
   }
 
-  patchMasks() {
+  patchMasks () {
     const { getSetting } = powercord.api.settings._fluxProps('better-status-indicators');
     const ConnectedStatusIcon = powercord.api.settings.connectStores('better-status-indicators')(StatusIcon);
     const ConnectedClientStatuses = powercord.api.settings.connectStores('better-status-indicators')(ClientStatuses);
@@ -583,13 +586,16 @@ module.exports = class BetterStatusIndicators extends Plugin {
     });
   }
 
-  async patchSettingsSection() {
+  async patchSettingsSection () {
     const ErrorBoundary = require('../pc-settings/components/ErrorBoundary');
 
     const FormSection = await getModuleByDisplayName('FormSection');
     const SettingsView = await getModuleByDisplayName('SettingsView');
 
-    if (this.promises.cancelled) return;
+    if (this.promises.cancelled) {
+      return;
+    }
+
     this.inject('bsi-settings-page', SettingsView.prototype, 'getPredicateSections', (_, sections) => {
       const changelog = sections.find(category => category.section === 'changelog');
       if (changelog) {
@@ -685,10 +691,10 @@ module.exports = class BetterStatusIndicators extends Plugin {
     powercord.api.settings.unregisterSettings(this.entityID);
 
     cache.injectionIds.forEach(id => uninject(id));
-    this._refreshMaskLibrary();
 
     await this.ModuleManager.shutdownModules();
 
+    this._refreshMaskLibrary();
     this._refreshAvatars();
   }
 };
