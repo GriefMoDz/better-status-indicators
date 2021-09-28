@@ -87,4 +87,8 @@ module.exports = class AvatarStatuses extends Module {
       return res;
     });
   }
+
+  moduleWillUnload () {
+    this.plugin._refreshMaskLibrary();
+  }
 };
