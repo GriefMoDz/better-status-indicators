@@ -137,7 +137,7 @@ module.exports = React.memo(props => {
 
   const clientStatuses = [];
 
-  platforms.forEach(platform => clientStatuses.push(renderClientStatus(platform, props, states)));
+  platforms.sort().forEach(platform => clientStatuses.push(renderClientStatus(platform, props, states)));
 
   return React.createElement('div', { className: 'bsi-clientStatuses' }, clientStatuses);
 });

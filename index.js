@@ -47,6 +47,8 @@ const clientStatusStore = require('./stores/clientStatusStore');
 const cache = {};
 const Lodash = window._;
 
+const { settings, getSetting, toggleSetting, updateSetting } = powercord.api.settings._fluxProps('better-status-indicators');
+
 module.exports = class BetterStatusIndicators extends Plugin {
   constructor () {
     super();
@@ -91,7 +93,6 @@ module.exports = class BetterStatusIndicators extends Plugin {
       return cache.settings;
     }
 
-    const { settings, getSetting, toggleSetting, updateSetting } = powercord.api.settings._fluxProps('better-status-indicators');
     const wrapInAvatarRefresh = (method, ...args) => {
       method(...args);
       this._refreshAvatars();
@@ -115,8 +116,6 @@ module.exports = class BetterStatusIndicators extends Plugin {
     this.promises = { cancelled: false };
     this.loadStylesheet('./style.scss');
     this._refreshAvatars = Lodash.debounce(() => FluxDispatcher.dirtyDispatch({ type: 'BSI_REFRESH_AVATARS' }), 500);
-
-    const { getSetting, toggleSetting, updateSetting } = powercord.api.settings._fluxProps('better-status-indicators');
 
     powercord.api.i18n.loadAllStrings(i18n);
     powercord.api.settings.registerSettings(this.entityID, {
@@ -180,7 +179,6 @@ module.exports = class BetterStatusIndicators extends Plugin {
   }
 
   patchStatus () {
-    const { getSetting } = powercord.api.settings._fluxProps('better-status-indicators');
     const _this = this;
 
     const statusStore = getModule([ 'isMobileOnline' ], false);
@@ -289,7 +287,6 @@ module.exports = class BetterStatusIndicators extends Plugin {
   }
 
   async patchAvatars () {
-    const { getSetting } = powercord.api.settings._fluxProps('better-status-indicators');
     const statusStore = getModule([ 'isMobileOnline' ], false);
 
     const avatarModule = getModule([ 'AnimatedAvatar' ], false);
@@ -444,7 +441,6 @@ module.exports = class BetterStatusIndicators extends Plugin {
   }
 
   patchMasks () {
-    const { getSetting } = powercord.api.settings._fluxProps('better-status-indicators');
     const ConnectedStatusIcon = powercord.api.settings.connectStores('better-status-indicators')(StatusIcon);
     const ConnectedClientStatuses = powercord.api.settings.connectStores('better-status-indicators')(ClientStatuses);
 
@@ -624,7 +620,6 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
   _refreshStatusVariables (unmount = false) {
     const currentStatusVariables = document.querySelector(`#${this.entityID}-status-variables`);
-    const { getSetting } = powercord.api.settings._fluxProps('better-status-indicators');
 
     if (!unmount) {
       const statuses = Object.values(StatusTypes).filter(status => status !== 'unknown');
