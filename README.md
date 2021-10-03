@@ -14,37 +14,49 @@ Whatever the case may be, "Better Status Indicators" has got you covered. Featur
 
 As well as plenty more other features that are ready to explore and still planned.
 
-And before you ask, yes it is fully compatible with Radial Status. It should also work with other plug-ins and themes. Please let me know if it doesn't! :)
+And before you ask - yes, it is fully compatible with Radial Status. It should also work with other plug-ins and themes. Please let me know if it doesn't! :)
 
 ## Previews
 
-### Direct Messages
-Custom Mobile Status:<br/>
-![Mobile Status in Direct Messages](https://griefmodz.xyz/uploads/mobile-status-direct-messages.png)
+### Direct Messages & Members List
+Mobile indicator for all statuses:<br/>
+![Mobile Status for DMs and Members List](https://griefmodz.xyz/uploads/~mobile-status-direct-messages-and-members-list.gif)
 
-Custom Web Status:<br/>
-![Web Status in Direct Messages](https://griefmodz.xyz/uploads/web-status-direct-messages.png)
+Client indicators for all statuses:<br/>
+![Client Statuses for DMs and Members List](https://griefmodz.xyz/uploads/~client-statuses-direct-messages-and-members-list.gif)
 
-### Members List
-Custom Mobile Status:<br/>
-![Mobile Status in Members List](https://griefmodz.xyz/uploads/mobile-status-members-list.png)
+### Messages
+Mobile indicator for all statuses (with `Status Everywhere` module enabled):<br/>
+![Mobile Status in User Popout](https://griefmodz.xyz/uploads/~mobile-status-messages.gif)
 
-Custom Web Status:<br/>
-![Web Status in Members List](https://griefmodz.xyz/uploads/web-status-members-list.png)
+Client indicators for all statuses:<br/>
+![Client Statuses for DMs and Members List](https://griefmodz.xyz/uploads/~client-statuses-messages.gif)
+
 
 ### User Popout
-Custom Mobile Status:<br/>
-![Mobile Status in User Popout](https://griefmodz.xyz/uploads/mobile-status-user-popout.png)
+Mobile indicator for all statuses:<br/>
+![Mobile Status in User Popout](https://griefmodz.xyz/uploads/~mobile-status-user-popout.gif)
 
-Custom Web Status:<br/>
-![Web Status in User Popout](https://griefmodz.xyz/uploads/web-status-user-popout.png)
+Client indicators for all statuses:<br/>
+![Client Statuses for DMs and Members List](https://griefmodz.xyz/uploads/~client-statuses-user-popout.gif)
 
 ### User Profile Modal
-Custom Mobile Status:<br/>
-![Mobile Status in User Popout](https://griefmodz.xyz/uploads/mobile-status-user-modal.png)
+Mobile indicator for all statuses:<br/>
+![Mobile Status in User Popout](https://griefmodz.xyz/uploads/~mobile-status-user-profile-modal.gif)
 
-Custom Web Status:<br/>
-![Web Status in User Modal](https://griefmodz.xyz/uploads/web-status-user-modal.png)
+Client indicators for all statuses:<br/>
+![Client Statuses for DMs and Members List](https://griefmodz.xyz/uploads/~client-statuses-user-profile-modal.gif)
+
+### Additional Features
+
+Display actual status while streaming:<br/>
+![Real Status while Streaming](https://griefmodz.xyz/uploads/~real-status-while-streaming.png)
+
+Custom status colors:<br/>
+![Custom Status Colors](https://griefmodz.xyz/uploads/~custom-status-colors.png)
+
+Custom status display (solid, default, classic):<br/>
+![Classic Status Display](https://griefmodz.xyz/uploads/~custom-status-display.gif)
 
 ## License
 This plug-in is licensed under the Open Software License ("OSL") v. 3.0. Please read the [`LICENSE`](https://github.com/GriefMoDz/better-status-indicators/blob/master/LICENSE) file for more details.
