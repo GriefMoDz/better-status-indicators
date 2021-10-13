@@ -282,7 +282,6 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     this.inject('bsi-mobile-custom-status-pre', Status.prototype, 'render', function(args) {
       if (!getSetting('mobileAvatarStatus', true)) {
-        console.log('a')
         this.props.isMobile = false;
       }
 
