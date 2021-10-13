@@ -27,7 +27,7 @@
  */
 
 /* eslint-disable object-property-newline */
-const { React, ReactDOM, Flux, FluxDispatcher, getModule, getModuleByDisplayName, getAllModules, i18n: { Messages }, constants: { StatusTypes } } = require('powercord/webpack');
+const { React, ReactDOM, Flux, FluxDispatcher, getModule, getModuleByDisplayName, i18n: { Messages }, constants: { StatusTypes } } = require('powercord/webpack');
 const { findInReactTree, getOwnerInstance, waitFor } = require('powercord/util');
 const { Text, modal: { Confirm } } = require('powercord/components');
 const { inject, uninject } = require('powercord/injector');
