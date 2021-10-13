@@ -27,7 +27,7 @@
  */
 
 /* eslint-disable object-property-newline */
-const { React, ReactDOM, Flux, FluxDispatcher, getModule, getModuleByDisplayName, i18n: { Messages }, constants: { StatusTypes } } = require('powercord/webpack');
+const { React, ReactDOM, Flux, FluxDispatcher, getModule, getModuleByDisplayName, getAllModules, i18n: { Messages }, constants: { StatusTypes } } = require('powercord/webpack');
 const { findInReactTree, getOwnerInstance, waitFor } = require('powercord/util');
 const { Text, modal: { Confirm } } = require('powercord/components');
 const { inject, uninject } = require('powercord/injector');
@@ -272,8 +272,24 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     statusModule.Status.displayName = 'Status';
 
+    const ConnectedClientStatuses = powercord.api.settings.connectStores('better-status-indicators')(ClientStatuses);
+    const ConnectedStatusIcon = powercord.api.settings.connectStores('better-status-indicators')(StatusIcon);
+
     const Status = getModuleByDisplayName('FluxContainer(Status)', false);
-    this.inject('bsi-mobile-custom-status', Status.prototype, 'render', (_, res) => {
+    const Users = getModule([ 'getCurrentUser', 'getUser' ], false);
+    const Divider = getModule(['transparent', 'divider'], false)?.divider;
+    const StatusStore = getModule([ 'getStatus' ], false);
+
+    this.inject('bsi-mobile-custom-status-pre', Status.prototype, 'render', function(args) {
+      if (!getSetting('mobileAvatarStatus', true)) {
+        console.log('a')
+        this.props.isMobile = false;
+      }
+
+      return args;
+    }, true)
+
+    this.inject('bsi-mobile-custom-status', Status.prototype, 'render', function (_, res) {
       const StatusComponent = this.hardwareAccelerationIsEnabled ? AnimatedStatus : statusModule.Status;
       const originalProps = res.props;
 
@@ -281,6 +297,29 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
       const tooltipChildren = res.props.children(originalProps);
       tooltipChildren.props.children.type = StatusComponent;
+
+      const props = {
+        user: Users.getUser(this.props.userId),
+        location: 'direct-messages'
+      }
+
+      const hasIcons = React.createElement(StatusIcon, props).type.type({ ...props, ..._this.$settings });
+      const hasStatuses = React.createElement(ClientStatuses, props).type.type({ ...props, ..._this.$settings });
+
+      const userStatus = StatusStore.getStatus(this.props.userId);
+      if( userStatus !== 'offline' && (hasIcons || hasStatuses)) {
+        if(!Array.isArray(tooltipChildren.props.children)) {
+          tooltipChildren.props.children = [tooltipChildren.props.children]
+        }
+
+        tooltipChildren.props.children.push(...[
+          React.createElement('div', { className: Divider }),
+          React.createElement(ConnectedStatusIcon, props),
+          React.createElement(ConnectedClientStatuses, props)
+        ])
+
+        res.props.children = () => tooltipChildren
+      }
 
       return res;
     });
