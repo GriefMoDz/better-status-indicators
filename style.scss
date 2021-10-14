@@ -41,19 +41,21 @@
   margin-left: 0;
 }
 
-.status-1XNdyw {
-  .bsi-statusIcon {
-    margin-right: 6px;
+.status-1XNdyw ~ .bsi-clientStatuses {
+  margin-right: 8px;
+
+  .icon-1A2_vz:first-of-type {
     margin-left: 0;
   }
 
-  .bsi-clientStatuses .icon-1A2_vz:first-of-type {
-    margin-left: 0;
-  }
-
-  .bsi-clientStatuses .icon-1A2_vz {
+  .icon-1A2_vz {
     margin-left: 6px;
   }
+}
+
+.status-1XNdyw ~ .bsi-statusIcon {
+  margin-right: 6px;
+  margin-left: 0;
 }
 
 .peopleListItem-2nzedh .userInfo-2zN2z8 {

@@ -276,9 +276,9 @@ module.exports = class BetterStatusIndicators extends Plugin {
     const ConnectedStatusIcon = powercord.api.settings.connectStores('better-status-indicators')(StatusIcon);
 
     const Status = getModuleByDisplayName('FluxContainer(Status)', false);
-    const Users = getModule([ 'getCurrentUser', 'getUser' ], false);
-    const Divider = getModule(['transparent', 'divider'], false)?.divider;
-    const StatusStore = getModule([ 'getStatus' ], false);
+
+    const dividerClass = getModule([ 'transparent', 'divider' ], false)?.divider;
+    const userStore = getModule([ 'getCurrentUser' ], false);
 
     this.inject('bsi-mobile-custom-status-pre', Status.prototype, 'render', function(args) {
       if (!getSetting('mobileAvatarStatus', true)) {
@@ -298,26 +298,23 @@ module.exports = class BetterStatusIndicators extends Plugin {
       tooltipChildren.props.children.type = StatusComponent;
 
       const props = {
-        user: Users.getUser(this.props.userId),
+        user: userStore.getUser(this.props.userId),
         location: 'direct-messages'
-      }
+      };
 
-      const hasIcons = React.createElement(StatusIcon, props).type.type({ ...props, ..._this.$settings });
-      const hasStatuses = React.createElement(ClientStatuses, props).type.type({ ...props, ..._this.$settings });
+      const hasStatusIcon =  _this.wrapInHooks(() => React.createElement(StatusIcon, props).type.type({ ...props, ..._this.$settings }))();
+      const hasClientStatuses = _this.wrapInHooks(() => React.createElement(ClientStatuses, props).type.type({ ...props, ..._this.$settings }))();
 
-      const userStatus = StatusStore.getStatus(this.props.userId);
-      if( userStatus !== 'offline' && (hasIcons || hasStatuses)) {
-        if(!Array.isArray(tooltipChildren.props.children)) {
-          tooltipChildren.props.children = [tooltipChildren.props.children]
+      if (originalProps.status !== 'offline' && (hasStatusIcon || hasClientStatuses)) {
+        if(!Array.isArray(res)) {
+          res = [ res ];
         }
 
-        tooltipChildren.props.children.push(...[
-          React.createElement('div', { className: Divider }),
+        res.push(...[
+          React.createElement('div', { className: dividerClass }),
           React.createElement(ConnectedStatusIcon, props),
           React.createElement(ConnectedClientStatuses, props)
-        ])
-
-        res.props.children = () => tooltipChildren
+        ]);
       }
 
       return res;
@@ -654,6 +651,36 @@ module.exports = class BetterStatusIndicators extends Plugin {
     }
 
     return value;
+  }
+
+  wrapInHooks (method) {
+    return function (...args) {
+      const Internals = React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentDispatcher.current;
+      const useMemo = Internals.useMemo;
+      const useState = Internals.useState;
+      const useEffect = Internals.useEffect;
+      const useLayoutEffect = Internals.useLayoutEffect;
+      const useRef = Internals.useRef;
+      const useCallback = Internals.useCallback;
+
+      Internals.useMemo = (fn) => fn();
+      Internals.useState = (value) => [ value, () => void 0 ];
+      Internals.useEffect = () => null;
+      Internals.useLayoutEffect = () => null;
+      Internals.useRef = () => ({});
+      Internals.useCallback = (cb) => cb;
+
+      const res = method(...args);
+
+      Internals.useMemo = useMemo;
+      Internals.useState = useState;
+      Internals.useEffect = useEffect;
+      Internals.useLayoutEffect = useLayoutEffect;
+      Internals.useRef = useRef;
+      Internals.useCallback = useCallback;
+
+      return res;
+    };
   }
 
   _refreshStatusVariables (unmount = false) {
