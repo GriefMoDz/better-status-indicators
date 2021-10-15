@@ -43,6 +43,7 @@
 
 .status-1XNdyw ~ .bsi-clientStatuses {
   margin-right: 8px;
+  display: flex;
 
   .icon-1A2_vz:first-of-type {
     margin-left: 0;
@@ -184,6 +185,7 @@ $avatar-statuses: (
 @include avatarStatusCutout();
 @include avatarStatusCutout(40, 12px, 28, 28);
 @include avatarStatusCutout(80, 16px, 60, 60);
+@include avatarStatusCutout(120, 24px, 88, 88);
 
 $statuses: (
   "online",
