@@ -58,6 +58,7 @@ function renderClientStatus (client, props, states) {
 
   return React.createElement(Tooltip, {
     text: Messages.BSI_CLIENT_SIGNED_IN.format({ clientCapitalized }),
+    position: props.tooltipPosition ?? 'top',
     hideOnClick: false
   }, (props) => React.createElement(clientIcons[client], {
     color: iconColor,

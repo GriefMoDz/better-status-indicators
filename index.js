@@ -115,7 +115,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
   async startPlugin () {
     this.promises = { cancelled: false };
     this.loadStylesheet('./style.scss');
-    this._refreshAvatars = Lodash.debounce(() => FluxDispatcher.dirtyDispatch({ type: 'BSI_REFRESH_AVATARS' }), 500);
+    this._refreshAvatars = Lodash.debounce(() => FluxDispatcher.dirtyDispatch({ type: 'BSI_REFRESH_AVATARS' }), 100);
 
     powercord.api.i18n.loadAllStrings(i18n);
     powercord.api.settings.registerSettings(this.entityID, {
@@ -299,7 +299,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
       const props = {
         user: userStore.getUser(this.props.userId),
-        location: 'direct-messages'
+        location: 'direct-messages',
+        tooltipPosition: 'bottom'
       };
 
       const hasStatusIcon =  _this.wrapInHooks(() => React.createElement(StatusIcon, props).type.type({ ...props, ..._this.$settings }))();

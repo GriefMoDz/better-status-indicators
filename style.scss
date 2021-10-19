@@ -412,9 +412,11 @@ $status-colors: (
 }
 
 .bsi-settings-avatar-preview {
-  width: calc(80px + 32px);
+  width: 100%;
   margin-bottom: 15px;
-  padding: 16px;
+  display: flex;
+  justify-content: center;
+  border: none;
 }
 
 html.reduce-motion {

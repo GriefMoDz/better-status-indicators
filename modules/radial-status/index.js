@@ -28,26 +28,35 @@
 
 const { React, getModule, i18n: { Messages } } = require('powercord/webpack');
 const { findInReactTree } = require('powercord/util');
-const { Card } = require('powercord/components');
 const { Module } = require('../../entities');
 
 class AvatarPreview extends React.PureComponent {
   constructor () {
     super();
 
+    this.state = {
+      speaking: true
+    };
+
     this.avatarModule = getModule([ 'AnimatedAvatar' ], false);
-    this.currentUser = getModule([ 'getCurrentUser' ], false).getCurrentUser()
+    this.currentUser = getModule([ 'getCurrentUser' ], false).getCurrentUser();
+    this.interval = setInterval(() => this.setState({ speaking: !this.state.speaking }), 1e3);
   }
 
   render () {
-    return React.createElement(Card, {
+    return React.createElement('div', {
       className: 'bsi-settings-avatar-preview'
     }, React.createElement(this.avatarModule.AnimatedAvatar, {
       'aria-label': 'avatar',
       src: this.currentUser.getAvatarURL(),
-      size: this.avatarModule.default.Sizes.SIZE_80,
-      status: 'online'
+      size: this.avatarModule.default.Sizes.SIZE_120,
+      isSpeaking: this.state.speaking,
+      status: 'dnd'
     }));
+  }
+
+  componentWillUnmount () {
+    clearInterval(this.interval);
   }
 }
 
