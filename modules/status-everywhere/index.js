@@ -85,7 +85,7 @@ module.exports = class StatusEverywhere extends Module {
 
     const avatarModule = getModule([ 'AnimatedAvatar' ], false);
     const statusStore = getModule([ 'isMobileOnline' ], false);
-    const userStore = getModule([ 'getCurrentUser' ], false);
+    const userStore = getModule([ 'getNullableCurrentUser' ], false);
     const guildStore = getModule([ 'getLastSelectedGuildId' ], false);
     const activityStore = getModule([ 'isGameActivity' ], false);
 

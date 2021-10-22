@@ -278,7 +278,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     const Status = getModuleByDisplayName('FluxContainer(Status)', false);
 
     const dividerClass = getModule([ 'transparent', 'divider' ], false)?.divider;
-    const userStore = getModule([ 'getCurrentUser' ], false);
+    const userStore = getModule([ 'getNullableCurrentUser' ], false);
 
     this.inject('bsi-mobile-custom-status-pre', Status.prototype, 'render', function(args) {
       if (!getSetting('mobileAvatarStatus', true)) {
@@ -544,7 +544,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     DiscordTag.default.displayName = 'DiscordTag';
 
-    const userStore = getModule([ 'getCurrentUser' ], false);
+    const userStore = getModule([ 'getNullableCurrentUser' ], false);
     const NameTag = getModule(m => m.default?.displayName === 'NameTag', false);
     this.inject('bsi-name-tag-client-status2', NameTag, 'default', ([ props ], res) => {
       const user = props.user || userStore.findByTag(props.name, props.discriminator);
@@ -719,8 +719,12 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     ReactDOM.render(React.createElement(Mask.MaskLibrary), tempMaskLibrary);
 
-    document.querySelector('#app-mount > svg').innerHTML = tempMaskLibrary.firstElementChild.innerHTML;
-    tempMaskLibrary.remove();
+    const maskLibrary = document.querySelector('#app-mount > svg');
+
+    if (maskLibrary) {
+      maskLibrary.innerHTML = tempMaskLibrary.firstElementChild.innerHTML;
+      tempMaskLibrary.remove();
+    }
   }
 
   _hardwareAccelerationDisabled () {

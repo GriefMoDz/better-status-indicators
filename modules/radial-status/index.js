@@ -39,7 +39,7 @@ class AvatarPreview extends React.PureComponent {
     };
 
     this.avatarModule = getModule([ 'AnimatedAvatar' ], false);
-    this.currentUser = getModule([ 'getCurrentUser' ], false).getCurrentUser();
+    this.currentUser = getModule([ 'getNullableCurrentUser' ], false).getCurrentUser();
     this.interval = setInterval(() => this.setState({ speaking: !this.state.speaking }), 1e3);
   }
 
