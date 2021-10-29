@@ -458,16 +458,22 @@ module.exports = class BetterStatusIndicators extends Plugin {
     }
 
     this.inject('bsi-account-avatar-status', Account.__proto__, 'render', (_, res) => {
-      const AvatarWithPopout = findInReactTree(res, n => n.type?.displayName === 'Popout');
-      if (AvatarWithPopout) {
-        AvatarWithPopout.props.children = (oldMethod => (args) => {
-          let res = oldMethod(args);
-          if (res?.props?.children) {
-            res.props.children.type = ConnectedMobileAvatar;
+      const MultiAccountCTATooltip = findInReactTree(res, n => n.type?.displayName === 'Popout');
+      if (MultiAccountCTATooltip) {
+        MultiAccountCTATooltip.props.children = (oldMethod => (args) => {
+          const res = oldMethod(args);
+          const AvatarWithPopout = findInReactTree(res, n => n.type?.displayName === 'Popout');
+          if (AvatarWithPopout) {
+            AvatarWithPopout.props.children = (oldMethod => (args) => {
+              const res = oldMethod(args);
+              res.props.children.type = ConnectedMobileAvatar;
+
+              return res;
+            })(AvatarWithPopout.props.children);
           }
 
           return res;
-        })(AvatarWithPopout.props.children);
+        })(MultiAccountCTATooltip.props.children);
       }
 
       return res;

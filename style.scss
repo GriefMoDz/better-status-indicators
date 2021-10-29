@@ -142,7 +142,8 @@ $avatar-statuses: (
   "online",
   "idle",
   "dnd",
-  "streaming"
+  "streaming",
+  "invisible"
 );
 
 @mixin avatarStatusCutout ($width: 32, $height: 10px, $x: 22, $y: 22, $avatar-status: false, $mask: avatar-default) {
