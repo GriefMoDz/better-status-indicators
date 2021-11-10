@@ -32,8 +32,8 @@ const { Status } = getModule([ 'AnimatedStatus' ], false);
 const { humanizeStatus } = getModule([ 'humanizeStatus' ], false);
 
 const classes = {
-  ...getModule([ 'menu', 'item' ], false),
-  ...getModule([ 'status', 'statusItem' ], false)
+  ...getModule([ 'status', 'statusItem' ], false),
+  ...getModule([ 'menu', 'item' ], false)
 };
 
 const StatusMenuItem = React.memo(props => {

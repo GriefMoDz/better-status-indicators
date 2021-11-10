@@ -98,7 +98,7 @@ module.exports = class StatusEverywhere extends Module {
     this.inject('bsi-module-status-everywhere-avatar', proposedAvatarModule, proposedAvatarMethod, ([ props ], res) => {
       const userId = props.userId || props.src?.includes('/avatars') && props.src.match(/\/(?:avatars|users)\/(\d+)/)[1];
 
-      if (props.status || props.size === 'SIZE_16' || props.size === 'SIZE_100') {
+      if (props.status || props.size === 'SIZE_16' || props.size === 'SIZE_56' || props.size === 'SIZE_100') {
         return res;
       }
 

@@ -574,13 +574,21 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
       const { activities, status, user } = this.props;
       const defaultProps = { user, location: 'direct-messages' };
-      const decorators = Array.isArray(res.props.decorators) ? res.props.decorators : [ res.props.decorators ];
 
-      res.props.decorators = [
-        ...decorators,
-        React.createElement(ConnectedStatusIcon, { activities, status, ...defaultProps }),
-        React.createElement(ConnectedClientStatuses, { status, ...defaultProps })
-      ];
+      if (typeof res.props.children === 'function') {
+        res.props.children = (oldMethod => (props) => {
+          const res = oldMethod(props);
+          const decorators = Array.isArray(res.props.decorators) ? res.props.decorators : [ res.props.decorators ];
+
+          res.props.decorators = [
+            ...decorators,
+            React.createElement(ConnectedStatusIcon, { activities, status, ...defaultProps }),
+            React.createElement(ConnectedClientStatuses, { status, ...defaultProps })
+          ];
+
+          return res;
+        })(res.props.children);
+      }
 
       return res;
     });
