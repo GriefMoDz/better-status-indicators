@@ -39,7 +39,7 @@ class AvatarPreview extends React.PureComponent {
     };
 
     this.avatarModule = getModule([ 'AnimatedAvatar' ], false);
-    this.currentUser = getModule([ 'getNullableCurrentUser' ], false).getCurrentUser();
+    this.currentUser = getModule([ 'initialize', 'getCurrentUser' ], false).getCurrentUser();
     this.interval = setInterval(() => this.setState({ speaking: !this.state.speaking }), 1e3);
   }
 
@@ -119,7 +119,7 @@ module.exports = class RadialStatus extends Module {
 
           res.props.children.push(React.createElement('div', {
             className: 'bsi-avatarRadial',
-            style: { 
+            style: {
               '--status-color': statusModule.getStatusColor(props.status),
               '--avatar-inset': `${props.size == 'SIZE_120' ? inset * 2.25 : props.size == 'SIZE_80' ? inset * 1.75 : inset}px`,
               '--outline-size': `${props.size == 'SIZE_120' ? 4 : props.size == 'SIZE_80' ? 3 : 2}px`
