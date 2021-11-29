@@ -73,21 +73,6 @@ module.exports = class BetterStatusIndicators extends Plugin {
     return window.DiscordNative.gpuSettings.getEnableHardwareAcceleration();
   }
 
-  get defaultStatusColors () {
-    if (cache.defaultStatusColors) {
-      return cache.defaultStatusColors;
-    }
-
-    const statusModule = getModule([ 'getStatusMask' ], false);
-    const getStatusColor = statusModule.__powercordOriginal_getStatusColor ?? statusModule.getStatusColor;
-
-    cache.defaultStatusColors = (Object.keys(StatusTypes)
-      .reduce((statusColors, status) => ({ ...statusColors, [status]: getStatusColor(status.toLowerCase()) }), {})
-    );
-
-    return cache.defaultStatusColors;
-  }
-
   get $settings () {
     if (cache.settings) {
       return cache.settings;
@@ -113,6 +98,13 @@ module.exports = class BetterStatusIndicators extends Plugin {
   }
 
   async startPlugin () {
+    const statusModule = getModule([ 'getStatusMask' ], false);
+    const getStatusColor = statusModule.__powercordOriginal_getStatusColor ?? statusModule.getStatusColor;
+
+    this.defaultStatusColors = (Object.keys(StatusTypes)
+      .reduce((statusColors, status) => ({ ...statusColors, [status]: getStatusColor(status.toLowerCase()) }), {})
+    );
+
     this.promises = { cancelled: false };
     this.loadStylesheet('./style.scss');
     this._refreshAvatars = Lodash.debounce(() => FluxDispatcher.dirtyDispatch({ type: 'BSI_REFRESH_AVATARS' }), 100);
