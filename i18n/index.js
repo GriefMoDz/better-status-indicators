@@ -28,5 +28,6 @@
 
 module.exports = {
   'en-GB': require('./en-GB.json'),
-  'en-US': require('./en-US.json')
+  'en-US': require('./en-US.json'),
+  'de-DE': require('./de-DE.json')
 };
