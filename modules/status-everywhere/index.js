@@ -182,7 +182,7 @@ module.exports = class StatusEverywhere extends Module {
           }
 
           const newProps = Object.assign(res.props, defaultProps);
-          res = React.createElement(Avatar, {
+          res = React.createElement(avatarModule.AnimatedAvatar, {
             ...newProps,
             message: props.message,
             className: [ newProps.className, getSetting('se-reducedStatuses', false) && 'bsi-reduced-statuses' ].filter(Boolean).join(' ')
