@@ -420,16 +420,18 @@ module.exports = class BetterStatusIndicators extends Plugin {
     });
 
     const UserProfileModalHeader = getModule(m => m.default?.displayName === 'UserProfileModalHeader', false);
-    this.inject('bsi-user-profile-avatar-status', UserProfileModalHeader, 'default', (_, res) => {
-      const avatarComponent = findInReactTree(res, n => n.props?.hasOwnProperty('isMobile'));
-      if (avatarComponent) {
-        avatarComponent.type = Avatar;
-      }
+    if (UserProfileModalHeader) {
+      this.inject('bsi-user-profile-avatar-status', UserProfileModalHeader, 'default', (_, res) => {
+        const avatarComponent = findInReactTree(res, n => n.props?.hasOwnProperty('isMobile'));
+        if (avatarComponent) {
+          avatarComponent.type = Avatar;
+        }
 
-      return res;
-    });
+        return res;
+      });
 
-    UserProfileModalHeader.default.displayName = 'UserProfileModalHeader';
+      UserProfileModalHeader.default.displayName = 'UserProfileModalHeader';
+    }
 
     const ConnectedMobileAvatar = Flux.connectStores([ statusStore ], () => ({
       isMobile: statusStore.isMobileOnline(this.currentUserId)
