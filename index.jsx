@@ -107,18 +107,13 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     this.promises = { cancelled: false };
     this.loadStylesheet('./style.scss');
-    this._refreshAvatars = Lodash.debounce(() => FluxDispatcher.dirtyDispatch({ type: 'BSI_REFRESH_AVATARS' }), 100);
+    this._refreshAvatars = Lodash.debounce(() => FluxDispatcher.dirtyDispatch({ type: 'BSI_REFRESH_AVATARS' }), 500);
 
     powercord.api.i18n.loadAllStrings(i18n);
     powercord.api.settings.registerSettings(this.entityID, {
       category: 'better-status-indicators',
       label: 'Better Status Indicators',
-      render: (props) => React.createElement(Settings, {
-        ...props,
-        main: this,
-        toggleSetting: this.$settings.toggleSetting,
-        updateSetting: this.$settings.updateSetting
-      })
+      render: (props) => <Settings {...props} main={this} toggleSetting={this.$settings.toggleSetting} updateSetting={this.$settings.updateSetting} />
     });
 
     this.ColorUtils = getModule([ 'isValidHex' ], false);
@@ -190,11 +185,11 @@ module.exports = class BetterStatusIndicators extends Plugin {
       return res;
     });
 
-    const getStatusMessage = (status) => Messages[`STATUS_${status.toUpperCase()}`];
+    const getStatusTranslation = (status) => Messages[`STATUS_${status.toUpperCase()}`];
     const statusUtils = getModule([ 'humanizeStatus' ], false);
     this.inject('bsi-mobile-status-text', statusUtils, 'humanizeStatus', ([ status, isMobile ], res) => {
       if (status !== 'online' && isMobile) {
-        return Messages.STATUS_ONLINE_MOBILE.replace(getStatusMessage('online'), getStatusMessage(status));
+        return Messages.STATUS_ONLINE_MOBILE.replace(getStatusTranslation('online'), getStatusTranslation(status));
       }
 
       return res;
@@ -202,22 +197,9 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     const statusModule = getModule([ 'getStatusMask' ], false);
     this.inject('bsi-status-colors', statusModule, 'getStatusColor', ([ status ]) => {
-      switch (status) {
-        case 'online':
-          return this.hex2hsl(getSetting('onlineStatusColor', this.defaultStatusColors.ONLINE));
-        case 'idle':
-          return this.hex2hsl(getSetting('idleStatusColor', this.defaultStatusColors.IDLE));
-        case 'dnd':
-          return this.hex2hsl(getSetting('dndStatusColor', this.defaultStatusColors.DND));
-        case 'streaming':
-          return this.hex2hsl(getSetting('streamingStatusColor', this.defaultStatusColors.STREAMING));
-        case 'offline':
-          return this.hex2hsl(getSetting('offlineStatusColor', this.defaultStatusColors.OFFLINE));
-        case 'invisible':
-          return this.hex2hsl(getSetting('invisibleStatusColor', this.defaultStatusColors.INVISIBLE));
-      }
+      status = status ?? 'offline';
 
-      return this.hex2hsl(getSetting('offlineStatusColor', this.defaultStatusColors.OFFLINE));
+      return this.hex2hsl(getSetting(`${status}StatusColor`, this.defaultStatusColors[status.toUpperCase()]))
     });
 
     this.inject('bsi-mobile-status-mask', statusModule, 'getStatusMask', ([ status, isMobile, isTyping ]) => {
@@ -295,8 +277,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
         tooltipPosition: 'bottom'
       };
 
-      const hasStatusIcon =  _this.wrapInHooks(() => React.createElement(StatusIcon, props).type.type({ ...props, ..._this.$settings }))();
-      const hasClientStatuses = _this.wrapInHooks(() => React.createElement(ClientStatuses, props).type.type({ ...props, ..._this.$settings }))();
+      const hasStatusIcon =  _this.wrapInHooks(() => (<StatusIcon {...props} />).type.type({ ...props, ..._this.$settings }))();
+      const hasClientStatuses = _this.wrapInHooks(() => (<ClientStatuses {...props } />).type.type({ ...props, ..._this.$settings }))();
 
       if (originalProps.status !== 'offline' && (hasStatusIcon || hasClientStatuses)) {
         if(!Array.isArray(res)) {
@@ -304,9 +286,9 @@ module.exports = class BetterStatusIndicators extends Plugin {
         }
 
         res.push(...[
-          React.createElement('div', { className: dividerClass }),
-          React.createElement(ConnectedStatusIcon, props),
-          React.createElement(ConnectedClientStatuses, props)
+          <div className={dividerClass} />,
+          <ConnectedStatusIcon {...props} />,
+          <ConnectedClientStatuses {...props} />
         ]);
       }
 
@@ -377,10 +359,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       }
 
       if (this.AnimatedAvatarStatus && props.status !== 'online' && props.isMobile && !props.isTyping) {
-        res.type = (props) => React.createElement(AnimatedAvatarStatus, {
-          ...props,
-          component: this.AnimatedAvatarStatus
-        });
+        res.type = (props) => <AnimatedAvatarStatus {...props} component={this.AnimatedAvatarStatus} />;
       }
 
       return res;
@@ -500,8 +479,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
     const UsernameHeader = getModule(m => getDefaultMethodByKeyword(m, 'withMentionPrefix'), false);
     this.inject('bsi-message-header-client-status2', UsernameHeader, 'default', ([ { __bsiDefaultProps: defaultProps } ], res) => {
       res.props.children.splice(2, 0, [
-        React.createElement(ConnectedStatusIcon, defaultProps),
-        React.createElement(ConnectedClientStatuses, defaultProps)
+        <ConnectedStatusIcon {...defaultProps} />,
+        <ConnectedClientStatuses {...defaultProps} />
       ]);
 
       return res;
@@ -528,8 +507,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
       const defaultProps = { user, location: 'members-list' };
 
       res.props.children.unshift([
-        React.createElement(ConnectedStatusIcon, { activities, status, ...defaultProps }),
-        React.createElement(ConnectedClientStatuses, { status, ...defaultProps })
+        <ConnectedStatusIcon activities={activities} status={status} {...defaultProps} />,
+        <ConnectedClientStatuses status={status} {...defaultProps} />
       ]);
 
       return res;
@@ -551,8 +530,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
       const defaultProps = { user, location: 'user-popout-modal' };
 
       res.props.children.splice(2, 0, [
-        React.createElement(ConnectedStatusIcon, defaultProps),
-        React.createElement(ConnectedClientStatuses, defaultProps)
+        <ConnectedStatusIcon {...defaultProps} />,
+        <ConnectedClientStatuses {...defaultProps} />
       ]);
 
       return res;
@@ -572,12 +551,14 @@ module.exports = class BetterStatusIndicators extends Plugin {
       if (typeof res.props.children === 'function') {
         res.props.children = (oldMethod => (props) => {
           const res = oldMethod(props);
-          const decorators = Array.isArray(res.props.decorators) ? res.props.decorators : [ res.props.decorators ];
 
-          res.props.decorators = [
+          const DecoratorsComponent = findInReactTree(res, n => n.props?.hasOwnProperty('decorators'));
+          const decorators = Array.isArray(DecoratorsComponent.props.decorators) ? DecoratorsComponent.props.decorators : [ DecoratorsComponent.props.decorators ];
+
+          DecoratorsComponent.props.decorators = [
             ...decorators,
-            React.createElement(ConnectedStatusIcon, { activities, status, ...defaultProps }),
-            React.createElement(ConnectedClientStatuses, { status, ...defaultProps })
+            <ConnectedStatusIcon activities={activities} status={status} {...defaultProps} />,
+            <ConnectedClientStatuses status={status} {...defaultProps} />
           ];
 
           return res;
@@ -601,20 +582,12 @@ module.exports = class BetterStatusIndicators extends Plugin {
       switch (statusDisplay) {
         case 'solid':
           statusMasks.forEach(mask => {
-            mask.props.children = React.createElement('circle', {
-              fill: 'white',
-              cx: 0.5,
-              cy: 0.5,
-              r: 0.5
-            });
+            mask.props.children = <circle fill='white' cx='0.5' cy='0.5' r='0.5' />;
           });
 
           break;
         case 'classic':
-          idleStatusMask.props.children[1] = React.createElement('polygon', {
-            fill: 'black',
-            points: '0.52, 0.51 0.84, 0.69 0.75, 0.81 0.37, 0.58 0.37, 0.15 0.52, 0.15'
-          });
+          idleStatusMask.props.children[1] = <polygon fill='black' points='0.52, 0.51 0.84, 0.69 0.75, 0.81 0.37, 0.58 0.37, 0.15 0.52, 0.15' />;
 
           Object.assign(dndStatusMask.props.children[1].props, { height: 0.15, y: 0.45 });
 
@@ -641,10 +614,13 @@ module.exports = class BetterStatusIndicators extends Plugin {
       if (changelog) {
         const bsiSettingsPage = sections.find(category => category.section === 'better-status-indicators');
         if (bsiSettingsPage) {
-          bsiSettingsPage.element = () => React.createElement(ErrorBoundary, {}, React.createElement(FormSection, {
-            title: 'Better Status Indicators',
-            tag: 'h1'
-          }, React.createElement(powercord.api.settings.tabs['better-status-indicators'].render)));
+          const SettingsComponent = powercord.api.settings.tabs['better-status-indicators'].render;
+
+          bsiSettingsPage.element = () => <ErrorBoundary>
+            <FormSection title='Better Status Indicators' tag='h1'>
+              <SettingsComponent />
+            </FormSection>
+          </ErrorBoundary>
         }
       }
 
@@ -721,17 +697,18 @@ module.exports = class BetterStatusIndicators extends Plugin {
   _refreshMaskLibrary () {
     const Mask = getModule([ 'MaskLibrary' ], false);
 
-    const tempMaskLibrary = document.createElement('div');
-    tempMaskLibrary.style.display = 'none';
-    document.body.appendChild(tempMaskLibrary);
+    const tempMaskContainer = document.createElement('div');
+    tempMaskContainer.style.display = 'none';
 
-    ReactDOM.render(React.createElement(Mask.MaskLibrary), tempMaskLibrary);
+    document.body.appendChild(tempMaskContainer);
 
-    const maskLibrary = document.querySelector('#app-mount > svg');
+    ReactDOM.render(<Mask.MaskLibrary/>, tempMaskContainer);
+
+    const maskLibrary = document.querySelector('#app-mount #svg-mask-squircle').parentNode;
 
     if (maskLibrary) {
-      maskLibrary.innerHTML = tempMaskLibrary.firstElementChild.innerHTML;
-      tempMaskLibrary.remove();
+      maskLibrary.innerHTML = tempMaskContainer.firstElementChild.innerHTML;
+      tempMaskContainer.remove();
     }
   }
 
@@ -741,29 +718,32 @@ module.exports = class BetterStatusIndicators extends Plugin {
       message: Messages.BSI_HARDWARE_ACCELERATION_DISABLED_MSG,
       button: {
         text: Messages.BSI_HARDWARE_ACCELERATION_DISABLED_BTN_TEXT,
-        onClick: () => openModal(() => React.createElement(Confirm, {
-          header: Messages.SWITCH_HARDWARE_ACCELERATION,
-          confirmText: Messages.OKAY,
-          cancelText: Messages.CANCEL,
-          onConfirm: () => window.DiscordNative.gpuSettings.setEnableHardwareAcceleration(!0)
-        }, React.createElement(Text, {}, Messages.SWITCH_HARDWARE_ACCELERATION_BODY)))
+        onClick: () => openModal(() => (
+          <Confirm
+            header={Messages.SWITCH_HARDWARE_ACCELERATION}
+            confirmText={Messages.OKAY}
+            cancelText={Messages.CANCEL}
+            onConfirm={() => window.DiscordNative.gpuSettings.setEnableHardwareAcceleration(!0)}
+          >
+            <Text>{Messages.SWITCH_HARDWARE_ACCELERATION_BODY}</Text>
+          </Confirm>
+        ))
       }
     });
   }
 
   inject (...args) {
-    if (!cache.injectionIds) {
-      cache.injectionIds = [];
-    }
+    if (!cache.injectionIds) cache.injectionIds = [];
 
     return (inject(...args), cache.injectionIds.push(args[0]));
   }
 
   async pluginWillUnload () {
     this.promises.cancelled = true;
+
     powercord.api.settings.unregisterSettings(this.entityID);
 
-    cache.injectionIds.forEach(id => uninject(id));
+    cache.injectionIds.forEach(uninject);
 
     await this.ModuleManager.shutdownModules();
 

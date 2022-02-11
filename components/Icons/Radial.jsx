@@ -29,27 +29,13 @@
 const { React } = require('powercord/webpack');
 
 module.exports = React.memo(
-  (props) => {
-    const filteredProps = ((props, filter) => {
-      if (props) {
-        const newProps = { ...props };
-
-        filter.forEach(prop => delete newProps[prop]);
-
-        return newProps;
-      }
-
-      return {};
-    })(props, [ 'width', 'height', 'color', 'foreground' ]);
-
-    return <svg
-      {...filteredProps}
-      aria-hidden={props['aria-hidden'] ?? false}
-      width={props.width ?? 24}
-      height={props.height ?? 24}
-      viewBox="0 0 24 24"
-    >
-      <circle cx="12" cy="12" r="11" className={props.foreground} fill="none" stroke={props.color ?? 'currentColor'} stroke-width="2" />
-    </svg>;
-  }
+  (props) => <svg
+    className={props.className ?? null}
+    aria-hidden={props['aria-hidden'] ?? false}
+    width={props.width ?? 24}
+    height={props.height ?? 24}
+    viewBox='0 0 24 24'
+  >
+    <circle cx='12' cy='12' r='11' className={props.foreground} fill='none' stroke={props.color ?? 'currentColor'} stroke-width='2' />
+  </svg>
 );
