@@ -28,8 +28,11 @@
 
 const { React } = require('powercord/webpack');
 
+const Lodash = window._;
+
 module.exports = React.memo(
   (props) => <svg
+    {...Lodash.omit(props, [ 'width', 'height', 'color', 'foreground' ])}
     className={props.className ?? null}
     aria-hidden={props['aria-hidden'] ?? false}
     width={props.width ?? 16}

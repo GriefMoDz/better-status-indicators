@@ -389,10 +389,22 @@ module.exports = class BetterStatusIndicators extends Plugin {
     NowPlayingHeader.default.displayName = 'NowPlayingHeader';
 
     const UserPopoutComponents = getModule([ 'UserPopoutAvatar' ], false);
-    this.inject('bsi-user-popout-avatar-status', UserPopoutComponents, 'UserPopoutAvatar', (_, res) => {
+    this.inject('bsi-user-popout-avatar-status', UserPopoutComponents, 'UserPopoutAvatar', ([ props ], res) => {
       const avatarComponent = findInReactTree(res, n => n.props?.hasOwnProperty('isMobile'));
       if (avatarComponent) {
         avatarComponent.type = Avatar;
+      }
+
+      const avatarHint = findInReactTree(res, n => n.props?.hasOwnProperty('mask'));
+      if (avatarHint) {
+        const isRadialStatusEnabled = this.ModuleManager.isEnabled('radial-status');
+        const isEnhancedAvatarStatusEnabled = this.ModuleManager.isEnabled('avatar-statuses');
+
+        if (isEnhancedAvatarStatusEnabled && !props.isMobile) {
+          avatarHint.props.mask = `svg-mask-avatar-status-round-${avatarHint.props.width}`;
+        } else {
+          avatarHint.props.mask = !props.isMobile && isRadialStatusEnabled ? 'svg-mask-avatar-default' : avatarHint.props.mask;
+        }
       }
 
       return res;
