@@ -31,6 +31,21 @@ const { React, getModule, getModuleByDisplayName, i18n: { Messages }, constants:
 const { Button, Divider, Flex, FormTitle } = require('powercord/components');
 const { ColorPickerInput, SwitchItem, RadioGroup } = require('powercord/components/settings');
 
+(async () => {
+  try {
+    const GuildSettingsWindow = getModule([ 'open', 'updateGuild' ], false);
+    const fakeGuildObj = getModule([ 'GuildRecord' ], false).default({
+      id: '1337',
+      name: 'Fake Guild',
+      ownerId: window.DiscordNative.crashReporter.getMetadata().user_id,
+    });
+
+    GuildSettingsWindow.open(fakeGuildObj.id, 'OVERVIEW');
+
+    getModule([ 'popLayer' ], false).popLayer();
+  } catch (_) {}
+})();
+
 const Icons = require('./Icons');
 const ModuleCard = require('./ModuleCard');
 const SettingsCard = require('./SettingsCard');
@@ -113,9 +128,9 @@ function renderTabBar ({ selectedItem, setSelectedItem, setSection }) {
 }
 
 function renderBreadcrumb ({ selectedItem, section, setSection }) {
-  const breadcrumbClasses = getModule([ 'breadcrumbInactive', 'breadcrumbActive' ], false);
+  const breadcrumbClasses = getModule([ 'breadcrumbActive',  'breadcrumbInactive' ], false);
 
-  return <Flex align={Flex.Align.CENTER} className={breadcrumbClasses.breadcrumbs}>
+  return <Flex align={Flex.Align.CENTER} className={breadcrumbClasses?.breadcrumbs}>
     {(!section || section === SettingsSections.SETTINGS)
       ? <FormTitle tag='h1' className='bsi-settings-title'>
         {Messages[`${selectedItem !== 'SETTINGS' ? 'BSI_' : ''}${selectedItem}`]}
@@ -131,8 +146,8 @@ function renderBreadcrumb ({ selectedItem, section, setSection }) {
           tag: 'h1',
           className: [
             'bsi-settings-title',
-            breadcrumbClasses.breadcrumb,
-            active ? breadcrumbClasses.breadcrumbActive : breadcrumbClasses.breadcrumbInactive
+            breadcrumbClasses?.breadcrumb,
+            active ? breadcrumbClasses?.breadcrumbActive : breadcrumbClasses?.breadcrumbInactive
           ].join(' ')
         }, section.label)}
       ></Breadcrumbs>}

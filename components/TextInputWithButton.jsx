@@ -32,11 +32,14 @@ const { Flex } = require('powercord/components');
 const Button = getModule(m => m.ButtonLink, false).default;
 
 const colorUtils = getModule([ 'isValidHex' ], false);
-const classes = getModule([ 'container', 'editIcon' ], false);
+
+let classes;
 
 module.exports = class TextInputWithButton extends React.PureComponent {
   constructor (props) {
     super(props);
+
+    classes = classes || getModule([ 'container', 'editIcon' ], false);
 
     this.handleOnChange = (e) => typeof props.onChange === 'function' && props.onChange(e.currentTarget.value);
     this.iconStyles = {
@@ -48,7 +51,7 @@ module.exports = class TextInputWithButton extends React.PureComponent {
   }
 
   renderInput (props) {
-    return <Flex.Child className={classes.input.split(' ').splice(1).join(' ')} style={{ cursor: 'auto' }}>
+    return <Flex.Child className={classes?.input.split(' ').splice(1).join(' ')} style={{ cursor: 'auto' }}>
       <input
         type='text'
         value={props.defaultValue}
@@ -62,7 +65,7 @@ module.exports = class TextInputWithButton extends React.PureComponent {
   renderButton (props) {
     return <Flex shrink={1} grow={0} style={{ margin: 0 }}>
       <Button
-        className={classes.button}
+        className={classes?.button}
         disabled={props.disabled}
         size={Button.Sizes.MIN}
         color={Button.Colors.GREY}
@@ -70,16 +73,16 @@ module.exports = class TextInputWithButton extends React.PureComponent {
         onClick={props.onButtonClick}
         style={{ backgroundColor: props.buttonColor ? colorUtils.hex2rgb(props.buttonColor, 0.25) : null }}
       >
-        <span className={classes.text}>{props.buttonText}</span>
-        <span className={`${props.buttonIcon} ${classes.editIcon}`} style={this.iconStyles}></span>
+        <span className={classes?.text}>{props.buttonText}</span>
+        <span className={`${props.buttonIcon} ${classes?.editIcon}`} style={this.iconStyles}></span>
       </Button>
     </Flex>
   }
 
   render () {
     return (
-      <div className={[ 'bsi-button-text-input', classes.container, classes.hasValue, this.props.disabled && classes.disabled ].filter(Boolean).join(' ')}>
-        <Flex className={classes.layout}>
+      <div className={[ 'bsi-button-text-input', classes?.container, classes?.hasValue, this.props.disabled && classes?.disabled ].filter(Boolean).join(' ')}>
+        <Flex className={classes?.layout}>
           {this.renderInput(this.props)}
           {this.renderButton(this.props)}
         </Flex>

@@ -35,14 +35,17 @@ const Components = require('powercord/components/settings');
 const Icons = require('./Icons');
 
 const Caret = getModuleByDisplayName('Caret', false);
-const IntegrationInfo = getModuleByDisplayName('IntegrationInfo', false);
 const FormDivider = getModuleByDisplayName('FormDivider', false);
 
-const classes = getModule([ 'card', 'pulseBorder' ], false);
+let classes;
+let IntegrationInfo;
 
 class ModuleCard extends React.PureComponent {
   constructor (props) {
     super(props);
+
+    classes = classes || getModule([ 'card', 'pulseBorder' ], false);
+    IntegrationInfo = IntegrationInfo || getModuleByDisplayName('IntegrationInfo', false);
 
     this.main = props.main;
     this.parser = getModule([ 'parse', 'parseTopic' ], false);
@@ -75,7 +78,7 @@ class ModuleCard extends React.PureComponent {
       const buttonColor = disabled ? 'GREEN' : 'RED';
 
       return <div>
-        <FormDivider className={classes.topDivider} style={{ marginBottom: 0 }} />
+        <FormDivider className={classes?.topDivider} style={{ marginBottom: 0 }} />
         <Flex style={{ padding: '5px 0' }}>
           <Text style={{ padding: 10 }}>{this.parser.parse(Messages.BSI_MODULE_SETTINGS_MISSING)}</Text>
           <Button style={{ alignSelf: 'center' }} size={Button.Sizes.SMALL} color={Button.Colors[buttonColor]} look={Button.Looks.OUTLINED} onClick={() => this.handleModuleState(disabled)}>{Messages[`BSI_MODULE_${disabled ? 'ENABLE' : 'DISABLE'}`]}</Button>
@@ -85,7 +88,7 @@ class ModuleCard extends React.PureComponent {
 
     if (disabled) {
       return <div>
-        <FormDivider className={classes.topDivider} style={{ marginBottom: 0 }} />
+        <FormDivider className={classes?.topDivider} style={{ marginBottom: 0 }} />
         <Flex style={{ padding: '5px 0' }}>
           <Text style={{ padding: 10 }}>{this.parser.parse(Messages.BSI_MODULE_SETTINGS_HIDDEN.plainFormat({}))}</Text>
           <Button style={{ alignSelf: 'center' }} size={Button.Sizes.SMALL} color={Button.Colors.GREEN} look={Button.Looks.OUTLINED} onClick={() => this.handleModuleState(true)}>{Messages.BSI_MODULE_ENABLE}</Button>
@@ -131,8 +134,8 @@ class ModuleCard extends React.PureComponent {
       }
     });
 
-    return <div className={classes.body}>
-      <FormDivider className={classes.topDivider} />
+    return <div className={classes?.body}>
+      <FormDivider className={classes?.topDivider} />
       {elements.length > 0 && elements.map(e => <Flex.Child>{e}</Flex.Child>)}
       <Flex direction={Flex.Direction.VERTICAL}>
         <Flex>
@@ -149,14 +152,14 @@ class ModuleCard extends React.PureComponent {
     const disabled = !enabledModules.includes(this.props.id);
 
     return [ <Flex direction={Flex.Direction.VERTICAL}>
-      <Clickable className={classes.header} aria-expanded={expanded} onClick={this.handleExpand.bind(this)}>
+      <Clickable className={classes?.header} aria-expanded={expanded} onClick={this.handleExpand.bind(this)}>
         <Flex align={Flex.Align.CENTER}>
           <IntegrationInfo
             name={this.props.name}
             icon={this.props.icon}
             details={[ { icon: (props) => React.createElement(Icons.Info, { ...props }), text: this.props.description } ]}
           />
-          <Caret className={classes.expandIcon} expanded={expanded} aria-hidden={true} />
+          <Caret className={classes?.expandIcon} expanded={expanded} aria-hidden={true} />
         </Flex>
       </Clickable>
     </Flex>, expanded && this.renderSettings(disabled) ];
@@ -164,7 +167,7 @@ class ModuleCard extends React.PureComponent {
 }
 
 module.exports = React.memo(props =>
-  <Card editable={true} className={[ 'bsi-settings-module-card', classes.card ].join(' ')}>
+  <Card editable={true} className={[ 'bsi-settings-module-card', classes?.card ].join(' ')}>
     <ModuleCard {...props} />
   </Card>
 );

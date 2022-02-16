@@ -32,10 +32,17 @@ const { RightCaret } = require('./Icons');
 
 const { default: Button } = getModule([ 'ButtonLink' ], false);
 
-const IntegrationInfo = getModuleByDisplayName('IntegrationInfo', false);
-const classes = getModule([ 'card', 'clickable' ], false);
+let classes;
+let IntegrationInfo;
 
 class SettingsCard extends React.PureComponent {
+  constructor () {
+    super();
+
+    classes = classes || getModule([ 'card', 'clickable' ], false);
+    IntegrationInfo = IntegrationInfo || getModuleByDisplayName('IntegrationInfo', false);
+  }
+
   renderButton ({ buttonText, buttonDisabled, hasNextSection, onButtonClick }) {
     if (!buttonText || !onButtonClick) {
       return null;
@@ -44,7 +51,7 @@ class SettingsCard extends React.PureComponent {
     if (hasNextSection) {
       return <Flex align={Flex.Align.CENTER}>
         <Text>{buttonText}</Text>
-        {hasNextSection ? <RightCaret width={10} height={10} className={classes.caret} /> : null}
+        {hasNextSection ? <RightCaret width={10} height={10} className={classes?.caret} /> : null}
       </Flex>;
     }
 
@@ -77,13 +84,13 @@ module.exports = React.memo(props => {
 
   if (props.hasNextSection) {
     return <Clickable onClick={props.onButtonClick} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}>
-      <Card editable={true} className={[ 'bsi-settings-card', classes.card, classes.clickable ].join(' ')}>
+      <Card editable={true} className={[ 'bsi-settings-card', classes?.card, classes?.clickable ].join(' ')}>
         <SettingsCard {...props} focused={focused} />
       </Card>
     </Clickable>;
   }
 
-  return <Card editable={true} className={[ 'bsi-settings-card', classes.card ].join(' ')}>
+  return <Card editable={true} className={[ 'bsi-settings-card', classes?.card ].join(' ')}>
     <SettingsCard {...props} focused={focused} />
   </Card>;
 });
