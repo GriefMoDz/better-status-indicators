@@ -173,7 +173,7 @@ module.exports = class StatusEverywhere extends Module {
         return res;
       }
 
-      const AvatarWithPopout = findInReactTree(res, n => n.type?.displayName === 'Popout');
+      const AvatarWithPopout = findInReactTree(res.props?.avatar, n => n.type?.displayName === 'Popout');
       if (AvatarWithPopout) {
         AvatarWithPopout.props.children = (oldMethod => (args) => {
           let res = oldMethod(args);

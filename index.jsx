@@ -107,7 +107,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     this.promises = { cancelled: false };
     this.loadStylesheet('./style.scss');
-    this._refreshAvatars = Lodash.debounce(() => FluxDispatcher.dirtyDispatch({ type: 'BSI_REFRESH_AVATARS' }), 500);
+    this._refreshAvatars = Lodash.debounce(() => FluxDispatcher.dirtyDispatch({ type: 'BSI_REFRESH_AVATARS' }), 100);
 
     powercord.api.i18n.loadAllStrings(i18n);
     powercord.api.settings.registerSettings(this.entityID, {
@@ -155,7 +155,6 @@ module.exports = class BetterStatusIndicators extends Plugin {
     this.patchMasks();
     this.patchStatus();
     this.patchAvatars();
-    this.patchSettingsSection();
 
     if (getSetting('statusDisplay', 'default') !== 'default') {
       const { container } = getModule([ 'container', 'base' ], false);
@@ -479,7 +478,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     const MessageHeader = getModule(m => getDefaultMethodByKeyword(m, 'showTimestampOnHover'), false);
     this.inject('bsi-message-header-client-status1', MessageHeader, 'default', ([ { message: { author: user } } ], res) => {
       const defaultProps = { user, location: 'message-headers' };
-      const usernameHeader = findInReactTree(res, n => Array.isArray(n?.props?.children) && n.props.children.find(c => c?.props?.message));
+      const usernameHeader = findInReactTree(res.props?.username, n => Array.isArray(n?.props?.children) && n.props.children.find(c => c?.props?.message));
 
       if (usernameHeader?.props?.children && usernameHeader?.props?.children[0] && usernameHeader?.props?.children[0].props) {
         usernameHeader.props.children[0].props.__bsiDefaultProps = defaultProps;
@@ -608,35 +607,6 @@ module.exports = class BetterStatusIndicators extends Plugin {
       }
 
       return res;
-    });
-  }
-
-  async patchSettingsSection () {
-    const ErrorBoundary = require('../pc-settings/components/ErrorBoundary');
-
-    const FormSection = await getModuleByDisplayName('FormSection');
-    const SettingsView = await getModuleByDisplayName('SettingsView');
-
-    if (this.promises.cancelled) {
-      return;
-    }
-
-    this.inject('bsi-settings-page', SettingsView.prototype, 'getPredicateSections', (_, sections) => {
-      const changelog = sections.find(category => category.section === 'changelog');
-      if (changelog) {
-        const bsiSettingsPage = sections.find(category => category.section === 'better-status-indicators');
-        if (bsiSettingsPage) {
-          const SettingsComponent = powercord.api.settings.tabs['better-status-indicators'].render;
-
-          bsiSettingsPage.element = () => <ErrorBoundary>
-            <FormSection title='Better Status Indicators' tag='h1'>
-              <SettingsComponent />
-            </FormSection>
-          </ErrorBoundary>
-        }
-      }
-
-      return sections;
     });
   }
 
