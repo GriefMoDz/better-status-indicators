@@ -26,7 +26,6 @@
  * SOFTWARE.
  */
 
-/* eslint-disable object-property-newline */
 const { React, getModule, getModuleByDisplayName, i18n: { Messages } } = require('powercord/webpack');
 const { Card, Clickable, Flex, Text } = require('powercord/components');
 const { default: Button } = getModule([ 'ButtonLink' ], false);
@@ -37,15 +36,12 @@ const Icons = require('./Icons');
 const Caret = getModuleByDisplayName('Caret', false);
 const FormDivider = getModuleByDisplayName('FormDivider', false);
 
-let classes;
-let IntegrationInfo;
+const classes = getModule([ 'card', 'pulseBorder' ], false);
+const IntegrationInfo = getModuleByDisplayName('IntegrationInfo', false) || (() => null);
 
 class ModuleCard extends React.PureComponent {
   constructor (props) {
     super(props);
-
-    classes = classes || getModule([ 'card', 'pulseBorder' ], false);
-    IntegrationInfo = IntegrationInfo || getModuleByDisplayName('IntegrationInfo', false);
 
     this.main = props.main;
     this.parser = getModule([ 'parse', 'parseTopic' ], false);
@@ -69,7 +65,6 @@ class ModuleCard extends React.PureComponent {
   }
 
   renderSettings (disabled) {
-    // eslint-disable-next-line no-empty-pattern
     const { getSetting, toggleSetting, updateSetting } = this.props;
 
     const settings = Object.keys(this.props.settings);

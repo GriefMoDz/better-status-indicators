@@ -26,63 +26,67 @@
  * SOFTWARE.
  */
 
-/* eslint-disable object-property-newline */
 const { React, getModule, getModuleByDisplayName, i18n: { Messages } } = require('powercord/webpack');
 const { Activity } = require('./Icons');
 
 const Flux = getModule([ 'useStateFromStores' ], false);
 const Tooltip = getModuleByDisplayName('Tooltip', false);
 
-const { humanizeStatus } = getModule([ 'humanizeStatus' ], false);
-const { isStreaming } = getModule([ 'isGameActivity', 'renderActivity' ], false);
-const { getId: getCurrentUserId } = getModule([ 'initialize', 'getFingerprint' ], false);
+const { humanizeStatus } = getModule([ 'humanizeStatus' ], false) || {};
+const { getId: getCurrentUserId } = getModule([ 'initialize', 'getFingerprint' ], false) || {};
 
 const StatusUtils = getModule([ 'getStatusColor' ], false);
+const StatusStore = getModule([ 'isMobileOnline' ], false);
+const ActivityStore = getModule([ 'isGameActivity', 'renderActivity' ], false);
 
-const statusStore = getModule([ 'isMobileOnline' ], false);
 const classes = getModule([ 'member', 'ownerIcon' ], false);
 
 const Lodash = window._;
 
-function renderStatusIcon ({ props, settings }, states) {
-  const locationKey = Lodash.upperFirst(Lodash.camelCase(props.location));
+const StatusIcon = React.memo(props => {
+  const tooltipText = Messages.BSI_STREAMING_AS_STATUS.format({ status: humanizeStatus?.(props.status) });
 
-  // eslint-disable-next-line multiline-ternary
-  return props.getSetting(`stream${locationKey}`, true) ? React.createElement(Tooltip, {
-    text: Messages.BSI_STREAMING_AS_STATUS.format({ status: humanizeStatus(states.status) }),
-    hideOnClick: false
-  }, (props) => React.createElement('div', {
-    className: 'bsi-statusIcon',
-    ...props
-  }, React.createElement(Activity, {
-    color: settings.matchStatus ? states.statusColor : 'currentColor',
-    className: classes.icon,
-    ...props
-  }))) : null;
-}
+  return <Tooltip
+    text={tooltipText}
+    hideOnClick={false}
+  >
+    {(tooltipProps) => <div className='bsi-statusIcon' {...tooltipProps}>
+      <Activity
+        color={props.statusColor}
+        className={classes?.icon}
+        data-bsi-status={props.status}
+        {...tooltipProps}
+      />
+    </div>}
+  </Tooltip>;
+});
 
 module.exports = React.memo(props => {
   const { getSetting } = props;
 
+  const locationKey = Lodash.upperFirst(Lodash.camelCase(props.location));
+
   const settings = {
     showOnBots: getSetting('streamShowOnBots', true),
     showOnSelf: getSetting('streamShowOnSelf', false),
-    matchStatus: getSetting('streamMatchStatus', true)
+    matchStatus: getSetting('streamMatchStatus', true),
+    shouldRender: getSetting(`stream${locationKey}`, true)
   };
 
-  if (!props.user || (props.user.bot && !settings.showOnBots) || (props.user.id === getCurrentUserId() && !settings.showOnSelf)) {
+  if (!props.user || (props.user.bot && !settings.showOnBots) || (props.user.id === getCurrentUserId?.() && !settings.showOnSelf)) {
     return null;
   }
 
-  const states = Flux.useStateFromStoresObject([ statusStore ], () => ({
-    status: props.status || statusStore.getStatus(props.user.id),
-    statusColor: StatusUtils.getStatusColor(props.status || statusStore.getStatus(props.user.id)),
-    isStreaming: isStreaming(props.activities || statusStore.getActivities(props.user.id))
-  }));
+  const { status, statusColor, isStreaming } = Flux.useStateFromStores([ StatusStore ], () => {
+    const status = props.status ?? StatusStore?.getStatus?.(props.user.id);
+    const activities = props.activities ?? StatusStore?.getActivities?.(props.user.id);
 
-  if (!states.isStreaming) {
-    return null;
-  }
+    return ({
+      status,
+      statusColor: settings.matchStatus ? StatusUtils?.getStatusColor(status) : 'currentColor',
+      isStreaming: ActivityStore?.isStreaming?.(activities)
+    });
+  });
 
-  return renderStatusIcon({ props, settings }, states);
+  return isStreaming && settings.shouldRender ? <StatusIcon status={status} statusColor={statusColor} {...props} /> : null;
 });

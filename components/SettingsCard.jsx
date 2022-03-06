@@ -32,17 +32,10 @@ const { RightCaret } = require('./Icons');
 
 const { default: Button } = getModule([ 'ButtonLink' ], false);
 
-let classes;
-let IntegrationInfo;
+const classes = getModule([ 'card', 'clickable' ], false);
+const IntegrationInfo = getModuleByDisplayName('IntegrationInfo', false) || (() => null);
 
 class SettingsCard extends React.PureComponent {
-  constructor () {
-    super();
-
-    classes = classes || getModule([ 'card', 'clickable' ], false);
-    IntegrationInfo = IntegrationInfo || getModuleByDisplayName('IntegrationInfo', false);
-  }
-
   renderButton ({ buttonText, buttonDisabled, hasNextSection, onButtonClick }) {
     if (!buttonText || !onButtonClick) {
       return null;

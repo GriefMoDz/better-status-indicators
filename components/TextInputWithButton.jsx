@@ -29,64 +29,58 @@
 const { React, getModule } = require('powercord/webpack');
 const { Flex } = require('powercord/components');
 
-const Button = getModule(m => m.ButtonLink, false).default;
+const { joinClassNames } = require('../lib/utils');
 
-const colorUtils = getModule([ 'isValidHex' ], false);
+const Button = getModule(m => m.ButtonLink, false).default || (() => null);
+const ColorUtils = getModule([ 'isValidHex' ], false);
 
 let classes;
 
-module.exports = class TextInputWithButton extends React.PureComponent {
-  constructor (props) {
-    super(props);
+const ButtonIconStyles = Object.freeze({
+  color: 'var(--text-normal)',
+  lineHeight: 0,
+  backgroundImage: 'none',
+  marginTop: 0
+});
 
-    classes = classes || getModule([ 'container', 'editIcon' ], false);
+const Input = React.memo(props => {
+  const handleOnChange = (e) => props.onChange?.(e.currentTarget.value);
 
-    this.handleOnChange = (e) => typeof props.onChange === 'function' && props.onChange(e.currentTarget.value);
-    this.iconStyles = {
-      color: 'var(--text-normal)',
-      lineHeight: 0,
-      backgroundImage: 'none',
-      marginTop: 0
-    };
-  }
+  return <Flex.Child className={classes?.input.split(' ').splice(1).join(' ')} style={{ cursor: 'auto' }}>
+    <input
+      type='text'
+      value={props.defaultValue}
+      placeholder={props.placeholder}
+      disabled={props.disabled}
+      onChange={handleOnChange}
+    />
+  </Flex.Child>
+});
 
-  renderInput (props) {
-    return <Flex.Child className={classes?.input.split(' ').splice(1).join(' ')} style={{ cursor: 'auto' }}>
-      <input
-        type='text'
-        value={props.defaultValue}
-        placeholder={props.placeholder}
-        disabled={props.disabled}
-        onChange={this.handleOnChange.bind(this)}
-      />
-    </Flex.Child>
-  }
+const IconButton = React.memo(props => {
+  return <Flex shrink={1} grow={0} style={{ margin: 0 }}>
+    <Button
+      className={classes?.button}
+      disabled={props.disabled}
+      size={Button.Sizes.MIN}
+      color={Button.Colors.GREY}
+      look={Button.Looks.GHOST}
+      onClick={props.onButtonClick}
+      style={{ backgroundColor: props.buttonColor ? ColorUtils?.hex2rgb?.(props.buttonColor, 0.25) : null }}
+    >
+      <span className={classes?.text}>{props.buttonText}</span>
+      <span className={`${props.buttonIcon} ${classes?.editIcon}`} style={ButtonIconStyles}></span>
+    </Button>
+  </Flex>
+});
 
-  renderButton (props) {
-    return <Flex shrink={1} grow={0} style={{ margin: 0 }}>
-      <Button
-        className={classes?.button}
-        disabled={props.disabled}
-        size={Button.Sizes.MIN}
-        color={Button.Colors.GREY}
-        look={Button.Looks.GHOST}
-        onClick={props.onButtonClick}
-        style={{ backgroundColor: props.buttonColor ? colorUtils.hex2rgb(props.buttonColor, 0.25) : null }}
-      >
-        <span className={classes?.text}>{props.buttonText}</span>
-        <span className={`${props.buttonIcon} ${classes?.editIcon}`} style={this.iconStyles}></span>
-      </Button>
+module.exports = React.memo(props => {
+  classes ??= getModule([ 'container', 'editIcon' ], false);
+
+  return <div className={joinClassNames('bsi-button-text-input', classes?.container, classes?.hasValue, props.disabled && classes?.disabled)}>
+    <Flex className={classes?.layout}>
+      <Input {...props} />
+      <IconButton {...props} />
     </Flex>
-  }
-
-  render () {
-    return (
-      <div className={[ 'bsi-button-text-input', classes?.container, classes?.hasValue, this.props.disabled && classes?.disabled ].filter(Boolean).join(' ')}>
-        <Flex className={classes?.layout}>
-          {this.renderInput(this.props)}
-          {this.renderButton(this.props)}
-        </Flex>
-      </div>
-    );
-  }
-};
+  </div>;
+});

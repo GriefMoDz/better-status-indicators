@@ -26,7 +26,6 @@
  * SOFTWARE.
  */
 
-/* eslint-disable object-property-newline */
 const { React, getModule, getModuleByDisplayName, i18n: { Messages }, constants: { HEXColors } } = require('powercord/webpack');
 const { Button, Divider, Flex, FormTitle } = require('powercord/components');
 const { ColorPickerInput, SwitchItem, RadioGroup } = require('powercord/components/settings');
@@ -155,7 +154,7 @@ function renderBreadcrumb ({ selectedItem, section, setSection }) {
 }
 
 function renderSectionSettings (section, { getSetting, toggleSetting, updateSetting }) {
-  const sections = require('../stores/settingsSections');
+  const sections = require('../lib/stores/settingsSections');
 
   const elements = [];
   const { settings } = sections[section];
@@ -199,7 +198,7 @@ function renderSectionSettings (section, { getSetting, toggleSetting, updateSett
 }
 
 function renderSettings ({ setSection }) {
-  const sections = require('../stores/settingsSections');
+  const sections = require('../lib/stores/settingsSections');
 
   return <React.Fragment>
     <FormTitle className='bsi-settings-status-display-title'>{formatClientTranslation('DISPLAY_TITLE', { clientCapitalized: 'Client' })}</FormTitle>
@@ -250,7 +249,7 @@ function renderCustomize ({ activeColorPicker, setActiveColorPicker }, props) {
               buttonColor={getSetting(settingsKey, defaultColor)}
               buttonIcon='fas fa-palette'
               onButtonClick={() => setActiveColorPicker(activeColorPicker === status ? null : status)}
-              onChange={(value) => ((updateSetting(settingsKey, value === '' ? defaultColor : value), main._refreshStatusVariables()))}
+              onChange={(value) => ((updateSetting(settingsKey, value === '' ? defaultColor : value), main.refreshStatusVariables()))}
               defaultValue={getSetting(settingsKey, defaultColor)}
             />;
           })}
@@ -261,7 +260,7 @@ function renderCustomize ({ activeColorPicker, setActiveColorPicker }, props) {
             className='bsi-reset-colors-button'
             onClick={() => statuses.forEach(status => {
               updateSetting(`${status}StatusColor`, defaultStatusColors[status.toUpperCase()]);
-              main._refreshStatusVariables();
+              main.refreshStatusVariables();
             })}
           >
             {Messages.BSI_RESTORE_DEFAULT_COLORS}
@@ -281,7 +280,7 @@ function renderCustomize ({ activeColorPicker, setActiveColorPicker }, props) {
     {activeColorPicker && <ColorPickerInput
       default={ColorUtils.hex2int(defaultStatusColors[activeColorPicker.toUpperCase()])}
       value={ColorUtils.hex2int(getSetting(`${activeColorPicker}StatusColor`, '000000'))}
-      onChange={(value) => ((updateSetting(`${activeColorPicker}StatusColor`, ColorUtils.int2hex(value)), main._refreshStatusVariables()))}
+      onChange={(value) => ((updateSetting(`${activeColorPicker}StatusColor`, ColorUtils.int2hex(value)), main.refreshStatusVariables()))}
     />}
 
     {!activeColorPicker && <Divider/>}
@@ -295,7 +294,7 @@ function renderCustomize ({ activeColorPicker, setActiveColorPicker }, props) {
       value={props.getSetting('statusDisplay', 'default')}
       onChange={e => {
         props.updateSetting('statusDisplay', e.value);
-        main._refreshMaskLibrary();
+        main.refreshMaskLibrary();
       }}
     >
       {Messages.BSI_STATUS_DISPLAY}
@@ -306,7 +305,7 @@ function renderCustomize ({ activeColorPicker, setActiveColorPicker }, props) {
       value={getSetting('themeVariables', false)}
       onChange={(state) => {
         toggleSetting('themeVariables', false);
-        main._refreshStatusVariables(!state);
+        main.refreshStatusVariables(!state);
       }}
     >
       {Messages.BSI_THEME_VARIABLES}

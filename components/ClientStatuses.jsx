@@ -26,7 +26,6 @@
  * SOFTWARE.
  */
 
-/* eslint-disable object-property-newline */
 const { React, getModule, getModuleByDisplayName, i18n: { Messages } } = require('powercord/webpack');
 const Icons = require('./Icons');
 
@@ -40,7 +39,7 @@ const statusModule = getModule([ 'getStatusColor' ], false);
 
 const classes = getModule([ 'member', 'ownerIcon' ], false);
 
-const clientStatusStore = require('../stores/clientStatusStore');
+const clientStatusStore = require('../lib/stores/clientStatusStore');
 const clientIcons = Object.freeze({
   web: Icons.Public,
   desktop: Icons.Monitor,

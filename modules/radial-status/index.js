@@ -28,7 +28,7 @@
 
 const { React, getModule, i18n: { Messages } } = require('powercord/webpack');
 const { findInReactTree } = require('powercord/util');
-const { Module } = require('../../entities');
+const { Module } = require('../../lib/entities');
 
 class AvatarPreview extends React.PureComponent {
   constructor () {
@@ -134,9 +134,9 @@ module.exports = class RadialStatus extends Module {
         return res;
       }
 
-      if (this.plugin.ModuleManager.isEnabled('avatar-statuses') && !props.isMobile && props.status !== 'offline') {
+      if (this.main.ModuleManager.isEnabled('avatar-statuses') && !props.isMobile && props.status !== 'offline') {
         const userId = props.userId || props.src?.includes('/avatars') && props.src.match(/\/(?:avatars|users)\/(\d+)/)[1];
-        const clientStatuses = userId === this.plugin.currentUserId ? this.plugin.clientStatusStore.getCurrentClientStatus() : statusStore.getState().clientStatuses[userId];
+        const clientStatuses = userId === this.main.currentUserId ? this.main.clientStatusStore.getCurrentClientStatus() : statusStore.getState().clientStatuses[userId];
 
         if (!clientStatuses || clientStatuses.desktop || clientStatuses.web) {
           return res;

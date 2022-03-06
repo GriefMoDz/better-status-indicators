@@ -27,9 +27,13 @@
  */
 
 const { React, Flux, getModule } = require('powercord/webpack');
+const { humanizeStatus } = getModule([ 'humanizeStatus' ], false) || {};
 
-const { Status } = getModule([ 'AnimatedStatus' ], false);
-const { humanizeStatus } = getModule([ 'humanizeStatus' ], false);
+const { joinClassNames } = require('../lib/utils');
+const { StatusTypes } = require('../lib/constants');
+
+const Statuses = Object.values(StatusTypes);
+const Status = getModule([ 'AnimatedStatus' ], false).Status || (() => null);
 
 const classes = {
   ...getModule([ 'status', 'statusItem' ], false),
@@ -40,33 +44,35 @@ const StatusMenuItem = React.memo(props => {
   const [ focused, setFocused ] = React.useState(false);
   const { status, selectedStatus } = props;
 
-  return [ <div
-    onMouseOver={() => setFocused(true)}
-    onMouseOut={() => setFocused(false)}
-    className={[ 'status-menu-item', classes.colorDefault, focused && classes.focused, selectedStatus === status && 'status-active' ].filter(Boolean).join(' ')}
-    data-status={status}
-    role='menuitem'
-  >
-    <div className='status-item'>
-      <Status status={status} className='status-icon' size={10} color={focused ? 'currentColor' : props.getSetting(`${status}StatusColor`)} />
-      <div className='status-text'>{humanizeStatus(status)}</div>
+  return <React.Fragment>
+    <div
+      onMouseOver={() => setFocused(true)}
+      onMouseOut={() => setFocused(false)}
+      className={joinClassNames('status-menu-item', classes?.colorDefault, focused && classes?.focused, selectedStatus === status && 'status-active')}
+      data-status={status}
+      role='menuitem'
+    >
+      <div className='status-item'>
+        <Status status={status} className='status-icon' size={10} color={focused ? 'currentColor' : props.getSetting(`${status}StatusColor`)} />
+        <div className='status-text'>{humanizeStatus?.(status)}</div>
+      </div>
     </div>
-  </div>, props.separate && <div role='separator' className='separator' /> ].filter(Boolean);
+
+    {props.separate && <div role='separator' className='separator' />}
+  </React.Fragment>;
 });
 
-const StatusPickerPreview = React.memo(props => {
-  const statuses = [ 'ONLINE', 'IDLE', 'DND', 'OFFLINE', 'INVISIBLE', 'STREAMING' ];
-
-  return <div className={[ classes.menu, props.className ].filter(Boolean).join(' ')} role='menu' id='bsi-status-preview'>
-    {statuses.map((status, index) =>
+const StatusPickerPreview = React.memo(props => (
+  <div className={joinClassNames(classes?.menu, props.className)} role='menu' id='bsi-status-preview'>
+    {Statuses.map((status, index) =>
       <StatusMenuItem
-        status={status.toLowerCase()}
-        separate={(index + 1) !== statuses.length}
+        status={status}
+        separate={(index + 1) !== Statuses.length}
         {...props}
       />
     )}
-  </div>;
-});
+  </div>
+));
 
 module.exports = Flux.connectStores([ powercord.api.settings.store ], () => ({
   ...powercord.api.settings._fluxProps('better-status-indicators')

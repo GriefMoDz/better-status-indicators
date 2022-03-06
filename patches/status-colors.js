@@ -26,34 +26,21 @@
  * SOFTWARE.
  */
 
-const { React, getModule } = require('powercord/webpack');
+const { getModule } = require('powercord/webpack');
 
-const AvatarModule = getModule([ 'AnimatedAvatar' ], false);
+module.exports = (main) => {
+  const { getSetting } = main.$settings;
 
-module.exports = React.memo(props => {
-  const { status, isMobile, isTyping, statusColor } = props;
+  const getStatusColor = (status) => (
+    getSetting(`${status}StatusColor`, main.defaultStatusColors[status.toUpperCase()])
+  );
 
-  const refs = {
-    status: React.useRef(props.fromStatus),
-    isMobile: React.useRef(props.fromIsMobile),
-    statusColor: React.useRef(props.fromColor),
-    animated: React.useRef(false)
-  };
+  const StatusModule = getModule([ 'getStatusMask' ], false);
+  main.inject('bsi-status-colors', StatusModule, 'getStatusColor', ([ status ]) => {
+    status ??= 'offline';
 
-  const animated = refs.animated.current || AvatarModule?.determineIsAnimated?.(isTyping, status, refs.status.current, isMobile, refs.isMobile.current);
+    const statusColor = getStatusColor(status);
 
-  React.useLayoutEffect(() => {
-    refs.animated.current = animated;
-    refs.status.current = status;
-    refs.isMobile.current = isMobile;
-    refs.statusColor.current = statusColor;
-  }, [ status, isMobile, statusColor, animated ]);
-
-  const Avatar = animated ? props.component : AvatarModule.default || (() => null);
-
-  if (!status && !refs.status.current) {
-    return null;
-  }
-
-  return <Avatar {...props} />;
-});
+    return main.hex2hsl(statusColor);
+  });
+};

@@ -214,7 +214,7 @@ $statuses: (
 
 @each $status in $statuses {
   .bsi-theme-variables {
-    .bsi-clientStatuses {
+    .bsi-clientStatuses, .bsi-statusIcon {
       svg[data-bsi-status=#{$status}] {
         path {
           @if $status == unknown {

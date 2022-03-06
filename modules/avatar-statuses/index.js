@@ -28,7 +28,7 @@
 
 const { React, getModule } = require('powercord/webpack');
 const { findInReactTree } = require('powercord/util');
-const { Module } = require('../../entities');
+const { Module } = require('../../lib/entities');
 
 const Masks = require('../../components/Masks');
 
@@ -51,14 +51,14 @@ module.exports = class AvatarStatuses extends Module {
       return res;
     });
 
-    this.plugin._refreshMaskLibrary();
+    this.main.refreshMaskLibrary();
 
     /* Avatar Status Indicators */
     const statusStore = getModule([ 'isMobileOnline' ], false);
     const Avatar = getModule([ 'AnimatedAvatar' ], false);
     this.inject('bsi-module-enhanced-avatar-status-indicators', Avatar, 'default', ([ props ], res) => {
       const userId = props.userId || props.src?.includes('/avatars') && props.src.match(/\/(?:avatars|users)\/(\d+)/)[1];
-      const clientStatuses = userId === this.plugin.currentUserId ? this.plugin.clientStatusStore.getCurrentClientStatus() : statusStore.getState().clientStatuses[userId];
+      const clientStatuses = userId === this.main.currentUserId ? this.main.clientStatusStore.getCurrentClientStatus() : statusStore.getState().clientStatuses[userId];
       if (!clientStatuses || !props.status || props.isTyping || props.isMobile) {
         return res;
       }
@@ -89,6 +89,6 @@ module.exports = class AvatarStatuses extends Module {
   }
 
   moduleWillUnload () {
-    this.plugin._refreshMaskLibrary();
+    this.main.refreshMaskLibrary();
   }
 };

@@ -26,7 +26,6 @@
  * SOFTWARE.
  */
 
-/* eslint-disable object-property-newline */
 const { React, Flux, getModule } = require('powercord/webpack');
 
 const ReactHooks = {
@@ -36,47 +35,50 @@ const ReactHooks = {
 
 const uuid = getModule([ 'v4', 'parse' ], false);
 const classes = getModule([ 'wrapper', 'avatar' ], false);
-const statusModule = getModule([ 'getStatusMask' ], false);
-
 const config = { tension: 600, friction: 70 };
 
+const StatusModule = getModule([ 'getStatusMask' ], false);
+
 const AnimatedStatus = React.memo(props => {
+  if (!ReactHooks.Spring || !ReactHooks.Basic) {
+    return null;
+  }
+
   const { status, className, style } = props;
-  const { Spring, Basic } = ReactHooks;
+  const { Spring: { animated, useSpring }, Basic } = ReactHooks;
 
-  const isMobile = props.isMobile !== void 0 && props.isMobile;
-  const color = props.color ? props.color : statusModule.getStatusColor(status);
-  const size = props.size ? props.size : 8;
+  const isMobile = props.isMobile ?? false;
+  const color = props.color ?? StatusModule?.getStatusColor?.(status);
+  const size = props.size ?? 8;
 
-  const statusValues = React.useMemo(() => statusModule.getStatusValues({ size, status, isMobile }), [ size, status, isMobile ]);
-  const statusDimensions = Spring.useSpring({ config, to: statusValues });
+  const statusValues = React.useMemo(() => StatusModule?.getStatusValues?.({ size, status, isMobile }), [ size, status, isMobile ]);
+  const statusDimensions = useSpring({ config, to: statusValues });
   const statusHeight = Math.ceil(size * 1.5);
-  const statusColor = Spring.useSpring(
+  const statusColor = useSpring(
     { config, fill: color },
     [ color ]
   )[0].fill;
 
-  const maskId = Basic.useLazyValue(() => uuid.v4());
-  const statusMask = statusModule.renderStatusMask(statusDimensions, size, maskId);
+  const maskID = Basic.useLazyValue(() => uuid?.v4?.());
+  const statusMask = StatusModule?.renderStatusMask?.(statusDimensions, size, maskID);
+
   if (props.getSetting('statusDisplay', 'default') === 'solid' && !isMobile) {
     delete statusMask.props.children[1];
   }
 
-  return React.createElement('svg', {
-    width: size,
-    height: statusHeight,
-    viewBox: `0 0 ${size} ${statusHeight}`,
-    className: [ classes.mask, className ].filter(Boolean).join(' '),
-    'data-bsi-status': status,
-    style
-  }, statusMask, React.createElement(Spring.animated.rect, {
-    x: 0,
-    y: 0,
-    width: size,
-    height: statusHeight,
-    fill: statusColor,
-    mask: `url(#${maskId})`
-  }));
+  return (
+    <svg
+      width={size}
+      height={statusHeight}
+      viewBox={`0 0 ${size} ${statusHeight}`}
+      className={[ classes?.mask, className ].filter(Boolean).join(' ')}
+      data-bsi-status={status}
+      style={style}
+    >
+      {statusMask}
+      <animated.rect x={0} y={0} width={size} height={statusHeight} fill={statusColor} mask={`url(#${maskID})`} />
+    </svg>
+  );
 });
 
 module.exports = Flux.connectStores([ powercord.api.settings.store ], () => ({

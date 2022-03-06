@@ -26,10 +26,9 @@
  * SOFTWARE.
  */
 
-/* eslint-disable object-property-newline */
 const { React, Flux, getModule, getModuleByDisplayName, i18n: { Messages } } = require('powercord/webpack');
 const { findInReactTree } = require('powercord/util');
-const { Module } = require('../../entities');
+const { Module } = require('../../lib/entities');
 
 module.exports = class StatusEverywhere extends Module {
   get manifest () {
@@ -91,9 +90,9 @@ module.exports = class StatusEverywhere extends Module {
 
     const useSubscribeGuildMembers = getModule([ 'useSubscribeGuildMembers' ], false).default;
 
-    const Avatar = this.plugin.hardwareAccelerationIsEnabled ? avatarModule.AnimatedAvatar : avatarModule.default;
-    const proposedAvatarModule = this.plugin.hardwareAccelerationIsEnabled ? avatarModule.AnimatedAvatar : avatarModule;
-    const proposedAvatarMethod = this.plugin.hardwareAccelerationIsEnabled ? 'type' : 'default';
+    const Avatar = this.main.hardwareAccelerationIsEnabled ? avatarModule.AnimatedAvatar : avatarModule.default;
+    const proposedAvatarModule = this.main.hardwareAccelerationIsEnabled ? avatarModule.AnimatedAvatar : avatarModule;
+    const proposedAvatarMethod = this.main.hardwareAccelerationIsEnabled ? 'type' : 'default';
 
     this.inject('bsi-module-status-everywhere-avatar', proposedAvatarModule, proposedAvatarMethod, ([ props ], res) => {
       const userId = props.userId || props.src?.includes('/avatars') && props.src.match(/\/(?:avatars|users)\/(\d+)/)[1];
@@ -114,9 +113,9 @@ module.exports = class StatusEverywhere extends Module {
         const typingStatus = getSetting('se-typingStatus', 'hidden');
 
         return {
-          mobileStatus: Boolean(mobileStatus === 'self+others' ? true : mobileStatus === 'others' ? userId !== this.plugin.currentUserId : false)
+          mobileStatus: Boolean(mobileStatus === 'self+others' ? true : mobileStatus === 'others' ? userId !== this.main.currentUserId : false)
             && statusStore.isMobileOnline(userId),
-          typingStatus: Boolean(typingStatus === 'self+others' ? true : typingStatus === 'others' ? userId !== this.plugin.currentUserId : false)
+          typingStatus: Boolean(typingStatus === 'self+others' ? true : typingStatus === 'others' ? userId !== this.main.currentUserId : false)
             && typingStore.isTyping(props.message?.channel_id, userId)
         }
       };

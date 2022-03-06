@@ -27,7 +27,7 @@
  */
 
 module.exports = {
+  'de': require('./de.json'),
   'en-GB': require('./en-GB.json'),
-  'en-US': require('./en-US.json'),
-  'de': require('./de.json')
+  'en-US': require('./en-US.json')
 };
