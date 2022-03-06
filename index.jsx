@@ -73,7 +73,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
   }
 
   get currentUserId () {
-    return window.localStorage.getItem('user_id_cache').replace(/"/g, '');
+    return window.DiscordNative.crashReporter.getMetadata().user_id;
   }
 
   get hardwareAccelerationIsEnabled () {
