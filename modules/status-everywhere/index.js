@@ -168,19 +168,22 @@ module.exports = class StatusEverywhere extends Module {
         size: avatarModule.Sizes.SIZE_40
       };
 
-      if (!message.author || (message.author && message.author.isNonUserBot())) {
+      if (!message.author || message.author.isNonUserBot()) {
         return res;
       }
 
       const AvatarWithPopout = findInReactTree(res.props?.avatar, n => n.type?.displayName === 'Popout');
       if (AvatarWithPopout) {
-        AvatarWithPopout.props.children = (oldMethod => (args) => {
+        const oldMethod = AvatarWithPopout.props.children;
+
+        AvatarWithPopout.props.children = (args) => {
           let res = oldMethod(args);
           if (res.type !== 'img' || !props.message) {
             return res;
           }
 
           const newProps = Object.assign(res.props, defaultProps);
+
           res = React.createElement(avatarModule.AnimatedAvatar, {
             ...newProps,
             message: props.message,
@@ -188,7 +191,7 @@ module.exports = class StatusEverywhere extends Module {
           });
 
           return res;
-        })(AvatarWithPopout.props.children);
+        };
       }
 
       return res;

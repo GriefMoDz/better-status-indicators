@@ -77,15 +77,15 @@ module.exports = React.memo(props => {
     return null;
   }
 
-  const { status, statusColor, isStreaming } = Flux.useStateFromStores([ StatusStore ], () => {
+  const [ status, statusColor, isStreaming ] = Flux.useStateFromStoresArray([ StatusStore ], () => {
     const status = props.status ?? StatusStore?.getStatus?.(props.user.id);
     const activities = props.activities ?? StatusStore?.getActivities?.(props.user.id);
 
-    return ({
+    return [
       status,
-      statusColor: settings.matchStatus ? StatusUtils?.getStatusColor(status) : 'currentColor',
-      isStreaming: ActivityStore?.isStreaming?.(activities)
-    });
+      settings.matchStatus ? StatusUtils?.getStatusColor(status) : 'currentColor',
+      ActivityStore?.isStreaming?.(activities)
+    ];
   });
 
   return isStreaming && settings.shouldRender ? <StatusIcon status={status} statusColor={statusColor} {...props} /> : null;

@@ -31,8 +31,8 @@ const { findInReactTree, wrapInHooks } = require('powercord/util');
 
 const AnimatedAvatarStatus = require('./../components/AnimatedAvatarStatus');
 
-module.exports = async (main) => {
-  const { getSetting } = main.$settings;
+module.exports = (main) => {
+  const { getSetting } = main._settings;
 
   const StatusStore = getModule([ 'isMobileOnline' ], false);
   const AvatarModule = getModule([ 'AnimatedAvatar' ], false);
@@ -102,9 +102,7 @@ module.exports = async (main) => {
     return res;
   });
 
-  AvatarModule.default.Sizes = AvatarModule.Sizes;
-
-  const Avatar = AvatarModule.default;
+  const Avatar = main.hardwareAccelerationEnabled ? AvatarModule.AnimatedAvatar : AvatarModule.default;
   const NowPlayingHeader = getModule(m => m.default?.displayName === 'NowPlayingHeader', false);
   main.inject('bsi-now-playing-avatar-status', NowPlayingHeader, 'default', (_, res) => {
     const originalType = res.type;
@@ -122,8 +120,6 @@ module.exports = async (main) => {
 
     return res;
   });
-
-  NowPlayingHeader.default.displayName = 'NowPlayingHeader';
 
   const UserPopoutComponents = getModule([ 'UserPopoutAvatar' ], false);
   main.inject('bsi-user-popout-avatar-status', UserPopoutComponents, 'UserPopoutAvatar', ([ props ], res) => {
@@ -157,13 +153,7 @@ module.exports = async (main) => {
 
       return res;
     });
-
-    UserProfileModalHeader.default.displayName = 'UserProfileModalHeader';
   }
-
-  const ConnectedMobileAvatar = Flux.connectStores([ StatusStore ], () => ({
-    isMobile: StatusStore.isMobileOnline(main.currentUserId)
-  }))(Avatar);
 
   const PrivateChannel = getModuleByDisplayName('PrivateChannel', false);
   main.inject('bsi-user-dm-avatar-status', PrivateChannel.prototype, 'renderAvatar', (_, res) => {
@@ -179,14 +169,20 @@ module.exports = async (main) => {
     return;
   }
 
+  const ConnectedMobileAvatar = Flux.connectStores([ StatusStore ], () => ({
+    isMobile: StatusStore.isMobileOnline(main.currentUserId)
+  }))(Avatar);
+
   main.inject('bsi-account-avatar-status', Account.prototype, 'renderAvatarWithPopout', (_, res) => {
     const AvatarWithPopout = findInReactTree(res, n => n.type?.displayName === 'Popout');
-    if (AvatarWithPopout) {
+    if (typeof AvatarWithPopout?.props?.children === 'function') {
       const oldMethod = AvatarWithPopout.props.children;
 
       AvatarWithPopout.props.children = (props) => {
         const res = oldMethod(props);
-        res.props.children.type = ConnectedMobileAvatar;
+        if (res?.props?.children.type) {
+          res.props.children.type = ConnectedMobileAvatar;
+        }
 
         return res;
       };

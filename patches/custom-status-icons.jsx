@@ -42,7 +42,7 @@ module.exports = (main) => {
   };
 
   const MessageHeader = getModule(m => getDefaultMethodByKeyword(m, 'showTimestampOnHover'), false);
-  main.inject('bsi-message-header-client-status1', MessageHeader, 'default', ([ { message: { author: user } } ], res) => {
+  main.inject('bsi-message-header-status-icons-1', MessageHeader, 'default', ([ { message: { author: user } } ], res) => {
     const defaultProps = { user, location: 'message-headers' };
     const usernameHeader = findInReactTree(res.props?.username, n => Array.isArray(n?.props?.children) && n.props.children.find(c => c?.props?.message));
 
@@ -54,7 +54,7 @@ module.exports = (main) => {
   });
 
   const UsernameHeader = getModule(m => getDefaultMethodByKeyword(m, 'withMentionPrefix'), false);
-  main.inject('bsi-message-header-client-status2', UsernameHeader, 'default', ([ { __bsiDefaultProps: defaultProps } ], res) => {
+  main.inject('bsi-message-header-status-icons-2', UsernameHeader, 'default', ([ { __bsiDefaultProps: defaultProps } ], res) => {
     res.props.children.splice(2, 0, [
       <ConnectedStatusIcon {...defaultProps} />,
       <ConnectedClientStatuses {...defaultProps} />
@@ -73,13 +73,11 @@ module.exports = (main) => {
 
         return res;
       });
-
-      mdl.type.displayName = component;
     }
   });
 
   const MemberListItem = getModuleByDisplayName('MemberListItem', false);
-  main.inject('bsi-member-list-client-status', MemberListItem.prototype, 'renderDecorators', function (_, res) {
+  main.inject('bsi-member-list-status-icons', MemberListItem.prototype, 'renderDecorators', function (_, res) {
     const { activities, status, user } = this.props;
     const defaultProps = { user, location: 'members-list' };
 
@@ -92,17 +90,15 @@ module.exports = (main) => {
   });
 
   const DiscordTag = getModule(m => m.default?.displayName === 'DiscordTag', false);
-  main.inject('bsi-name-tag-client-status1', DiscordTag, 'default', ([ { user } ], res) => {
+  main.inject('bsi-name-tag-status-icons-1', DiscordTag, 'default', ([ { user } ], res) => {
     res.props.user = user;
 
     return res;
   });
 
-  DiscordTag.default.displayName = 'DiscordTag';
-
   const UserStore = getModule([ 'initialize', 'getCurrentUser' ], false);
   const NameTag = getModule(m => m.default?.displayName === 'NameTag', false);
-  main.inject('bsi-name-tag-client-status2', NameTag, 'default', ([ props ], res) => {
+  main.inject('bsi-name-tag-status-icons-2', NameTag, 'default', ([ props ], res) => {
     const user = props.user || UserStore.findByTag(props.name, props.discriminator);
     const defaultProps = { user, location: 'user-popout-modal' };
 
@@ -114,10 +110,8 @@ module.exports = (main) => {
     return res;
   });
 
-  NameTag.default.displayName = 'NameTag';
-
   const PrivateChannel = getModuleByDisplayName('PrivateChannel', false);
-  main.inject('bsi-dm-channel-client-status', PrivateChannel.prototype, 'render', function (_, res) {
+  main.inject('bsi-dm-channel-status-icons', PrivateChannel.prototype, 'render', function (_, res) {
     if (!this.props.user) {
       return res;
     }

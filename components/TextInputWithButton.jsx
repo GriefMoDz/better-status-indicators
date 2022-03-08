@@ -31,7 +31,7 @@ const { Flex } = require('powercord/components');
 
 const { joinClassNames } = require('../lib/utils');
 
-const Button = getModule(m => m.ButtonLink, false).default || (() => null);
+const Button = getModule([ 'ButtonLink' ], false).default || (() => null);
 const ColorUtils = getModule([ 'isValidHex' ], false);
 
 let classes;

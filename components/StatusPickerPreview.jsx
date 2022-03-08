@@ -32,9 +32,9 @@ const { humanizeStatus } = getModule([ 'humanizeStatus' ], false) || {};
 const { joinClassNames } = require('../lib/utils');
 const { StatusTypes } = require('../lib/constants');
 
-const Statuses = Object.values(StatusTypes);
 const Status = getModule([ 'AnimatedStatus' ], false).Status || (() => null);
 
+const statuses = Object.values(StatusTypes);
 const classes = {
   ...getModule([ 'status', 'statusItem' ], false),
   ...getModule([ 'menu', 'item' ], false)
@@ -64,10 +64,10 @@ const StatusMenuItem = React.memo(props => {
 
 const StatusPickerPreview = React.memo(props => (
   <div className={joinClassNames(classes?.menu, props.className)} role='menu' id='bsi-status-preview'>
-    {Statuses.map((status, index) =>
+    {statuses.map((status, index) =>
       <StatusMenuItem
         status={status}
-        separate={(index + 1) !== Statuses.length}
+        separate={(index + 1) !== statuses.length}
         {...props}
       />
     )}

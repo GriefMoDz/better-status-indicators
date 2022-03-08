@@ -34,20 +34,20 @@ const AnimatedStatus = require('./../components/AnimatedStatus');
 const StatusIcon = require('./../components/StatusIcon');
 
 module.exports = (main) => {
-  const { getSetting } = main.$settings;
+  const { getSetting } = main._settings;
 
   const Mask = getModule([ 'MaskLibrary' ], false);
   const StatusModule = getModule([ 'getStatusMask' ], false);
 
   main.inject('bsi-status-icon', StatusModule, 'Status', ([ { isMobile, status, size, color } ], res) => {
-    const statusStyle = res.props.children.props.style;
-    if (!color) {
-      statusStyle.backgroundColor = getSetting(`${status}StatusColor`, main.defaultStatusColors[status.toUpperCase()]);
+    const statusStyles = res.props?.children?.props?.style;
+    if (!color && statusStyles) {
+      statusStyles.backgroundColor = getSetting(`${status}StatusColor`, main.defaultStatusColors[status.toUpperCase()]);
     }
 
     if (status !== 'online' && isMobile) {
       res.props = { ...res.props,
-        mask: Mask.default.Masks.STATUS_ONLINE_MOBILE,
+        mask: Mask.MaskIDs.STATUS_ONLINE_MOBILE,
         height: size * 1.5,
         width: size
       };
@@ -56,15 +56,10 @@ module.exports = (main) => {
     return res;
   });
 
-  StatusModule.Status.displayName = 'Status';
-
   const ConnectedClientStatuses = powercord.api.settings.connectStores('better-status-indicators')(ClientStatuses);
   const ConnectedStatusIcon = powercord.api.settings.connectStores('better-status-indicators')(StatusIcon);
 
   const Status = getModuleByDisplayName('FluxContainer(Status)', false);
-
-  const dividerClass = getModule([ 'transparent', 'divider' ], false)?.divider;
-  const UserStore = getModule([ 'initialize', 'getCurrentUser' ], false);
 
   main.inject('bsi-mobile-custom-status-pre', Status.prototype, 'render', function (args) {
     if (!getSetting('mobileAvatarStatus', true)) {
@@ -73,6 +68,9 @@ module.exports = (main) => {
 
     return args;
   }, true)
+
+  const dividerClass = getModule([ 'transparent', 'divider' ], false)?.divider;
+  const UserStore = getModule([ 'initialize', 'getCurrentUser' ], false);
 
   main.inject('bsi-custom-status-icon', Status.prototype, 'render', function (_, res) {
     const StatusComponent = main.hardwareAccelerationIsEnabled ? AnimatedStatus : StatusModule.Status;
@@ -83,14 +81,14 @@ module.exports = (main) => {
     const tooltipChildren = res.props.children(originalProps);
     tooltipChildren.props.children.type = StatusComponent;
 
-    const props = {
+    const customProps = {
       user: UserStore.getUser(this.props.userId),
       location: 'direct-messages',
       tooltipPosition: 'bottom'
     };
 
-    const hasStatusIcon =  wrapInHooks(() => (<StatusIcon {...props} />).type.type({ ...props, ...main.$settings }))();
-    const hasClientStatuses = wrapInHooks(() => (<ClientStatuses {...props } />).type.type({ ...props, ...main.$settings }))();
+    const hasStatusIcon =  wrapInHooks(() => (<StatusIcon {...customProps} />).type.type({ ...customProps, ...main._settings }))();
+    const hasClientStatuses = wrapInHooks(() => (<ClientStatuses {...customProps } />).type.type({ ...customProps, ...main._settings }))();
 
     if (originalProps.status !== 'offline' && (hasStatusIcon || hasClientStatuses)) {
       if(!Array.isArray(res)) {
@@ -99,8 +97,8 @@ module.exports = (main) => {
 
       res.push(...[
         <div className={dividerClass} />,
-        <ConnectedStatusIcon {...props} />,
-        <ConnectedClientStatuses {...props} />
+        <ConnectedStatusIcon {...customProps} />,
+        <ConnectedClientStatuses {...customProps} />
       ]);
     }
 

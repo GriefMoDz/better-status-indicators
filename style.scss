@@ -74,6 +74,10 @@
 .message-2CShn3 .avatar-2e8lTP {
   overflow: visible;
 
+  &::before {
+    display: inline;
+  }
+
   &.bsi-reduced-statuses {
     &[data-bsi-mobile-avatar-status='false'] {
       foreignObject:not([mask*='#svg-mask-avatar-default']) {

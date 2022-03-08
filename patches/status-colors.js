@@ -29,17 +29,14 @@
 const { getModule } = require('powercord/webpack');
 
 module.exports = (main) => {
-  const { getSetting } = main.$settings;
-
-  const getStatusColor = (status) => (
-    getSetting(`${status}StatusColor`, main.defaultStatusColors[status.toUpperCase()])
+  const getCustomStatusColor = (status) => main.settings.get(
+    `${status}StatusColor`,
+    main.defaultStatusColors[status.toUpperCase()]
   );
 
   const StatusModule = getModule([ 'getStatusMask' ], false);
   main.inject('bsi-status-colors', StatusModule, 'getStatusColor', ([ status ]) => {
-    status ??= 'offline';
-
-    const statusColor = getStatusColor(status);
+    const statusColor = getCustomStatusColor(status ?? 'offline');
 
     return main.hex2hsl(statusColor);
   });

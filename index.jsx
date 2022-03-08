@@ -80,7 +80,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     return window.DiscordNative.gpuSettings.getEnableHardwareAcceleration();
   }
 
-  get $settings () {
+  get _settings () {
     if (cache.settings) {
       return cache.settings;
     }
@@ -117,8 +117,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
       render: (props) => <Settings
         {...props}
         main={this}
-        toggleSetting={this.$settings.toggleSetting}
-        updateSetting={this.$settings.updateSetting}
+        toggleSetting={this._settings.toggleSetting}
+        updateSetting={this._settings.updateSetting}
       />
     });
 
@@ -160,7 +160,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
       const start = performance.now();
       const patch = patches[patchID];
 
-      (new Promise((resolve) => resolve(patch(this)))
+      (new Promise((resolve) => resolve(patch(this, logger)))
         .catch((e) => logger.error(`An error has occurred while trying to initialize ${patchID}:`, e))
         .then(() => logger.log(`Patch loaded. Initialization took ${Math.floor(performance.now() - start)}ms`))
       );
@@ -234,6 +234,9 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
   refreshMaskLibrary () {
     const Mask = getModule([ 'MaskLibrary' ], false);
+    if (Mask === null) {
+      return this.error('Missing “MaskLibrary” module; please report this to the developer.');
+    }
 
     const TempMaskContainer = document.createElement('div');
     TempMaskContainer.style.display = 'none';
@@ -273,7 +276,39 @@ module.exports = class BetterStatusIndicators extends Plugin {
   }
 
   inject (injectionID, ...args) {
-    return (inject(injectionID, ...args), (cache.injections ??= []).push(injectionID));
+    (cache.injections ??= []).push(injectionID);
+
+    const [ mod, method, patch, pre ] = args;
+
+    const errors = [];
+
+    switch (true) {
+      case !mod:
+        errors.push('Module is missing');
+        break;
+      case typeof method !== 'string':
+        errors.push('Method is not a string');
+        break;
+      case typeof patch !== 'function':
+        errors.push('Patch is not a function');
+        break;
+      case pre && typeof pre !== 'boolean':
+        errors.push('Pre is not a boolean');
+    }
+
+    if (errors.length > 0) {
+      const logger = createLogger(`Injections:${injectionID}`);
+
+      for (const error of errors) {
+        logger.error(`${error}; please report this to the developer.`);
+      }
+
+      return;
+    }
+
+    inject(injectionID, ...args);
+
+    Object.assign(mod[method], mod[`__powercordOriginal_${method}`]);
   }
 
   async pluginWillUnload () {

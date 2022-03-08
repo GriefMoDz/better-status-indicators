@@ -28,35 +28,36 @@
 
 const { React, getModule } = require('powercord/webpack');
 
-module.exports = (main) => {
-  const { getSetting } = main.$settings;
+module.exports = (main, logger) => {
+  const { getSetting } = main._settings;
 
   const Mask = getModule([ 'MaskLibrary' ], false);
+  if (Mask === null) {
+    return logger.error('Missing “MaskLibrary” module; please report this to the developer.');
+  }
+
+  const FILTERED_STATUSES = [ 'idle', 'dnd', 'offline', 'streaming' ];
 
   main.inject('bsi-custom-status-masks', Mask.MaskLibrary, 'type', (_, res) => {
     const masks = res.props.children;
     const statusDisplay = getSetting('statusDisplay', 'default');
 
-    const filteredStatuses = [ 'idle', 'dnd', 'offline', 'streaming' ];
+    const statusMasks = masks.filter(mask => FILTERED_STATUSES.includes(mask.props.id?.split('svg-mask-status-').pop()));
 
-    const statusMasks = masks.filter(mask => filteredStatuses.includes(mask.props.id?.split('svg-mask-status-').pop()));
-    const idleStatusMask = statusMasks.find(mask => mask.props.id === 'svg-mask-status-idle');
-    const dndStatusMask = statusMasks.find(mask => mask.props.id === 'svg-mask-status-dnd');
+    const IdleStatusMask = statusMasks.find(mask => mask.props.id === 'svg-mask-status-idle');
+    const DndStatusMask = statusMasks.find(mask => mask.props.id === 'svg-mask-status-dnd');
 
-    switch (statusDisplay) {
-      case 'solid':
-        statusMasks.forEach(mask => {
-          mask.props.children = <circle fill='white' cx='0.5' cy='0.5' r='0.5' />;
-        });
+    if (statusDisplay === 'solid') {
+      for (const mask of statusMasks) {
+        mask.props.children = <circle fill='white' cx='0.5' cy='0.5' r='0.5' />;
+      }
+    } else if (statusDisplay === 'classic') {
+      IdleStatusMask.props.children[1] = <polygon fill='black' points='0.52, 0.51 0.84, 0.69 0.75, 0.81 0.37, 0.58 0.37, 0.15 0.52, 0.15' />;
 
-        break;
-      case 'classic':
-        idleStatusMask.props.children[1] = <polygon fill='black' points='0.52, 0.51 0.84, 0.69 0.75, 0.81 0.37, 0.58 0.37, 0.15 0.52, 0.15' />;
+      Object.assign(DndStatusMask.props.children[1].props, { height: 0.15, y: 0.45 });
 
-        Object.assign(dndStatusMask.props.children[1].props, { height: 0.15, y: 0.45 });
-
-        delete dndStatusMask.props.children[1].props.rx;
-        delete dndStatusMask.props.children[1].props.ry;
+      delete DndStatusMask.props.children[1].props.rx;
+      delete DndStatusMask.props.children[1].props.ry;
     }
 
     return res;

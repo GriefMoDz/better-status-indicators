@@ -29,23 +29,21 @@
 const { getModule, i18n: { Messages } } = require('powercord/webpack');
 
 module.exports = (main) => {
-  const { getSetting } = main.$settings;
+  const { getSetting } = main._settings;
 
   const StatusStore = getModule([ 'isMobileOnline' ], false);
   const StatusUtils = getModule([ 'humanizeStatus' ], false);
   const StatusModule = getModule([ 'getStatusMask' ], false);
 
-  const getStatusTranslation = (status) => Messages[`STATUS_${status.toUpperCase()}`];
-
   /* Override Discord's default mobile status logic */
-  main.inject('bsi-mobile-status-online', StatusStore, 'isMobileOnline', function ([ userId ], res) {
+  main.inject('bsi-override-mobile-status', StatusStore, 'isMobileOnline', function ([ userId ], res) {
     if (getSetting('mobileDisabled', false)) {
       return false;
     }
 
     const showOnSelf = userId === main.currentUserId && getSetting('mobileShowOnSelf', false);
     const clientStatuses = showOnSelf ? main.clientStatusStore.getCurrentClientStatus() : this.getState().clientStatuses[userId];
-    if (clientStatuses && clientStatuses.mobile && (getSetting('mobilePreserveStatus', false) ? true : !clientStatuses.desktop)) {
+    if (clientStatuses?.mobile && (getSetting('mobilePreserveStatus', false) ? true : !clientStatuses.desktop)) {
       return true;
     }
 
@@ -53,7 +51,9 @@ module.exports = (main) => {
   });
 
   /* Replace the online mobile status text with the user's current status type */
-  main.inject('bsi-mobile-status-text', StatusUtils, 'humanizeStatus', ([ status, isMobile ], res) => {
+  const getStatusTranslation = (status) => Messages[`STATUS_${status.toUpperCase()}`];
+
+  main.inject('bsi-replace-mobile-status-text', StatusUtils, 'humanizeStatus', ([ status, isMobile ], res) => {
     if (status !== 'online' && isMobile) {
       return Messages.STATUS_ONLINE_MOBILE.replace(getStatusTranslation('online'), getStatusTranslation(status));
     }
@@ -62,7 +62,7 @@ module.exports = (main) => {
   });
 
   /* Force the mobile status indicator to display for every status type */
-  main.inject('bsi-mobile-status-mask', StatusModule, 'getStatusMask', ([ status, isMobile, isTyping ]) => {
+  main.inject('bsi-force-mobile-status-mask', StatusModule, 'getStatusMask', ([ status, isMobile, isTyping ]) => {
     if (status !== 'online' && isMobile && !isTyping) {
       status = 'online';
     }
@@ -70,7 +70,7 @@ module.exports = (main) => {
     return [ status, isMobile, isTyping ];
   }, true);
 
-  main.inject('bsi-mobile-status-size', StatusModule, 'getStatusSize', ([ size, status, isMobile, isTyping ]) => {
+  main.inject('bsi-force-mobile-status-size', StatusModule, 'getStatusSize', ([ size, status, isMobile, isTyping ]) => {
     if (status !== 'online' && isMobile && !isTyping) {
       status = 'online';
     }
@@ -78,7 +78,7 @@ module.exports = (main) => {
     return [ size, status, isMobile, isTyping ];
   }, true);
 
-  main.inject('bsi-mobile-status-value', StatusModule, 'getStatusValues', (args) => {
+  main.inject('bsi-force-mobile-status-values', StatusModule, 'getStatusValues', (args) => {
     const { status, isMobile, isTyping } = args[0];
 
     if (status !== 'online' && isMobile && !isTyping) {
