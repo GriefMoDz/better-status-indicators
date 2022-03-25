@@ -316,7 +316,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
 
     powercord.api.settings.unregisterSettings(this.entityID);
 
-    for (const injectionID of cache.injections) {
+    for (const injectionID of (cache.injections || [])) {
       uninject(injectionID);
     }
 
