@@ -59,8 +59,8 @@ module.exports = class BetterStatusIndicators extends Plugin {
       cancelled: false
     };
 
-    for (const logMethod of [ 'log', 'debug', 'warn', 'error' ]) {
-      this[logMethod] = logger[logMethod];
+    for (const logFn of [ 'log', 'debug', 'warn', 'error' ]) {
+      this[logFn] = logger[logFn];
     }
   }
 

@@ -62,7 +62,7 @@ const StatusMenuItem = React.memo(props => {
   </React.Fragment>;
 });
 
-const StatusPickerPreview = React.memo(props => (
+const StatusPickerPreview = React.memo(props =>
   <div className={joinClassNames(classes?.menu, props.className)} role='menu' id='bsi-status-preview'>
     {statuses.map((status, index) =>
       <StatusMenuItem
@@ -72,7 +72,7 @@ const StatusPickerPreview = React.memo(props => (
       />
     )}
   </div>
-));
+);
 
 module.exports = Flux.connectStores([ powercord.api.settings.store ], () => ({
   ...powercord.api.settings._fluxProps('better-status-indicators')

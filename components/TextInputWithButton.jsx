@@ -57,8 +57,8 @@ const Input = React.memo(props => {
   </Flex.Child>
 });
 
-const IconButton = React.memo(props => {
-  return <Flex shrink={1} grow={0} style={{ margin: 0 }}>
+const IconButton = React.memo(props =>
+  <Flex shrink={1} grow={0} style={{ margin: 0 }}>
     <Button
       className={classes?.button}
       disabled={props.disabled}
@@ -72,7 +72,7 @@ const IconButton = React.memo(props => {
       <span className={`${props.buttonIcon} ${classes?.editIcon}`} style={ButtonIconStyles}></span>
     </Button>
   </Flex>
-});
+);
 
 module.exports = React.memo(props => {
   classes ??= getModule([ 'container', 'editIcon' ], false);

@@ -162,6 +162,10 @@ module.exports = class StatusEverywhere extends Module {
     }, false);
 
     this.inject('bsi-module-status-everywhere-chat-avatar', MessageHeader, 'default', ([ props ], res) => {
+      if (props.compact) {
+        return res;
+      }
+
       const { message } = props;
       const defaultProps = {
         userId: message.author.id,

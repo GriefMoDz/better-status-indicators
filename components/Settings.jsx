@@ -33,7 +33,7 @@ const { ColorPickerInput, SwitchItem, RadioGroup } = require('powercord/componen
 (async () => {
   try {
     const GuildSettingsWindow = getModule([ 'open', 'updateGuild' ], false);
-    const fakeGuildObj = getModule([ 'GuildRecord' ], false).default({
+    const fakeGuildObj = new getModule([ 'GuildRecord' ], false).GuildRecord({
       id: '1337',
       name: 'Fake Guild',
       ownerId: window.DiscordNative.crashReporter.getMetadata().user_id,
