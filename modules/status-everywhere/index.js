@@ -145,11 +145,9 @@ module.exports = class StatusEverywhere extends Module {
 
     const MemberListItem = getModuleByDisplayName('MemberListItem', false);
     this.inject('bsi-module-status-everywhere-members-list', MemberListItem.prototype, 'renderAvatar', function (_, res) {
-      if (res) {
-        res = React.createElement(Avatar, {
-          ...res.props,
-          userId: this.props.user.id
-        });
+      const AvatarComponent = findInReactTree(res, n => n.props?.hasOwnProperty('isMobile'));
+      if (AvatarComponent) {
+        AvatarComponent.props.userId = this.props.user.id;
       }
 
       return res;
