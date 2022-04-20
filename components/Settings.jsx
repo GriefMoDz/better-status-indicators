@@ -56,7 +56,7 @@ const ColorUtils = getModule([ 'isValidHex' ], false);
 
 function formatClientTranslation (translation, args) {
   const key = translation === 'DISPLAY_TITLE' ? 'CLIENT_DISPLAY_TITLE' : `CLIENT_SWITCH_${translation}`;
-  return Messages[`BSI_${key}`].format(args);
+  return Messages[`BSI_${key}`]?.format?.(args);
 }
 
 let ModuleManager;
@@ -317,7 +317,7 @@ function renderModules ({ getSetting, toggleSetting, updateSetting, main }) {
   const modules = ModuleManager.getModules();
 
   return <React.Fragment>
-    <FormTitle className='bsi-settings-status-display-title'>{Messages.BSI_AVAILABLE_MODULES.format({ count: modules.length })}</FormTitle>
+    <FormTitle className='bsi-settings-status-display-title'>{Messages.BSI_AVAILABLE_MODULES?.format?.({ count: modules.length })}</FormTitle>
 
     {modules.map(modId => {
       const { manifest } = ModuleManager.get(modId);

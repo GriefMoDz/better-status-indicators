@@ -145,7 +145,10 @@ module.exports = class RadialStatus extends Module {
 
       foreignObject.props.mask = 'url(#svg-mask-avatar-default)';
 
-      delete res.props.children.props.children[1];
+      const AvatarSVG = findInReactTree(res, n => n.type === 'svg');
+      if (Array.isArray(AvatarSVG?.props?.children)) {
+        delete AvatarSVG.props.children[1];
+      }
 
       return res;
     });

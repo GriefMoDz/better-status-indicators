@@ -40,7 +40,7 @@ module.exports = class StatusEverywhere extends Module {
         'se-typingStatus': {
           type: 'radio',
           name: 'Typing Status Display',
-          description: Messages.BSI_STATUS_EVERYWHERE_TYPING_STATUS_DESC.format({}),
+          description: Messages.BSI_STATUS_EVERYWHERE_TYPING_STATUS_DESC?.format?.({}),
           defaultValue: 'hidden',
           options: [ {
             name: 'Show for self and others',

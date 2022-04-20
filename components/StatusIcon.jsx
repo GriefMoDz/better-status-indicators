@@ -44,7 +44,7 @@ const classes = getModule([ 'member', 'ownerIcon' ], false);
 const Lodash = window._;
 
 const StatusIcon = React.memo(props => {
-  const tooltipText = Messages.BSI_STREAMING_AS_STATUS.format({ status: humanizeStatus?.(props.status) });
+  const tooltipText = Messages.BSI_STREAMING_AS_STATUS?.format?.({ status: humanizeStatus?.(props.status) });
 
   return <Tooltip
     text={tooltipText}
