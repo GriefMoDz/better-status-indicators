@@ -28,6 +28,7 @@
 
 const { React, getModule, getModuleByDisplayName } = require('powercord/webpack');
 const { findInReactTree } = require('powercord/util');
+const { uninject } = require('powercord/injector');
 
 const ClientStatuses = require('./../components/ClientStatuses');
 const StatusIcon = require('./../components/StatusIcon');
@@ -76,15 +77,37 @@ module.exports = (main) => {
     }
   });
 
-  const MemberListItem = getModuleByDisplayName('MemberListItem', false);
-  main.inject('bsi-member-list-status-icons', MemberListItem.prototype, 'renderDecorators', function (_, res) {
-    const { activities, status, user } = this.props;
-    const defaultProps = { user, location: 'members-list' };
+  const MemberListItem = getModuleByDisplayName('MemberListItem', false) || getModule([ 'AVATAR_DECORATION_PADDING' ], false)?.default;
+  const MemberListItemTarget = {
+    module: MemberListItem.prototype || MemberListItem,
+    method: MemberListItem.prototype ? 'renderDecorators' : 'type'
+  };
 
-    res.props.children.unshift([
-      <ConnectedStatusIcon activities={activities} status={status} {...defaultProps} />,
-      <ConnectedClientStatuses status={status} {...defaultProps} />
-    ]);
+  main.inject('bsi-member-list-status-icons-1', MemberListItemTarget.module, MemberListItemTarget.method, function (_, res) {
+    if (res?.props?.children) {
+      const { activities, status, user } = this.props;
+      const defaultProps = { user, location: 'members-list' };
+
+      res.props.children.unshift([
+        <ConnectedStatusIcon activities={activities} status={status} {...defaultProps} />,
+        <ConnectedClientStatuses status={status} {...defaultProps} />
+      ]);
+    } else {
+      const MemberListItem = res.type;
+      main.inject('bsi-member-list-status-icons-2', MemberListItem.prototype, 'renderDecorators', function (_, res) {
+        const { activities, status, user } = this.props;
+        const defaultProps = { user, location: 'members-list' };
+
+        res.props.children.unshift([
+          <ConnectedStatusIcon activities={activities} status={status} {...defaultProps} />,
+          <ConnectedClientStatuses status={status} {...defaultProps} />
+        ]);
+
+        return res;
+      });
+
+      uninject('bsi-member-list-status-icons-1');
+    }
 
     return res;
   });

@@ -28,6 +28,7 @@
 
 const { React, Flux, getModule, getModuleByDisplayName, i18n: { Messages } } = require('powercord/webpack');
 const { findInReactTree } = require('powercord/util');
+const { uninject } = require('powercord/injector');
 const { Module } = require('../../lib/entities');
 
 module.exports = class StatusEverywhere extends Module {
@@ -143,11 +144,32 @@ module.exports = class StatusEverywhere extends Module {
     const { default: GuildMemberSubscriptions } = getModule(m => m.default?.prototype?.checkForLeaks, false);
     this.inject('bsi-module-status-everywhere-silence-leaks', GuildMemberSubscriptions.prototype, 'checkForLeaks', () => false, true);
 
-    const MemberListItem = getModuleByDisplayName('MemberListItem', false);
-    this.inject('bsi-module-status-everywhere-members-list', MemberListItem.prototype, 'renderAvatar', function (_, res) {
-      const AvatarComponent = findInReactTree(res, n => n.props?.hasOwnProperty('isMobile'));
-      if (AvatarComponent) {
-        AvatarComponent.props.userId = this.props.user.id;
+    const MemberListItem = getModuleByDisplayName('MemberListItem', false) || getModule([ 'AVATAR_DECORATION_PADDING' ], false)?.default;
+    const MemberListItemTarget = {
+      module: MemberListItem.prototype || MemberListItem,
+      method: MemberListItem.prototype ? 'renderAvatar' : 'type'
+    };
+
+    const _this = this;
+
+    this.inject('bsi-module-status-everywhere-members-list-1', MemberListItemTarget.module, MemberListItemTarget.method, function (_, res) {
+      if (res?.props?.children) {
+        const AvatarComponent = findInReactTree(res, n => n.props?.hasOwnProperty('isMobile'));
+        if (AvatarComponent) {
+          AvatarComponent.props.userId = this.props.user.id;
+        }
+      } else {
+        const MemberListItem = res.type;
+        _this.inject('bsi-module-status-everywhere-members-list-2', MemberListItem.prototype, 'renderAvatar', function (_, res) {
+          const AvatarComponent = findInReactTree(res, n => n.props?.hasOwnProperty('isMobile'));
+          if (AvatarComponent) {
+            AvatarComponent.props.userId = this.props.user.id;
+          }
+
+          return res;
+        });
+
+        uninject('bsi-module-status-everywhere-members-list-1');
       }
 
       return res;
@@ -180,17 +202,24 @@ module.exports = class StatusEverywhere extends Module {
 
         AvatarWithPopout.props.children = (args) => {
           let res = oldMethod(args);
-          if (res.type !== 'img' || !props.message) {
+
+          const AvatarImg = res?.props?.children?.[0] || res?.type === 'img' && res;
+          if (!AvatarImg || !props.message) {
             return res;
           }
 
-          const newProps = Object.assign(res.props, defaultProps);
-
-          res = React.createElement(avatarModule.AnimatedAvatar, {
+          const newProps = Object.assign(AvatarImg.props, defaultProps);
+          const AvatarComponent = React.createElement(avatarModule.AnimatedAvatar, {
             ...newProps,
             message: props.message,
             className: [ newProps.className, getSetting('se-reducedStatuses', false) && 'bsi-reduced-statuses' ].filter(Boolean).join(' ')
           });
+
+          if (res.props.children[0]) {
+            res.props.children[0] = AvatarComponent;
+          } else {
+            res = AvatarComponent;
+          }
 
           return res;
         };
