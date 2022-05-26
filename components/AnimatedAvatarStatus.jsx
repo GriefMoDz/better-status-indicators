@@ -49,7 +49,7 @@ module.exports = React.memo(props => {
     refs.statusColor.current = statusColor;
   }, [ status, isMobile, statusColor, animated ]);
 
-  const Avatar = animated ? props.component : AvatarModule.default || (() => null);
+  const Avatar = animated ? props.component : AvatarModule.default;
 
   if (!status && !refs.status.current) {
     return null;

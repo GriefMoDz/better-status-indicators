@@ -56,7 +56,7 @@ module.exports = (main) => {
 
   const UsernameHeader = getModule(m => getDefaultMethodByKeyword(m, 'withMentionPrefix'), false);
   main.inject('bsi-message-header-status-icons-2', UsernameHeader, 'default', ([ { __bsiDefaultProps: defaultProps } ], res) => {
-    res.props.children.splice(2, 0, [
+    res.props.children.splice(4, 0, [
       <ConnectedStatusIcon {...defaultProps} />,
       <ConnectedClientStatuses {...defaultProps} />
     ]);

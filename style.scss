@@ -211,7 +211,7 @@ $statuses: (
     }
   }
 
-  .avatarWrapper-1B9FTW .wrapper-1VLyxH rect[mask='url(#svg-mask-status-offline)'] {
+  .wrapper-1VLyxH[data-bsi-status='invisible'] rect[mask='url(#svg-mask-status-offline)'] {
     fill: var(--bsi-invisible-color) !important;
   }
 }
