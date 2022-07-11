@@ -129,11 +129,18 @@ module.exports = (main) => {
     }
 
     const avatarHint = findInReactTree(res, n => n.props?.hasOwnProperty('mask'));
+    const useEnhancedAvatarStatus = main.ModuleManager.isEnabled('avatar-statuses');
+    const useMobileAvatarStatus = getSetting('mobileAvatarStatus', true) || useEnhancedAvatarStatus;
+
     if (avatarHint) {
       const isRadialStatusEnabled = main.ModuleManager.isEnabled('radial-status');
       const isEnhancedAvatarStatusEnabled = main.ModuleManager.isEnabled('avatar-statuses');
 
-      if (isEnhancedAvatarStatusEnabled && !props.isMobile) {
+      if (useMobileAvatarStatus || isEnhancedAvatarStatusEnabled && !props.isMobile) {
+        avatarHint.props.mask = `svg-mask-avatar-status-round-${avatarHint.props.width}`;
+      } else if (!useMobileAvatarStatus && isRadialStatusEnabled) {
+        avatarHint.props.mask = 'svg-mask-avatar-default';
+      } else if (!useMobileAvatarStatus) {
         avatarHint.props.mask = `svg-mask-avatar-status-round-${avatarHint.props.width}`;
       } else {
         avatarHint.props.mask = !props.isMobile && isRadialStatusEnabled ? 'svg-mask-avatar-default' : avatarHint.props.mask;
