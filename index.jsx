@@ -254,8 +254,9 @@ module.exports = class BetterStatusIndicators extends Plugin {
   }
 
   showHWADisabledNotice () {
-    const handleButtonClick = () => openModal(() => (
+    const handleButtonClick = () => openModal((e) => (
       <Confirm
+        {...e}
         header={Messages.SWITCH_HARDWARE_ACCELERATION}
         confirmText={Messages.OKAY}
         cancelText={Messages.CANCEL}
