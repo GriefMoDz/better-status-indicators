@@ -136,7 +136,7 @@ module.exports = (main) => {
       const isRadialStatusEnabled = main.ModuleManager.isEnabled('radial-status');
       const isEnhancedAvatarStatusEnabled = main.ModuleManager.isEnabled('avatar-statuses');
 
-      if (useMobileAvatarStatus || isEnhancedAvatarStatusEnabled && !props.isMobile) {
+      if ((useMobileAvatarStatus || isEnhancedAvatarStatusEnabled) && !props.isMobile) {
         avatarHint.props.mask = `svg-mask-avatar-status-round-${avatarHint.props.width}`;
       } else if (!useMobileAvatarStatus && isRadialStatusEnabled) {
         avatarHint.props.mask = 'svg-mask-avatar-default';
