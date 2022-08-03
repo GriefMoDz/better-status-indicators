@@ -108,7 +108,7 @@ module.exports = class BetterStatusIndicators extends Plugin {
     const t0 = performance.now();
 
     this.loadStylesheet('./style.scss');
-    this.refreshAvatars = Lodash.debounce(() => FluxDispatcher.dirtyDispatch({ type: 'BSI_REFRESH_AVATARS' }), 100);
+    this.refreshAvatars = Lodash.debounce(() => FluxDispatcher.dispatch({ type: 'BSI_REFRESH_AVATARS' }), 100);
 
     powercord.api.i18n.loadAllStrings(i18n);
     powercord.api.settings.registerSettings(this.entityID, {
