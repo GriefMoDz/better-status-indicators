@@ -68,6 +68,10 @@ function renderClientStatus (client, props, states) {
 }
 
 function shouldClientStatusRender (client, props) {
+  if(!client) {
+    return false;
+  }
+  
   if (client === 'mobile' && props.getSetting('mobileAvatarStatus', true)) {
     return false;
   }
