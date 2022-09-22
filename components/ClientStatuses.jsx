@@ -68,7 +68,7 @@ function renderClientStatus (client, props, states) {
 }
 
 function shouldClientStatusRender (client, props) {
-  if(!client) {
+  if (!client) {
     return false;
   }
   
