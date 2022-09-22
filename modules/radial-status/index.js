@@ -28,6 +28,7 @@
 
 const { React, getModule, i18n: { Messages } } = require('powercord/webpack');
 const { findInReactTree } = require('powercord/util');
+const { uninject } = require('powercord/injector');
 const { Module } = require('../../lib/entities');
 
 class AvatarPreview extends React.PureComponent {
@@ -95,60 +96,66 @@ module.exports = class RadialStatus extends Module {
     const statusStore = getModule([ 'isMobileOnline' ], false);
     const statusModule = getModule([ 'getStatusMask' ], false);
     const Avatar = getModule([ 'AnimatedAvatar' ], false);
-    this.inject('bsi-module-radial-avatar-status', Avatar, 'default', ([ props ], res) => {
-      if (props.status) {
-        res.props['data-bsi-radial-status'] = true;
-      }
+    this.inject('bsi-module-radial-avatar-status-1', Avatar, 'default', (_, res) => {
+      uninject('bsi-module-radial-avatar-status-2');
 
-      const foreignObject = findInReactTree(res, n => n?.type === 'foreignObject');
-      if (!foreignObject) {
-        return res;
-      }
-
-      const { type: AvatarImg } = foreignObject.props.children;
-
-      foreignObject.props.children.type = (_props) => {
-        const res = AvatarImg(_props);
-
-        if (getSetting('rs-hide-speaking-ring', false)) {
-          _props.isSpeaking = false;
+      this.inject('bsi-module-radial-avatar-status-2', res, 'type', ([ props ], res) => {
+        if (props.status) {
+          res.props['data-bsi-radial-status'] = true;
         }
 
-        if (!_props.isSpeaking) {
-          const inset = getSetting('rs-avatar-inset', 3);
-
-          res.props.children.push(React.createElement('div', {
-            className: 'bsi-avatarRadial',
-            style: {
-              '--status-color': statusModule.getStatusColor(props.status),
-              '--avatar-inset': `${props.size == 'SIZE_120' ? inset * 2.25 : props.size == 'SIZE_80' ? inset * 1.75 : inset}px`,
-              '--outline-size': `${props.size == 'SIZE_120' ? 4 : props.size == 'SIZE_80' ? 3 : 2}px`
-            }
-          }));
-        }
-
-        return res;
-      };
-
-      if (props.isTyping || (props.isMobile && getSetting('mobileAvatarStatus', true))) {
-        return res;
-      }
-
-      if (this.main.ModuleManager.isEnabled('avatar-statuses') && !props.isMobile && props.status !== 'offline') {
-        const userId = props.userId || props.src?.includes('/avatars') && props.src.match(/\/(?:avatars|users)\/(\d+)/)[1];
-        const clientStatuses = userId === this.main.currentUserId ? this.main.clientStatusStore.getCurrentClientStatus() : statusStore.getState().clientStatuses[userId];
-
-        if (!clientStatuses || clientStatuses.desktop || clientStatuses.web) {
+        const foreignObject = findInReactTree(res, n => n?.type === 'foreignObject');
+        if (!foreignObject) {
           return res;
         }
-      }
 
-      foreignObject.props.mask = 'url(#svg-mask-avatar-default)';
+        const { type: AvatarImg } = foreignObject.props.children;
 
-      const AvatarSVG = findInReactTree(res, n => n.type === 'svg');
-      if (Array.isArray(AvatarSVG?.props?.children)) {
-        delete AvatarSVG.props.children[1];
-      }
+        foreignObject.props.children.type = (_props) => {
+          const res = AvatarImg(_props);
+
+          if (getSetting('rs-hide-speaking-ring', false)) {
+            _props.isSpeaking = false;
+          }
+
+          if (!_props.isSpeaking) {
+            const inset = getSetting('rs-avatar-inset', 3);
+
+            res.props.children.push(React.createElement('div', {
+              className: 'bsi-avatarRadial',
+              style: {
+                '--status-color': statusModule.getStatusColor(props.status),
+                '--avatar-inset': `${props.size == 'SIZE_120' ? inset * 2.25 : props.size == 'SIZE_80' ? inset * 1.75 : inset}px`,
+                '--outline-size': `${props.size == 'SIZE_120' ? 4 : props.size == 'SIZE_80' ? 3 : 2}px`
+              }
+            }));
+          }
+
+          return res;
+        };
+
+        if (props.isTyping || (props.isMobile && getSetting('mobileAvatarStatus', true))) {
+          return res;
+        }
+
+        if (this.main.ModuleManager.isEnabled('avatar-statuses') && !props.isMobile && props.status !== 'offline') {
+          const userId = props.userId || props.src?.includes('/avatars') && props.src.match(/\/(?:avatars|users)\/(\d+)/)[1];
+          const clientStatuses = userId === this.main.currentUserId ? this.main.clientStatusStore.getCurrentClientStatus() : statusStore.getState().clientStatuses[userId];
+
+          if (!clientStatuses || clientStatuses.desktop || clientStatuses.web) {
+            return res;
+          }
+        }
+
+        foreignObject.props.mask = 'url(#svg-mask-avatar-default)';
+
+        const AvatarSVG = findInReactTree(res, n => n.type === 'svg');
+        if (Array.isArray(AvatarSVG?.props?.children)) {
+          delete AvatarSVG.props.children[1];
+        }
+
+        return res;
+      });
 
       return res;
     });

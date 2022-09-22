@@ -99,7 +99,7 @@ function getSectionLabel (section) {
 }
 
 function renderTabBar ({ selectedItem, setSelectedItem, setSection }) {
-  const { tabBar, tabBarItem } = getModule([ 'tabBar', 'tabBarItem' ], false);
+  const { tabBar, tabBarItem } = getModule([ 'tabBarItem', 'divider' ], false);
   const handleOnItemSelect = (selectedItem) => {
     setSelectedItem(selectedItem);
     setSection(null);

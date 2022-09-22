@@ -28,6 +28,7 @@
 
 const { React, Flux, FluxDispatcher, getModule, getModuleByDisplayName } = require('powercord/webpack');
 const { findInReactTree, wrapInHooks } = require('powercord/util');
+const { uninject } = require('powercord/injector');
 
 const AnimatedAvatarStatus = require('./../components/AnimatedAvatarStatus');
 
@@ -46,46 +47,52 @@ module.exports = (main) => {
     return [ isTyping, status, lastStatus, isMobile, lastIsMobile ];
   }, true);
 
-  main.inject('bsi-mobile-status-default-mask', AvatarModule, 'default', ([ props ], res) => {
-    const { size, status, isMobile, isTyping } = props;
-    const foreignObject = findInReactTree(res, n => n?.type === 'foreignObject');
-    const forceUpdate = React.useState({})[1];
+  main.inject('bsi-mobile-status-default-mask-1', AvatarModule, 'default', (_, res) => {
+    uninject('bsi-mobile-status-default-mask-2');
 
-    React.useEffect(() => {
-      const callback = () => forceUpdate({});
+    main.inject('bsi-mobile-status-default-mask-2', res, 'type', ([ props ], res) => {
+      const { size, status, isMobile, isTyping } = props;
+      const foreignObject = findInReactTree(res, n => n?.type === 'foreignObject');
+      const forceUpdate = React.useState({})[1];
 
-      FluxDispatcher.subscribe('BSI_REFRESH_AVATARS', callback);
+      React.useEffect(() => {
+        const callback = () => forceUpdate({});
 
-      return () => FluxDispatcher.unsubscribe('BSI_REFRESH_AVATARS', callback);
-    }, []);
+        FluxDispatcher.subscribe('BSI_REFRESH_AVATARS', callback);
 
-    if (status) {
-      res.props['data-bsi-status'] = status;
-    }
+        return () => FluxDispatcher.unsubscribe('BSI_REFRESH_AVATARS', callback);
+      }, []);
 
-    const useEnhancedAvatarStatus = main.ModuleManager.isEnabled('avatar-statuses');
-    const useMobileAvatarStatus = getSetting('mobileAvatarStatus', true) || useEnhancedAvatarStatus;
-
-    if (status && isMobile && !isTyping) {
-      res.props['data-bsi-mobile-avatar-status'] = useMobileAvatarStatus;
-    }
-
-    if (status !== 'online' && isMobile && !isTyping && useMobileAvatarStatus) {
-      foreignObject.props.mask = `url(#svg-mask-avatar-status-mobile-${size.split('_')[1]})`;
-
-      const tooltip = findInReactTree(res, n => n.type?.displayName === 'Tooltip');
-      if (tooltip) {
-        const { children } = tooltip.props;
-
-        tooltip.props.children = (props) => {
-          const res = children(props);
-
-          res.props.children[0].props = { ...res.props.children[0].props, mask: 'url(#svg-mask-status-online-mobile)' };
-
-          return res;
-        };
+      if (status) {
+        res.props['data-bsi-status'] = status;
       }
-    }
+
+      const useEnhancedAvatarStatus = main.ModuleManager.isEnabled('avatar-statuses');
+      const useMobileAvatarStatus = getSetting('mobileAvatarStatus', true) || useEnhancedAvatarStatus;
+
+      if (status && isMobile && !isTyping) {
+        res.props['data-bsi-mobile-avatar-status'] = useMobileAvatarStatus;
+      }
+
+      if (status !== 'online' && isMobile && !isTyping && useMobileAvatarStatus) {
+        foreignObject.props.mask = `url(#svg-mask-avatar-status-mobile-${size.split('_')[1]})`;
+
+        const tooltip = findInReactTree(res, n => n.type?.displayName === 'Tooltip');
+        if (tooltip) {
+          const { children } = tooltip.props;
+
+          tooltip.props.children = (props) => {
+            const res = children(props);
+
+            res.props.children[0].props = { ...res.props.children[0].props, mask: 'url(#svg-mask-status-online-mobile)' };
+
+            return res;
+          };
+        }
+      }
+
+      return res;
+    });
 
     return res;
   });
