@@ -75,8 +75,9 @@ module.exports = class AvatarStatuses extends Module {
 
         tooltip.props.children = (props) => {
           const res = children(props);
+          const child = res.props.children.find(c => c && c.props);
 
-          res.props.children[0].props = { ...res.props.children[0].props,
+          child.props = { ...child.props,
             mask: `url(#svg-mask-status-online-${client})`
           };
 
