@@ -72,7 +72,7 @@ function shouldClientStatusRender (client, props) {
     return false;
   }
   
-  if(client === 'embedded') {
+  if (client === 'embedded') {
     return false;
   }
   
