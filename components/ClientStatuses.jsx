@@ -72,6 +72,10 @@ function shouldClientStatusRender (client, props) {
     return false;
   }
   
+  if(client === 'embedded') {
+    return false;
+  }
+  
   if (client === 'mobile' && props.getSetting('mobileAvatarStatus', true)) {
     return false;
   }
